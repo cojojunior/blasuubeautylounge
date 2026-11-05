@@ -16,6 +16,9 @@ import { BookingFee } from "./pages/policies/BookingFee";
 import { Cookies } from "./pages/policies/Cookies";
 import { Refund } from "./pages/policies/Refund";
 
+import { Login } from "./admin/Login";
+import { Dashboard } from "./admin/Dashboard";
+
 export default function App() {
   return (
     <Router>
@@ -38,6 +41,10 @@ export default function App() {
 
           <Route path="*" element={<NotFound />} />
         </Route>
+
+        {/* ADMIN ROUTES (No Header/Footer) */}
+        <Route path="/admin" element={<Login />} />
+        <Route path="/admin/dashboard" element={<Dashboard />} />
       </Routes>
     </Router>
   );
