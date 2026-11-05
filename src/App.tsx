@@ -1,5 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { RootLayout } from "./components/layout/RootLayout";
+
+// Public Pages
 import { Home } from "./pages/Home";
 import { Services } from "./pages/Services";
 import { Booking } from "./pages/Booking";
@@ -9,6 +11,7 @@ import { Contact } from "./pages/Contact";
 import { Reviews } from "./pages/Reviews";
 import { NotFound } from "./pages/NotFound";
 
+// Policies
 import { Terms } from "./pages/policies/Terms";
 import { Privacy } from "./pages/policies/Privacy";
 import { Cancellation } from "./pages/policies/Cancellation";
@@ -16,6 +19,7 @@ import { BookingFee } from "./pages/policies/BookingFee";
 import { Cookies } from "./pages/policies/Cookies";
 import { Refund } from "./pages/policies/Refund";
 
+// Admin Pages
 import { Login } from "./admin/Login";
 import { Dashboard } from "./admin/Dashboard";
 
@@ -23,6 +27,7 @@ export default function App() {
   return (
     <Router>
       <Routes>
+        {/* PUBLIC ROUTES */}
         <Route element={<RootLayout />}>
           <Route path="/" element={<Home />} />
           <Route path="/services" element={<Services />} />

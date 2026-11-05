@@ -31,7 +31,9 @@ export function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-white-soft px-4">
       <div className="max-w-md w-full bg-white-pure p-8 rounded-3xl border border-elephant/10 shadow-lg">
-        <h2 className="text-2xl font-serif text-center mb-6">Admin Access</h2>
+        <h2 className="text-2xl font-serif text-center mb-6 text-elephant">
+          Admin Access
+        </h2>
 
         {error && (
           <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm">

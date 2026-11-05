@@ -47,7 +47,6 @@ export function Dashboard() {
   };
 
   const openWhatsApp = (phone: string, name: string) => {
-    // Clean phone number and ensure it starts with 233 (Ghana code)
     let formattedPhone = phone.replace(/\D/g, "");
     if (formattedPhone.startsWith("0")) {
       formattedPhone = "233" + formattedPhone.substring(1);
@@ -86,10 +85,9 @@ export function Dashboard() {
               <div
                 key={apt.id}
                 className="bg-white-pure p-6 rounded-2xl border border-elephant/10 shadow-sm flex flex-col md:flex-row justify-between gap-6">
-                {/* Customer Details */}
                 <div className="flex-grow">
                   <div className="flex items-center gap-3 mb-2">
-                    <h3 className="font-semibold text-lg">
+                    <h3 className="font-semibold text-lg text-elephant">
                       {apt.customer_name}
                     </h3>
                     <span
@@ -116,7 +114,6 @@ export function Dashboard() {
                   </p>
                 </div>
 
-                {/* Actions */}
                 <div className="flex flex-col md:flex-row gap-2 md:items-center flex-shrink-0 border-t md:border-t-0 md:border-l border-elephant/10 pt-4 md:pt-0 md:pl-6">
                   <Button
                     size="sm"
