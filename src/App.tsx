@@ -10,9 +10,9 @@ import { Home } from "./pages/Home";
 import { Services } from "./pages/Services";
 import { Booking } from "./pages/Booking";
 import { Availability } from "./pages/Availability";
+import { About } from "./pages/About"; // <-- Import
+import { Contact } from "./pages/Contact"; // <-- Import
 
-
-// Import the individual policy pages
 import { Terms } from "./pages/policies/Terms";
 import { Privacy } from "./pages/policies/Privacy";
 import { Cancellation } from "./pages/policies/Cancellation";
@@ -20,20 +20,6 @@ import { BookingFee } from "./pages/policies/BookingFee";
 import { Cookies } from "./pages/policies/Cookies";
 import { Refund } from "./pages/policies/Refund";
 
-const About = () => (
-  <div className="py-32 text-center">
-    <h1 className="text-4xl font-serif">About Blasuu</h1>
-    <p className="mt-4 text-elephant-muted">Coming soon.</p>
-  </div>
-);
-const Contact = () => (
-  <div className="py-32 text-center">
-    <h1 className="text-4xl font-serif">Contact Us</h1>
-    <p className="mt-4 text-elephant-muted">
-      Contact page details coming soon.
-    </p>
-  </div>
-);
 const Reviews = () => (
   <div className="py-32 text-center">
     <h1 className="text-4xl font-serif">Reviews</h1>
@@ -61,20 +47,14 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/services" element={<Services />} />
           <Route path="/book" element={<Booking />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/reviews" element={<Reviews />} />
-          <Route
-            path="/availability"
-            element={
-              <div className="py-32 text-center">
-                <h1 className="text-4xl font-serif">Availability Calendar</h1>
-              </div>
-            }
-          />
           <Route path="/availability" element={<Availability />} />
 
-          {/* Policy Routes */}
+          {/* Use real components here */}
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
+
+          <Route path="/reviews" element={<Reviews />} />
+
           <Route path="/policies/terms" element={<Terms />} />
           <Route path="/policies/privacy" element={<Privacy />} />
           <Route path="/policies/cancellation" element={<Cancellation />} />
