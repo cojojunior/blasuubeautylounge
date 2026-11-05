@@ -4,12 +4,14 @@ import { services } from "../content/services";
 import { policies } from "../content/policies/bookingFee";
 import { Button } from "../components/ui/Button";
 import { businessConfig } from "../config/business";
+import { supabase } from "../lib/supabase";
 
 export function Booking() {
   const [searchParams] = useSearchParams();
   const initialService = searchParams.get("service") || services[0].id;
 
   const [step, setStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     serviceId: initialService,
     date: "",
@@ -28,12 +30,76 @@ export function Booking() {
   const handleNext = () => setStep((s) => s + 1);
   const handlePrev = () => setStep((s) => s - 1);
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!formData.agreeTerms) return alert("You must agree to the terms.");
 
-    const text = `Hello Blasuu Lounge! I'd like to book:%0A%0A*Service:* ${selectedService.name}%0A*Date:* ${formData.date}%0A*Time:* ${formData.time}%0A*Name:* ${formData.name}%0A*Deposit:* GH₵${selectedService.depositAmount}%0A%0APlease confirm my appointment.`;
-    window.location.href = `https://wa.me/${businessConfig.whatsappNumber}?text=${text}`;
+    setIsSubmitting(true);
+
+    try {
+      // 1. Check Availability (Double Booking Prevention)
+      const { data: isAvailable, error: checkError } = await supabase.rpc(
+        "check_booking_availability",
+        {
+          p_date: formData.date,
+          p_time: formData.time,
+        },
+      );
+
+      if (checkError) throw checkError;
+
+      if (!isAvailable) {
+        alert(
+          "Sorry, this time slot is already booked. Please select another time.",
+        );
+        setStep(2); // Send them back to date/time selection
+        setIsSubmitting(false);
+        return;
+      }
+
+      // 2. Save to Database
+      const { data, error } = await supabase
+        .from("appointments")
+        .insert({
+          service_id: selectedService.id,
+          service_name: selectedService.name,
+          appointment_date: formData.date,
+          appointment_time: formData.time,
+          customer_name: formData.name,
+          customer_email: formData.email,
+          customer_phone: formData.phone,
+          total_price: selectedService.price,
+          deposit_amount: selectedService.depositAmount,
+          status: "pending",
+        })
+        .select()
+        .single();
+
+      if (error) {
+        // Catch database constraint errors if two people book at the exact same millisecond
+        if (error.code === "23505") {
+          alert("This slot was just taken. Please choose another time.");
+          setStep(2);
+          setIsSubmitting(false);
+          return;
+        }
+        throw error;
+      }
+
+      // 3. Generate the WhatsApp message with the real Booking Reference (ID)
+      const bookingRef = data.id.split("-")[0].toUpperCase(); // Short reference
+
+      const text = `Hello Blasuu Lounge! I'd like to confirm my booking.%0A%0A*Ref:* ${bookingRef}%0A*Service:* ${selectedService.name}%0A*Date:* ${formData.date}%0A*Time:* ${formData.time}%0A*Name:* ${formData.name}%0A*Deposit Due:* GH₵${selectedService.depositAmount}%0A%0APlease send payment details to confirm.`;
+
+      // 4. Redirect to WhatsApp
+      window.location.href = `https://wa.me/${businessConfig.whatsappNumber}?text=${text}`;
+    } catch (error) {
+      console.error("Booking error:", error);
+      alert(
+        "There was an error saving your booking. Please try again or contact us via WhatsApp.",
+      );
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -225,11 +291,17 @@ export function Booking() {
                     type="button"
                     variant="outline"
                     onClick={handlePrev}
-                    className="w-1/3">
+                    className="w-1/3"
+                    disabled={isSubmitting}>
                     Back
                   </Button>
-                  <Button type="submit" className="w-2/3">
-                    Confirm via WhatsApp
+                  <Button
+                    type="submit"
+                    className="w-2/3"
+                    disabled={isSubmitting}>
+                    {isSubmitting
+                      ? "Checking Availability..."
+                      : "Confirm via WhatsApp"}
                   </Button>
                 </div>
               </div>
