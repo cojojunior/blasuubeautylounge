@@ -1,4 +1,4 @@
-import { services } from "../../content/services";
+import { allServices as services } from "../../content";
 import { Button } from "../ui/Button";
 
 interface StepServiceProps {

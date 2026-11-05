@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { useSearchParams } from "react-router-dom";
-import { services } from "../content/services";
+import { allServices as services } from "../content";
 import { supabase } from "../lib/supabase";
 import { businessConfig } from "../config/business";
 import { useBookingForm } from "../hooks/useBookingForm";

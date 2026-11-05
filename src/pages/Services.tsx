@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { services, categories } from "../content/services";
+import { allServices as services, categories } from "../content";
+
 
 export function Services() {
   const [activeCategory, setActiveCategory] = useState("All");
