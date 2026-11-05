@@ -10,18 +10,23 @@ export function Booking() {
   const [searchParams] = useSearchParams();
   const initialService = searchParams.get("service") || services[0].id;
 
-  const [step, setStep] = useState(1);
+  const initialDate = searchParams.get("date") || "";
+  const initialTime = searchParams.get("time") || "";
+
+  // Jump straight to step 3 if they clicked from the calendar
+  const [step, setStep] = useState(initialDate && initialTime ? 3 : 1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     serviceId: initialService,
-    date: "",
-    time: "",
+    date: initialDate,
+    time: initialTime,
     name: "",
     email: "",
     phone: "",
     notes: "",
     agreeTerms: false,
   });
+
 
   const selectedService =
     services.find((s) => s.id === formData.serviceId) || services[0];

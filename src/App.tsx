@@ -9,6 +9,8 @@ import { Footer } from "./components/layout/Footer";
 import { Home } from "./pages/Home";
 import { Services } from "./pages/Services";
 import { Booking } from "./pages/Booking";
+import { Availability } from "./pages/Availability";
+
 
 // Import the individual policy pages
 import { Terms } from "./pages/policies/Terms";
@@ -70,6 +72,7 @@ export default function App() {
               </div>
             }
           />
+          <Route path="/availability" element={<Availability />} />
 
           {/* Policy Routes */}
           <Route path="/policies/terms" element={<Terms />} />
