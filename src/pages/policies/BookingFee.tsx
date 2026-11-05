@@ -1,19 +1,29 @@
+import { PolicyLayout } from "../../components/policy/PolicyLayout";
+import { policyConfig } from "../../content/policies/bookingFee";
+
 export function BookingFee() {
   return (
-    <div className="py-20 bg-white-soft min-h-screen">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 bg-white-pure p-8 md:p-12 rounded-3xl border border-elephant/10 shadow-sm">
-        <h1 className="text-3xl font-serif mb-6 text-elephant">
-          Booking Fee & Refund Policy
-        </h1>
-        <p className="text-elephant-muted mb-4">
-          A booking fee is required to secure your appointment. 60% of your
-          booking fee is refundable only if you cancel at least 15 days before
-          your appointment date. The remaining 40% is non-refundable and covers
-          administrative and reservation costs. Cancellations made within 15
-          days of the appointment, no-shows, and late arrivals are not
-          refundable.
+    <PolicyLayout title="Booking Fee & Refund Policy">
+      <p className="mb-4 text-elephant-muted leading-relaxed">
+        A booking fee is required to secure your appointment.{" "}
+        {policyConfig.refundablePercent}% of your booking fee is refundable only
+        if you cancel at least {policyConfig.cancellationWindowDays} days before
+        your appointment date. The remaining {policyConfig.nonRefundablePercent}
+        % is non-refundable and covers administrative and reservation costs.
+        Cancellations made within {policyConfig.cancellationWindowDays}
+        days of the appointment, no-shows, and late arrivals are not refundable.
+      </p>
+
+      <div className="bg-burnt/5 p-6 rounded-xl border border-burnt/10 mt-8">
+        <h3 className="font-medium text-elephant mb-2">Refund Summary</h3>
+        <p className="text-sm text-elephant-muted">
+          Cancellation window: {policyConfig.cancellationWindowDays} days before
+          appointment.
+          <br />
+          Refundable amount: {policyConfig.refundablePercent}%<br />
+          Non-refundable amount: {policyConfig.nonRefundablePercent}%
         </p>
       </div>
-    </div>
+    </PolicyLayout>
   );
 }
