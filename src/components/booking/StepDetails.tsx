@@ -2,15 +2,14 @@ import { BookingSummary } from "./BookingSummary";
 import { DepositNotice } from "./DepositNotice";
 import { ConsentBlock } from "./ConsentBlock";
 import { Button } from "../ui/Button";
-import { type Service } from "../../types/booking";
+import { type Service, type BookingFormData } from "../../types/booking";
 
 interface StepDetailsProps {
   service: Service;
   date: string;
   time: string;
-  formData: any;
-  updateField: (field: any, value: any) => void;
-  onSubmit: (e: React.FormEvent) => void;
+  formData: BookingFormData;
+  updateField: (field: keyof BookingFormData, value: any) => void;
   onPrev: () => void;
   isSubmitting: boolean;
 }
@@ -21,7 +20,6 @@ export function StepDetails({
   time,
   formData,
   updateField,
-  onSubmit,
   onPrev,
   isSubmitting,
 }: StepDetailsProps) {

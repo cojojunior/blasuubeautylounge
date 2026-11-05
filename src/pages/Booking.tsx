@@ -137,7 +137,6 @@ export function Booking() {
                 time={formData.time}
                 formData={formData}
                 updateField={updateField}
-                onSubmit={handleSubmit}
                 onPrev={prevStep}
                 isSubmitting={isSubmitting}
               />
