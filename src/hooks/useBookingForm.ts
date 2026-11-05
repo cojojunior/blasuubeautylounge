@@ -6,7 +6,8 @@ export function useBookingForm(
   initialDate: string,
   initialTime: string,
 ) {
-  const [step, setStep] = useState(initialDate && initialTime ? 3 : 1);
+  // Jump to step 4 if date and time are provided
+  const [step, setStep] = useState(initialDate && initialTime ? 4 : 1);
 
   const [formData, setFormData] = useState<BookingFormData>({
     serviceId: initialService,

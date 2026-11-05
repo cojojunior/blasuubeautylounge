@@ -5,9 +5,11 @@ import { supabase } from "../lib/supabase";
 import { businessConfig } from "../config/business";
 import { useBookingForm } from "../hooks/useBookingForm";
 
-// Import our new separated components
+import { BookingStepper } from "../components/booking/BookingStepper";
 import { StepService } from "../components/booking/StepService";
 import { StepDate } from "../components/booking/StepDate";
+import { StepTime } from "../components/booking/StepTime";
+import { StepReview } from "../components/booking/StepReview";
 import { StepDetails } from "../components/booking/StepDetails";
 
 export function Booking() {
@@ -18,7 +20,6 @@ export function Booking() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Use our custom hook to manage state
   const { step, formData, updateField, nextStep, prevStep, setStep } =
     useBookingForm(initialService, initialDate, initialTime);
 
@@ -46,7 +47,7 @@ export function Booking() {
         alert(
           "Sorry, this time slot is already booked. Please select another time.",
         );
-        setStep(2);
+        setStep(3); // Send them back to Time selection
         setIsSubmitting(false);
         return;
       }
@@ -71,7 +72,7 @@ export function Booking() {
       if (error) {
         if (error.code === "23505") {
           alert("This slot was just taken. Please choose another time.");
-          setStep(2);
+          setStep(3);
           setIsSubmitting(false);
           return;
         }
@@ -95,20 +96,7 @@ export function Booking() {
     <div className="py-20 bg-white-soft min-h-screen">
       <div className="max-w-2xl mx-auto px-4 sm:px-6">
         <div className="bg-white-pure p-8 rounded-3xl border border-elephant/10 shadow-lg">
-          <div className="flex justify-between mb-8 pb-4 border-b border-elephant/10">
-            <span
-              className={`text-sm font-medium ${step >= 1 ? "text-burnt" : "text-elephant-muted"}`}>
-              1. Service
-            </span>
-            <span
-              className={`text-sm font-medium ${step >= 2 ? "text-burnt" : "text-elephant-muted"}`}>
-              2. Date & Time
-            </span>
-            <span
-              className={`text-sm font-medium ${step >= 3 ? "text-burnt" : "text-elephant-muted"}`}>
-              3. Details
-            </span>
-          </div>
+          <BookingStepper currentStep={step} />
 
           <form onSubmit={handleSubmit}>
             {step === 1 && (
@@ -122,19 +110,33 @@ export function Booking() {
             {step === 2 && (
               <StepDate
                 date={formData.date}
-                time={formData.time}
                 onDateChange={(val) => updateField("date", val)}
-                onTimeChange={(val) => updateField("time", val)}
                 onNext={nextStep}
                 onPrev={prevStep}
               />
             )}
 
             {step === 3 && (
-              <StepDetails
+              <StepTime
+                time={formData.time}
+                onTimeChange={(val) => updateField("time", val)}
+                onNext={nextStep}
+                onPrev={prevStep}
+              />
+            )}
+
+            {step === 4 && (
+              <StepReview
                 service={selectedService}
                 date={formData.date}
                 time={formData.time}
+                onNext={nextStep}
+                onPrev={prevStep}
+              />
+            )}
+
+            {step === 5 && (
+              <StepDetails
                 formData={formData}
                 updateField={updateField}
                 onPrev={prevStep}

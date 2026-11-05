@@ -1,13 +1,9 @@
-import { BookingSummary } from "./BookingSummary";
 import { DepositNotice } from "./DepositNotice";
 import { ConsentBlock } from "./ConsentBlock";
 import { Button } from "../ui/Button";
-import { type Service, type BookingFormData } from "../../types/booking";
+import { type BookingFormData } from "../../types/booking";
 
 interface StepDetailsProps {
-  service: Service;
-  date: string;
-  time: string;
   formData: BookingFormData;
   updateField: (field: keyof BookingFormData, value: any) => void;
   onPrev: () => void;
@@ -15,9 +11,6 @@ interface StepDetailsProps {
 }
 
 export function StepDetails({
-  service,
-  date,
-  time,
   formData,
   updateField,
   onPrev,
@@ -26,8 +19,6 @@ export function StepDetails({
   return (
     <div className="space-y-6 animate-fade-in">
       <h2 className="text-2xl font-serif">Your Details</h2>
-
-      <BookingSummary service={service} date={date} time={time} />
 
       <div className="grid grid-cols-1 gap-4">
         <input
@@ -69,7 +60,7 @@ export function StepDetails({
           Back
         </Button>
         <Button type="submit" className="w-2/3" disabled={isSubmitting}>
-          {isSubmitting ? "Checking Availability..." : "Confirm via WhatsApp"}
+          {isSubmitting ? "Saving..." : "Confirm via WhatsApp"}
         </Button>
       </div>
     </div>
