@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import { supabase } from "../lib/supabase";
+import { AvailabilityCalendar } from "../components/calendar/AvailabilityCalendar";
 
 const getNext7Days = () => {
   const days = [];
@@ -12,24 +12,19 @@ const getNext7Days = () => {
   return days;
 };
 
-const times = ["09:00", "10:00", "11:00", "13:00", "14:00", "15:00"];
-
 export function Availability() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [bookedSlots, setBookedSlots] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const days = getNext7Days();
 
-  const formatDate = (date: Date) => {
-    return date.toISOString().split("T")[0];
-  };
+  const formatDate = (date: Date) => date.toISOString().split("T")[0];
 
   useEffect(() => {
     async function fetchBookings() {
       setIsLoading(true);
       try {
         const targetDate = formatDate(selectedDate);
-
         const { data, error } = await supabase
           .from("appointments")
           .select("appointment_time")
@@ -37,16 +32,13 @@ export function Availability() {
           .neq("status", "cancelled");
 
         if (error) throw error;
-
-        const times = data.map((b) => b.appointment_time);
-        setBookedSlots(times);
+        setBookedSlots(data.map((b) => b.appointment_time));
       } catch (error) {
         console.error("Error fetching availability:", error);
       } finally {
         setIsLoading(false);
       }
     }
-
     fetchBookings();
   }, [selectedDate]);
 
@@ -85,57 +77,16 @@ export function Availability() {
           })}
         </div>
 
-        <div className="bg-white-pure p-8 rounded-3xl border border-elephant/10 shadow-sm">
-          <h2 className="text-xl font-serif mb-6">
-            Slots for{" "}
-            {selectedDate.toLocaleDateString("en-US", {
-              weekday: "long",
-              month: "long",
-              day: "numeric",
-            })}
-          </h2>
-
-          {isLoading ? (
-            <p className="text-elephant-muted text-center py-8">
-              Checking availability...
-            </p>
-          ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {times.map((time) => {
-                const [hour, minute] = time.split(":");
-                const displayHour =
-                  parseInt(hour) > 12 ? parseInt(hour) - 12 : hour;
-                const ampm = parseInt(hour) >= 12 ? "PM" : "AM";
-                const displayTime = `${displayHour}:${minute} ${ampm}`;
-
-                const isBooked = bookedSlots.includes(time);
-
-                return isBooked ? (
-                  <div
-                    key={time}
-                    className="p-4 rounded-xl border border-elephant/5 bg-elephant/5 text-center cursor-not-allowed">
-                    <p className="text-sm font-medium text-elephant-muted line-through">
-                      {displayTime}
-                    </p>
-                    <p className="text-xs text-elephant-muted mt-1">Booked</p>
-                  </div>
-                ) : (
-                  <Link
-                    key={time}
-                    to={`/book?date=${formatDate(selectedDate)}&time=${time}`}
-                    className="p-4 rounded-xl border border-burnt/20 bg-burnt/5 text-center hover:bg-burnt hover:text-white-pure transition-colors group">
-                    <p className="text-sm font-medium text-burnt group-hover:text-white-pure">
-                      {displayTime}
-                    </p>
-                    <p className="text-xs text-burnt/70 group-hover:text-white-pure/80 mt-1">
-                      Available
-                    </p>
-                  </Link>
-                );
-              })}
-            </div>
-          )}
-        </div>
+        {isLoading ? (
+          <div className="text-center py-20 text-elephant-muted">
+            Checking availability...
+          </div>
+        ) : (
+          <AvailabilityCalendar
+            selectedDate={selectedDate}
+            bookedSlots={bookedSlots}
+          />
+        )}
       </div>
     </div>
   );
