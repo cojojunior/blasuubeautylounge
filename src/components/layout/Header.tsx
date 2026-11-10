@@ -23,7 +23,7 @@ export function Header() {
           {/* Logo - UPDATED */}
           <Link to="/" className="flex-shrink-0 flex items-center gap-2">
             <img
-              src="/logo.png"
+              src="/icon-512.png"
               alt="Blasuu Beauty Lounge"
               className="h-12 w-auto object-contain"
             />
