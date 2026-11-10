@@ -2,16 +2,80 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { Button } from "../components/ui/Button";
-import { LogOut, CheckCircle, XCircle, MessageCircle } from "lucide-react";
+import {
+  LogOut,
+  CheckCircle,
+  XCircle,
+  MessageCircle,
+  Calendar,
+} from "lucide-react";
 
 export function Dashboard() {
   const [appointments, setAppointments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isCalendarConnected, setIsCalendarConnected] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchAppointments();
+    checkCalendarStatus();
+    handleOAuthRedirect();
   }, []);
+
+  // Check if calendar is already connected
+  const checkCalendarStatus = async () => {
+    // We'll add a visual state for this in the next step,
+    // for now it just sets a local state if the URL has the param.
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("calendar") === "connected") {
+      setIsCalendarConnected(true);
+    }
+  };
+
+  const handleOAuthRedirect = async () => {
+    const params = new URLSearchParams(window.location.search);
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (
+      params.get("calendar") === "connected" &&
+      session?.provider_refresh_token
+    ) {
+      // Send token to Edge Function
+      const { error } = await supabase.functions.invoke("save-calendar-token", {
+        body: { refreshToken: session.provider_refresh_token },
+      });
+
+      if (!error) {
+        alert("Google Calendar connected successfully!");
+        setIsCalendarConnected(true);
+        window.history.replaceState(
+          {},
+          document.title,
+          window.location.pathname,
+        );
+      } else {
+        alert("Failed to save calendar token.");
+      }
+    }
+  };
+
+  const connectCalendar = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        scopes: "https://www.googleapis.com/auth/calendar.events",
+        redirectTo: `${window.location.origin}/admin/dashboard?calendar=connected`,
+        queryParams: {
+          access_type: "offline",
+          prompt: "consent",
+        },
+      },
+    });
+
+    if (error) console.error("OAuth error:", error);
+  };
 
   const fetchAppointments = async () => {
     const { data, error } = await supabase
@@ -40,7 +104,7 @@ export function Dashboard() {
       .eq("id", id);
 
     if (!error) {
-      fetchAppointments(); // Refresh list
+      fetchAppointments();
     } else {
       alert("Error updating status: " + error.message);
     }
@@ -58,19 +122,36 @@ export function Dashboard() {
   return (
     <div className="min-h-screen bg-white-soft p-4 md:p-8">
       <div className="max-w-6xl mx-auto">
-        <header className="flex justify-between items-center mb-8 pb-4 border-b border-elephant/10">
+        {/* Header */}
+        <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 pb-4 border-b border-elephant/10 gap-4">
           <div>
             <h1 className="text-3xl font-serif text-elephant">Dashboard</h1>
             <p className="text-sm text-elephant-muted">Manage your bookings</p>
           </div>
-          <Button
-            variant="outline"
-            onClick={handleLogout}
-            className="flex items-center gap-2">
-            <LogOut size={16} /> Logout
-          </Button>
+
+          <div className="flex flex-wrap gap-3">
+            <Button
+              variant="outline"
+              onClick={connectCalendar}
+              className={`flex items-center gap-2 ${
+                isCalendarConnected
+                  ? "text-green-600 border-green-200 bg-green-50"
+                  : "text-blue-600 border-blue-200 hover:bg-blue-50"
+              }`}>
+              <Calendar size={16} />
+              {isCalendarConnected ? "Calendar Connected" : "Connect Calendar"}
+            </Button>
+
+            <Button
+              variant="outline"
+              onClick={handleLogout}
+              className="flex items-center gap-2">
+              <LogOut size={16} /> Logout
+            </Button>
+          </div>
         </header>
 
+        {/* Appointments List */}
         {loading ? (
           <p className="text-elephant-muted text-center py-20">
             Loading appointments...
@@ -85,6 +166,7 @@ export function Dashboard() {
               <div
                 key={apt.id}
                 className="bg-white-pure p-6 rounded-2xl border border-elephant/10 shadow-sm flex flex-col md:flex-row justify-between gap-6">
+                {/* Customer Details */}
                 <div className="flex-grow">
                   <div className="flex items-center gap-3 mb-2">
                     <h3 className="font-semibold text-lg text-elephant">
@@ -114,6 +196,7 @@ export function Dashboard() {
                   </p>
                 </div>
 
+                {/* Actions */}
                 <div className="flex flex-col md:flex-row gap-2 md:items-center flex-shrink-0 border-t md:border-t-0 md:border-l border-elephant/10 pt-4 md:pt-0 md:pl-6">
                   <Button
                     size="sm"
