@@ -11,7 +11,7 @@ export function Footer() {
 
            <Link to="/" className="inline-block">
              <img
-               src="/icon-512.png"
+               src="/icon-192.png"
                alt="Blasuu Beauty Lounge"
                className="h-16 w-auto object-contain invert brightness-0"
              />
