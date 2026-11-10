@@ -5,6 +5,7 @@ import { supabase } from "../lib/supabase";
 import { businessConfig } from "../config/business";
 import { Button } from "../components/ui/Button";
 import { ChevronDown, Bell, Loader2 } from "lucide-react";
+import { PolicyModal } from "../components/booking/PolicyModal"; // <-- Import Modal
 
 const times = ["09:00", "10:00", "11:00", "13:00", "14:00", "15:00"];
 
@@ -42,17 +43,20 @@ export function Booking() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showDetailsForm, setShowDetailsForm] = useState(false);
 
+  // Modal State
+  const [isPolicyModalOpen, setIsPolicyModalOpen] = useState(false);
+
   const days = getNext7Days();
   const selectedService =
     services.find((s) => s.id === selectedServiceId) || services[0];
   const formatDate = (date: Date) => date.toISOString().split("T")[0];
 
-  // Fetch booked slots whenever the date changes
+  // Fetch booked slots
   useEffect(() => {
     async function fetchBookings() {
       setIsLoadingSlots(true);
       setSelectedTime("");
-      setShowDetailsForm(false); 
+      setShowDetailsForm(false);
 
       const targetDate = formatDate(selectedDate);
 
@@ -65,12 +69,11 @@ export function Booking() {
       if (!error && data) {
         setBookedSlots(data.map((b) => b.appointment_time));
       } else {
-        setBookedSlots([]); // Fallback
+        setBookedSlots([]);
       }
 
       setIsLoadingSlots(false);
     }
-
     fetchBookings();
   }, [selectedDate]);
 
@@ -82,7 +85,6 @@ export function Booking() {
     try {
       const dateString = formatDate(selectedDate);
 
-      // Double check server-side before inserting
       const { data: isAvailable, error: checkError } = await supabase.rpc(
         "check_booking_availability",
         { p_date: dateString, p_time: selectedTime },
@@ -93,7 +95,6 @@ export function Booking() {
       if (!isAvailable) {
         alert("Sorry, this slot was just taken. Please choose another time.");
         setIsSubmitting(false);
-        // Refresh the slots to show the newly taken slot
         setSelectedTime("");
         return;
       }
@@ -218,9 +219,7 @@ export function Booking() {
 
           <div className="grid grid-cols-3 gap-3 mb-6 relative">
             {isLoadingSlots && (
-              <div className="absolute inset-0 bg-white-pure/60 backdrop-blur-sm z-10 rounded-xl flex items-center justify-center">
-                {/* Overlay to prevent clicking while loading */}
-              </div>
+              <div className="absolute inset-0 bg-white-pure/60 backdrop-blur-sm z-10 rounded-xl flex items-center justify-center"></div>
             )}
 
             {times.map((time) => {
@@ -313,18 +312,27 @@ export function Booking() {
                 }
               />
 
+              {/* MODIFIED CHECKBOX */}
               <label className="flex items-start gap-3 mt-4 cursor-pointer">
                 <input
                   type="checkbox"
                   required
-                  className="mt-1"
-                  onChange={(e) =>
-                    setFormData({ ...formData, agreeTerms: e.target.checked })
-                  }
+                  className="mt-1 cursor-pointer"
+                  checked={formData.agreeTerms}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setIsPolicyModalOpen(true); // Open modal instead of checking directly
+                    } else {
+                      setFormData({ ...formData, agreeTerms: false });
+                    }
+                  }}
                 />
-                <span className="text-xs text-elephant-muted">
-                  I agree to the Terms & Conditions and non-refundable deposit
-                  policy.
+                <span className="text-xs text-elephant-muted leading-relaxed">
+                  I have read and agree to the{" "}
+                  <strong className="text-elephant">Terms & Conditions</strong>{" "}
+                  and{" "}
+                  <strong className="text-elephant">Cancellation Policy</strong>
+                  .
                 </span>
               </label>
 
@@ -336,7 +344,10 @@ export function Booking() {
                   className="w-1/3">
                   Back
                 </Button>
-                <Button type="submit" className="w-2/3" disabled={isSubmitting}>
+                <Button
+                  type="submit"
+                  className="w-2/3"
+                  disabled={isSubmitting || !formData.agreeTerms}>
                   {isSubmitting ? "Saving..." : "Confirm via WhatsApp"}
                 </Button>
               </div>
@@ -344,6 +355,13 @@ export function Booking() {
           )}
         </div>
       </div>
+
+      {/* Add the Modal component here */}
+      <PolicyModal
+        isOpen={isPolicyModalOpen}
+        onClose={() => setIsPolicyModalOpen(false)}
+        onAgree={() => setFormData({ ...formData, agreeTerms: true })}
+      />
     </div>
   );
 }
