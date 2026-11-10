@@ -51,8 +51,8 @@ export function Booking() {
   useEffect(() => {
     async function fetchBookings() {
       setIsLoadingSlots(true);
-      setSelectedTime(""); // Clear selected time when switching dates
-      setShowDetailsForm(false); // Reset form if they switch dates
+      setSelectedTime("");
+      setShowDetailsForm(false); 
 
       const targetDate = formatDate(selectedDate);
 
