@@ -55,24 +55,24 @@ export function Dashboard() {
     }
   };
 
- const connectCalendar = async () => {
-   const { error } = await supabase.auth.signInWithOAuth({
-     provider: "google",
-     options: {
-       // Add the email scope here
-       scopes:
-         "https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/userinfo.email",
-       redirectTo: `${window.location.origin}/admin/dashboard?calendar=connected`,
-       queryParams: {
-         access_type: "offline",
-         prompt: "consent",
-       },
-     },
-   });
+const connectCalendar = async () => {
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      // MUST include the email scope for Supabase to work
+      scopes:
+        "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/calendar.events",
+      redirectTo: `${window.location.origin}/admin/dashboard?calendar=connected`,
+      queryParams: {
+        access_type: "offline",
+        prompt: "consent",
+      },
+    },
+  });
 
-   if (error) console.error("OAuth error:", error);
- };
- 
+  if (error) console.error("OAuth error:", error);
+};
+
   const fetchAppointments = async () => {
     const { data, error } = await supabase
       .from("appointments")
