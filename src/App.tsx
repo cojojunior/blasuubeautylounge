@@ -10,6 +10,7 @@ import { About } from "./pages/About";
 import { Contact } from "./pages/Contact";
 import { Reviews } from "./pages/Reviews";
 import { NotFound } from "./pages/NotFound";
+import { BookingConfirmation } from "./pages/BookingConfirmation";
 
 // Policies
 import { Terms } from "./pages/policies/Terms";
@@ -43,6 +44,10 @@ export default function App() {
           <Route path="/policies/booking-fee" element={<BookingFee />} />
           <Route path="/policies/cookies" element={<Cookies />} />
           <Route path="/policies/refund" element={<Refund />} />
+          <Route
+            path="/booking-confirmation"
+            element={<BookingConfirmation />}
+          />
 
           <Route path="*" element={<NotFound />} />
         </Route>
