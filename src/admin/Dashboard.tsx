@@ -18,13 +18,12 @@ export function Dashboard() {
 
   useEffect(() => {
     fetchAppointments();
+    checkCalendarStatus();
 
     // Listen for the OAuth redirect
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (event === "SIGNED_IN" && session?.provider_refresh_token) {
-          console.log("Caught refresh token, saving to database...");
-
           const { error } = await supabase.functions.invoke(
             "save-calendar-token",
             {
@@ -40,23 +39,34 @@ export function Dashboard() {
               document.title,
               window.location.pathname,
             );
-          } else {
-            console.error(error);
-            alert("Failed to save token.");
           }
         }
       },
     );
 
-    // Check if we just returned from OAuth
+    return () => authListener.subscription.unsubscribe();
+  }, []);
+
+  const checkCalendarStatus = async () => {
+    // 1. Check if URL indicates we just connected
     const params = new URLSearchParams(window.location.search);
     if (params.get("calendar") === "connected") {
       setIsCalendarConnected(true);
+      return;
     }
 
-    // Cleanup listener on unmount
-    return () => authListener.subscription.unsubscribe();
-  }, []);
+    // 2. Ask database if a token exists
+    const { data: hasToken, error } = await supabase.rpc(
+      "check_calendar_connection",
+    );
+
+    if (!error && hasToken) {
+      setIsCalendarConnected(true);
+    } else {
+      // 3. If no token exists, auto-trigger the connection
+      connectCalendar();
+    }
+  };
 
   const connectCalendar = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
@@ -91,14 +101,12 @@ export function Dashboard() {
   };
 
   const updateStatus = async (id: string, newStatus: string, apt: any) => {
-    // 1. Update Database
     const { error } = await supabase
       .from("appointments")
       .update({ status: newStatus })
       .eq("id", id);
     if (error) return alert("Error updating status: " + error.message);
 
-    // 2. Sync to Calendar if Confirmed
     if (newStatus === "confirmed") {
       try {
         await supabase.functions.invoke("sync-booking-to-calendar", {
@@ -107,18 +115,16 @@ export function Dashboard() {
         alert("Booking confirmed and synced to Google Calendar!");
       } catch (err) {
         console.error("Sync failed", err);
-        alert("Booking confirmed, but calendar sync failed. Check console.");
+        alert("Booking confirmed, but calendar sync failed.");
       }
     }
-
-    fetchAppointments(); // Refresh UI
+    fetchAppointments();
   };
 
   const openWhatsApp = (phone: string, name: string) => {
     let formattedPhone = phone.replace(/\D/g, "");
-    if (formattedPhone.startsWith("0")) {
+    if (formattedPhone.startsWith("0"))
       formattedPhone = "233" + formattedPhone.substring(1);
-    }
     const text = `Hello ${name}, this is Blasuu Beauty Lounge. We are confirming your appointment!`;
     window.open(`https://wa.me/${formattedPhone}?text=${text}`, "_blank");
   };
@@ -126,7 +132,6 @@ export function Dashboard() {
   return (
     <div className="min-h-screen bg-white-soft p-4 md:p-8">
       <div className="max-w-6xl mx-auto">
-        {/* Header */}
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 pb-4 border-b border-elephant/10 gap-4">
           <div>
             <h1 className="text-3xl font-serif text-elephant">Dashboard</h1>
@@ -152,7 +157,7 @@ export function Dashboard() {
           </div>
         </header>
 
-        {/* Appointments List */}
+        {/* Keep your appointments rendering code exactly the same here... */}
         {loading ? (
           <p className="text-elephant-muted text-center py-20">
             Loading appointments...
@@ -167,7 +172,6 @@ export function Dashboard() {
               <div
                 key={apt.id}
                 className="bg-white-pure p-6 rounded-2xl border border-elephant/10 shadow-sm flex flex-col md:flex-row justify-between gap-6">
-                {/* Details */}
                 <div className="flex-grow">
                   <div className="flex items-center gap-3 mb-2">
                     <h3 className="font-semibold text-lg text-elephant">
@@ -197,7 +201,6 @@ export function Dashboard() {
                   </p>
                 </div>
 
-                {/* Actions */}
                 <div className="flex flex-col md:flex-row gap-2 md:items-center flex-shrink-0 border-t md:border-t-0 md:border-l border-elephant/10 pt-4 md:pt-0 md:pl-6">
                   <Button
                     size="sm"
@@ -206,7 +209,6 @@ export function Dashboard() {
                     disabled={apt.status === "confirmed"}>
                     <CheckCircle size={16} className="mr-2" /> Confirm
                   </Button>
-
                   <Button
                     size="sm"
                     variant="outline"
@@ -215,7 +217,6 @@ export function Dashboard() {
                     disabled={apt.status === "cancelled"}>
                     <XCircle size={16} className="mr-2" /> Cancel
                   </Button>
-
                   <Button
                     size="sm"
                     variant="outline"
