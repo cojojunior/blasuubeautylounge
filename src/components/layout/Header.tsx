@@ -20,11 +20,13 @@ export function Header() {
     <header className="sticky top-0 z-50 w-full bg-white-soft/90 backdrop-blur-md border-b border-elephant/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
-          {/* Logo */}
+          {/* Logo - UPDATED */}
           <Link to="/" className="flex-shrink-0 flex items-center gap-2">
-            <span className="font-serif text-2xl font-bold text-elephant tracking-tight">
-              Blasuu<span className="text-burnt">.</span>
-            </span>
+            <img
+              src="/logo.png"
+              alt="Blasuu Beauty Lounge"
+              className="h-12 w-auto object-contain"
+            />
           </Link>
 
           {/* Desktop Navigation */}
