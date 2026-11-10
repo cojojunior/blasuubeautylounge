@@ -32,7 +32,6 @@ export function Login() {
     setLoading(true);
     setError("");
 
-    // We don't pass calendar scopes here, just standard login
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
