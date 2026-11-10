@@ -18,19 +18,14 @@ export function Dashboard() {
 
   useEffect(() => {
     fetchAppointments();
-    checkCalendarStatus();
     handleOAuthRedirect();
-  }, []);
 
-  // Check if calendar is already connected
-  const checkCalendarStatus = async () => {
-    // We'll add a visual state for this in the next step,
-    // for now it just sets a local state if the URL has the param.
+    // Check if calendar is already connected on load
     const params = new URLSearchParams(window.location.search);
     if (params.get("calendar") === "connected") {
       setIsCalendarConnected(true);
     }
-  };
+  }, []);
 
   const handleOAuthRedirect = async () => {
     const params = new URLSearchParams(window.location.search);
@@ -42,7 +37,6 @@ export function Dashboard() {
       params.get("calendar") === "connected" &&
       session?.provider_refresh_token
     ) {
-      // Send token to Edge Function
       const { error } = await supabase.functions.invoke("save-calendar-token", {
         body: { refreshToken: session.provider_refresh_token },
       });
@@ -97,17 +91,43 @@ export function Dashboard() {
     navigate("/admin");
   };
 
-  const updateStatus = async (id: string, newStatus: string) => {
+  // UPDATED: This now triggers the Google Calendar sync
+  const updateStatus = async (
+    id: string,
+    newStatus: string,
+    appointment: any,
+  ) => {
     const { error } = await supabase
       .from("appointments")
       .update({ status: newStatus })
       .eq("id", id);
 
-    if (!error) {
-      fetchAppointments();
-    } else {
+    if (error) {
       alert("Error updating status: " + error.message);
+      return;
     }
+
+    // If confirmed, sync to Google Calendar
+    if (newStatus === "confirmed") {
+      try {
+        const { error: calError } = await supabase.functions.invoke(
+          "sync-booking-to-calendar",
+          {
+            body: { appointment: { ...appointment, status: newStatus } },
+          },
+        );
+
+        if (calError) throw calError;
+        alert("Booking confirmed and added to Google Calendar!");
+      } catch (err: any) {
+        console.error(err);
+        alert(
+          "Booking confirmed, but failed to sync to calendar. Did you connect your calendar?",
+        );
+      }
+    }
+
+    fetchAppointments();
   };
 
   const openWhatsApp = (phone: string, name: string) => {
@@ -122,7 +142,6 @@ export function Dashboard() {
   return (
     <div className="min-h-screen bg-white-soft p-4 md:p-8">
       <div className="max-w-6xl mx-auto">
-        {/* Header */}
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 pb-4 border-b border-elephant/10 gap-4">
           <div>
             <h1 className="text-3xl font-serif text-elephant">Dashboard</h1>
@@ -151,7 +170,6 @@ export function Dashboard() {
           </div>
         </header>
 
-        {/* Appointments List */}
         {loading ? (
           <p className="text-elephant-muted text-center py-20">
             Loading appointments...
@@ -166,7 +184,6 @@ export function Dashboard() {
               <div
                 key={apt.id}
                 className="bg-white-pure p-6 rounded-2xl border border-elephant/10 shadow-sm flex flex-col md:flex-row justify-between gap-6">
-                {/* Customer Details */}
                 <div className="flex-grow">
                   <div className="flex items-center gap-3 mb-2">
                     <h3 className="font-semibold text-lg text-elephant">
@@ -196,12 +213,11 @@ export function Dashboard() {
                   </p>
                 </div>
 
-                {/* Actions */}
                 <div className="flex flex-col md:flex-row gap-2 md:items-center flex-shrink-0 border-t md:border-t-0 md:border-l border-elephant/10 pt-4 md:pt-0 md:pl-6">
                   <Button
                     size="sm"
                     className="bg-green-600 hover:bg-green-700 text-white"
-                    onClick={() => updateStatus(apt.id, "confirmed")}
+                    onClick={() => updateStatus(apt.id, "confirmed", apt)} // <-- Passing the apt object here
                     disabled={apt.status === "confirmed"}>
                     <CheckCircle size={16} className="mr-2" /> Confirm
                   </Button>
@@ -210,7 +226,7 @@ export function Dashboard() {
                     size="sm"
                     variant="outline"
                     className="text-red-600 border-red-200 hover:bg-red-50"
-                    onClick={() => updateStatus(apt.id, "cancelled")}
+                    onClick={() => updateStatus(apt.id, "cancelled", apt)}
                     disabled={apt.status === "cancelled"}>
                     <XCircle size={16} className="mr-2" /> Cancel
                   </Button>
