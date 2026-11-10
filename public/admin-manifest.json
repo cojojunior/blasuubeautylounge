@@ -1,0 +1,23 @@
+{
+  "name": "Blasuu Admin",
+  "short_name": "Blasuu Admin",
+  "description": "Manage bookings for Blasuu Beauty Lounge",
+  "start_url": "/admin/dashboard",
+  "display": "standalone",
+  "background_color": "#FAFAFA",
+  "theme_color": "#C6511B",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

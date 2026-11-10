@@ -21,6 +21,7 @@ import { Cookies } from "./pages/policies/Cookies";
 import { Refund } from "./pages/policies/Refund";
 
 // Admin Pages
+import { AdminLayout } from "./admin/AdminLayout";
 import { Login } from "./admin/Login";
 import { Dashboard } from "./admin/Dashboard";
 
@@ -53,8 +54,10 @@ export default function App() {
         </Route>
 
         {/* ADMIN ROUTES (No Header/Footer) */}
-        <Route path="/admin" element={<Login />} />
-        <Route path="/admin/dashboard" element={<Dashboard />} />
+        <Route element={<AdminLayout />}>
+          <Route path="/admin" element={<Login />} />
+          <Route path="/admin/dashboard" element={<Dashboard />} />
+        </Route>
       </Routes>
     </Router>
   );
