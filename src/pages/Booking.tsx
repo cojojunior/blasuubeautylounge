@@ -1,10 +1,10 @@
 import { useState, useEffect, type FormEvent } from "react";
 import { useSearchParams } from "react-router-dom";
-import { services } from "../content";
+import { allServices as services } from "../content";
 import { supabase } from "../lib/supabase";
 import { businessConfig } from "../config/business";
 import { Button } from "../components/ui/Button";
-import { ChevronDown, Bell } from "lucide-react";
+import { ChevronDown, Bell, Loader2 } from "lucide-react";
 
 const times = ["09:00", "10:00", "11:00", "13:00", "14:00", "15:00"];
 
@@ -27,7 +27,10 @@ export function Booking() {
   const [selectedTime, setSelectedTime] = useState<string>("");
   const [selectedServiceId, setSelectedServiceId] =
     useState<string>(initialService);
+
+  // Availability State
   const [bookedSlots, setBookedSlots] = useState<string[]>([]);
+  const [isLoadingSlots, setIsLoadingSlots] = useState(false);
 
   // Customer Details
   const [formData, setFormData] = useState({
@@ -42,13 +45,17 @@ export function Booking() {
   const days = getNext7Days();
   const selectedService =
     services.find((s) => s.id === selectedServiceId) || services[0];
-
   const formatDate = (date: Date) => date.toISOString().split("T")[0];
 
-  // Fetch booked slots for selected date
+  // Fetch booked slots whenever the date changes
   useEffect(() => {
     async function fetchBookings() {
+      setIsLoadingSlots(true);
+      setSelectedTime(""); // Clear selected time when switching dates
+      setShowDetailsForm(false); // Reset form if they switch dates
+
       const targetDate = formatDate(selectedDate);
+
       const { data, error } = await supabase
         .from("appointments")
         .select("appointment_time")
@@ -57,10 +64,14 @@ export function Booking() {
 
       if (!error && data) {
         setBookedSlots(data.map((b) => b.appointment_time));
+      } else {
+        setBookedSlots([]); // Fallback
       }
+
+      setIsLoadingSlots(false);
     }
+
     fetchBookings();
-    setSelectedTime(""); // Reset time when date changes
   }, [selectedDate]);
 
   const handleSubmit = async (e: FormEvent) => {
@@ -69,15 +80,21 @@ export function Booking() {
     setIsSubmitting(true);
 
     try {
+      const dateString = formatDate(selectedDate);
+
+      // Double check server-side before inserting
       const { data: isAvailable, error: checkError } = await supabase.rpc(
         "check_booking_availability",
-        { p_date: formatDate(selectedDate), p_time: selectedTime },
+        { p_date: dateString, p_time: selectedTime },
       );
 
       if (checkError) throw checkError;
+
       if (!isAvailable) {
-        alert("This slot was just taken. Please choose another time.");
+        alert("Sorry, this slot was just taken. Please choose another time.");
         setIsSubmitting(false);
+        // Refresh the slots to show the newly taken slot
+        setSelectedTime("");
         return;
       }
 
@@ -86,7 +103,7 @@ export function Booking() {
         .insert({
           service_id: selectedService.id,
           service_name: selectedService.name,
-          appointment_date: formatDate(selectedDate),
+          appointment_date: dateString,
           appointment_time: selectedTime,
           customer_name: formData.name,
           customer_email: formData.email,
@@ -101,7 +118,7 @@ export function Booking() {
       if (error) throw error;
 
       const bookingRef = data.id.split("-")[0].toUpperCase();
-      const text = `Hello Blasuu Lounge! I'd like to confirm my booking.%0A%0A*Ref:* ${bookingRef}%0A*Service:* ${selectedService.name}%0A*Date:* ${formatDate(selectedDate)}%0A*Time:* ${selectedTime}%0A*Name:* ${formData.name}%0A*Deposit Due:* GH₵${selectedService.depositAmount}%0A%0APlease send payment details to confirm.`;
+      const text = `Hello Blasuu Lounge! I'd like to confirm my booking.%0A%0A*Ref:* ${bookingRef}%0A*Service:* ${selectedService.name}%0A*Date:* ${dateString}%0A*Time:* ${selectedTime}%0A*Name:* ${formData.name}%0A*Deposit Due:* GH₵${selectedService.depositAmount}%0A%0APlease send payment details to confirm.`;
 
       window.location.href = `https://wa.me/${businessConfig.whatsappNumber}?text=${text}`;
     } catch (error) {
@@ -116,15 +133,15 @@ export function Booking() {
       <div className="w-full max-w-md bg-white-pure rounded-[2.5rem] shadow-xl border border-elephant/5 overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-6 pb-2">
-          <button className="w-8 h-8 flex items-center justify-center rounded-full bg-elephant/5 text-elephant">
+          <button className="w-8 h-8 flex items-center justify-center rounded-full bg-elephant/5 text-elephant hover:bg-elephant/10 transition-colors">
             &larr;
           </button>
           <h1 className="font-semibold text-elephant">Book Appointment</h1>
-          <div className="w-8 h-8"></div> {/* Spacer */}
+          <div className="w-8 h-8"></div>
         </div>
 
         <div className="p-6">
-          {/* Service Selector (Replaces the Doctor Card) */}
+          {/* Service Selector */}
           <div className="flex items-center gap-4 p-4 rounded-2xl border border-elephant/10 shadow-sm mb-6">
             <div className="w-12 h-12 rounded-full bg-burnt/10 flex items-center justify-center text-burnt font-serif text-xl">
               B
@@ -188,12 +205,24 @@ export function Booking() {
             <h2 className="font-semibold text-sm text-elephant">
               Available Slots
             </h2>
-            <span className="text-xs text-elephant-muted">
-              {times.length - bookedSlots.length} open
-            </span>
+            {isLoadingSlots ? (
+              <span className="text-xs text-elephant-muted flex items-center gap-1">
+                <Loader2 size={12} className="animate-spin" /> Loading...
+              </span>
+            ) : (
+              <span className="text-xs text-elephant-muted">
+                {times.length - bookedSlots.length} open
+              </span>
+            )}
           </div>
 
-          <div className="grid grid-cols-3 gap-3 mb-6">
+          <div className="grid grid-cols-3 gap-3 mb-6 relative">
+            {isLoadingSlots && (
+              <div className="absolute inset-0 bg-white-pure/60 backdrop-blur-sm z-10 rounded-xl flex items-center justify-center">
+                {/* Overlay to prevent clicking while loading */}
+              </div>
+            )}
+
             {times.map((time) => {
               const isBooked = bookedSlots.includes(time);
               const isSelected = selectedTime === time;
@@ -205,13 +234,13 @@ export function Booking() {
               return (
                 <button
                   key={time}
-                  disabled={isBooked}
+                  disabled={isBooked || isLoadingSlots}
                   onClick={() => setSelectedTime(time)}
                   className={`py-3 rounded-xl border text-sm font-medium transition-all ${
                     isBooked
-                      ? "bg-elephant/5 text-elephant-muted border-transparent cursor-not-allowed opacity-50"
+                      ? "bg-elephant/5 text-elephant-muted border-transparent cursor-not-allowed line-through opacity-60"
                       : isSelected
-                        ? "bg-burnt/10 border-burnt text-burnt"
+                        ? "bg-burnt/10 border-burnt text-burnt shadow-sm"
                         : "bg-white-pure border-elephant/10 text-elephant hover:border-burnt/30"
                   }`}>
                   {displayHour}:{minute} {ampm}
@@ -220,7 +249,7 @@ export function Booking() {
             })}
           </div>
 
-          {/* Reminder Toggle (Visual only) */}
+          {/* Reminder Toggle */}
           <div className="flex items-center justify-between p-3 rounded-xl border border-elephant/10 mb-6">
             <div className="flex items-center gap-3">
               <Bell size={18} className="text-burnt" />
@@ -236,8 +265,8 @@ export function Booking() {
           {/* Confirm / Details Flow */}
           {!showDetailsForm ? (
             <Button
-              className="w-full py-4 rounded-xl shadow-lg shadow-burnt/20"
-              disabled={!selectedTime}
+              className="w-full py-4 rounded-xl shadow-lg shadow-burnt/20 transition-all"
+              disabled={!selectedTime || isLoadingSlots}
               onClick={() => setShowDetailsForm(true)}>
               Confirm Booking &rarr;
             </Button>
@@ -245,7 +274,17 @@ export function Booking() {
             <form
               onSubmit={handleSubmit}
               className="space-y-4 animate-fade-in pt-4 border-t border-elephant/10">
-              <h3 className="font-semibold text-elephant mb-2">Your Details</h3>
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-semibold text-elephant">Your Details</h3>
+                <span className="text-xs text-burnt font-medium bg-burnt/10 px-2 py-1 rounded">
+                  {selectedDate.toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                  })}{" "}
+                  at {selectedTime}
+                </span>
+              </div>
+
               <input
                 required
                 type="text"
