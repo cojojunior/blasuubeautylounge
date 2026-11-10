@@ -18,60 +18,61 @@ export function Dashboard() {
 
   useEffect(() => {
     fetchAppointments();
-    handleOAuthRedirect();
 
-    // Check if calendar is already connected on load
+    // Listen for the OAuth redirect
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (event === "SIGNED_IN" && session?.provider_refresh_token) {
+          console.log("Caught refresh token, saving to database...");
+
+          const { error } = await supabase.functions.invoke(
+            "save-calendar-token",
+            {
+              body: { refreshToken: session.provider_refresh_token },
+            },
+          );
+
+          if (!error) {
+            alert("Google Calendar connected successfully!");
+            setIsCalendarConnected(true);
+            window.history.replaceState(
+              {},
+              document.title,
+              window.location.pathname,
+            );
+          } else {
+            console.error(error);
+            alert("Failed to save token.");
+          }
+        }
+      },
+    );
+
+    // Check if we just returned from OAuth
     const params = new URLSearchParams(window.location.search);
     if (params.get("calendar") === "connected") {
       setIsCalendarConnected(true);
     }
+
+    // Cleanup listener on unmount
+    return () => authListener.subscription.unsubscribe();
   }, []);
 
-  const handleOAuthRedirect = async () => {
-    const params = new URLSearchParams(window.location.search);
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-
-    if (
-      params.get("calendar") === "connected" &&
-      session?.provider_refresh_token
-    ) {
-      const { error } = await supabase.functions.invoke("save-calendar-token", {
-        body: { refreshToken: session.provider_refresh_token },
-      });
-
-      if (!error) {
-        alert("Google Calendar connected successfully!");
-        setIsCalendarConnected(true);
-        window.history.replaceState(
-          {},
-          document.title,
-          window.location.pathname,
-        );
-      } else {
-        alert("Failed to save calendar token.");
-      }
-    }
-  };
-
-const connectCalendar = async () => {
-  const { error } = await supabase.auth.signInWithOAuth({
-    provider: "google",
-    options: {
-      // MUST include the email scope for Supabase to work
-      scopes:
-        "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/calendar.events",
-      redirectTo: `${window.location.origin}/admin/dashboard?calendar=connected`,
-      queryParams: {
-        access_type: "offline",
-        prompt: "consent",
+  const connectCalendar = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        scopes:
+          "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/calendar.events",
+        redirectTo: `${window.location.origin}/admin/dashboard?calendar=connected`,
+        queryParams: {
+          access_type: "offline",
+          prompt: "consent",
+        },
       },
-    },
-  });
-
-  if (error) console.error("OAuth error:", error);
-};
+    });
+    if (error) console.error("OAuth error:", error);
+  };
 
   const fetchAppointments = async () => {
     const { data, error } = await supabase
@@ -80,11 +81,7 @@ const connectCalendar = async () => {
       .order("appointment_date", { ascending: true })
       .order("appointment_time", { ascending: true });
 
-    if (error) {
-      console.error("Error fetching:", error);
-    } else {
-      setAppointments(data || []);
-    }
+    if (!error && data) setAppointments(data);
     setLoading(false);
   };
 
@@ -93,43 +90,28 @@ const connectCalendar = async () => {
     navigate("/admin");
   };
 
-  // UPDATED: This now triggers the Google Calendar sync
-  const updateStatus = async (
-    id: string,
-    newStatus: string,
-    appointment: any,
-  ) => {
+  const updateStatus = async (id: string, newStatus: string, apt: any) => {
+    // 1. Update Database
     const { error } = await supabase
       .from("appointments")
       .update({ status: newStatus })
       .eq("id", id);
+    if (error) return alert("Error updating status: " + error.message);
 
-    if (error) {
-      alert("Error updating status: " + error.message);
-      return;
-    }
-
-    // If confirmed, sync to Google Calendar
+    // 2. Sync to Calendar if Confirmed
     if (newStatus === "confirmed") {
       try {
-        const { error: calError } = await supabase.functions.invoke(
-          "sync-booking-to-calendar",
-          {
-            body: { appointment: { ...appointment, status: newStatus } },
-          },
-        );
-
-        if (calError) throw calError;
-        alert("Booking confirmed and added to Google Calendar!");
-      } catch (err: any) {
-        console.error(err);
-        alert(
-          "Booking confirmed, but failed to sync to calendar. Did you connect your calendar?",
-        );
+        await supabase.functions.invoke("sync-booking-to-calendar", {
+          body: { appointment: { ...apt, status: newStatus } },
+        });
+        alert("Booking confirmed and synced to Google Calendar!");
+      } catch (err) {
+        console.error("Sync failed", err);
+        alert("Booking confirmed, but calendar sync failed. Check console.");
       }
     }
 
-    fetchAppointments();
+    fetchAppointments(); // Refresh UI
   };
 
   const openWhatsApp = (phone: string, name: string) => {
@@ -144,6 +126,7 @@ const connectCalendar = async () => {
   return (
     <div className="min-h-screen bg-white-soft p-4 md:p-8">
       <div className="max-w-6xl mx-auto">
+        {/* Header */}
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 pb-4 border-b border-elephant/10 gap-4">
           <div>
             <h1 className="text-3xl font-serif text-elephant">Dashboard</h1>
@@ -154,24 +137,22 @@ const connectCalendar = async () => {
             <Button
               variant="outline"
               onClick={connectCalendar}
-              className={`flex items-center gap-2 ${
+              className={
                 isCalendarConnected
                   ? "text-green-600 border-green-200 bg-green-50"
-                  : "text-blue-600 border-blue-200 hover:bg-blue-50"
-              }`}>
-              <Calendar size={16} />
+                  : "text-blue-600 border-blue-200"
+              }>
+              <Calendar size={16} className="mr-2" />
               {isCalendarConnected ? "Calendar Connected" : "Connect Calendar"}
             </Button>
 
-            <Button
-              variant="outline"
-              onClick={handleLogout}
-              className="flex items-center gap-2">
-              <LogOut size={16} /> Logout
+            <Button variant="outline" onClick={handleLogout}>
+              <LogOut size={16} className="mr-2" /> Logout
             </Button>
           </div>
         </header>
 
+        {/* Appointments List */}
         {loading ? (
           <p className="text-elephant-muted text-center py-20">
             Loading appointments...
@@ -186,6 +167,7 @@ const connectCalendar = async () => {
               <div
                 key={apt.id}
                 className="bg-white-pure p-6 rounded-2xl border border-elephant/10 shadow-sm flex flex-col md:flex-row justify-between gap-6">
+                {/* Details */}
                 <div className="flex-grow">
                   <div className="flex items-center gap-3 mb-2">
                     <h3 className="font-semibold text-lg text-elephant">
@@ -215,11 +197,12 @@ const connectCalendar = async () => {
                   </p>
                 </div>
 
+                {/* Actions */}
                 <div className="flex flex-col md:flex-row gap-2 md:items-center flex-shrink-0 border-t md:border-t-0 md:border-l border-elephant/10 pt-4 md:pt-0 md:pl-6">
                   <Button
                     size="sm"
                     className="bg-green-600 hover:bg-green-700 text-white"
-                    onClick={() => updateStatus(apt.id, "confirmed", apt)} // <-- Passing the apt object here
+                    onClick={() => updateStatus(apt.id, "confirmed", apt)}
                     disabled={apt.status === "confirmed"}>
                     <CheckCircle size={16} className="mr-2" /> Confirm
                   </Button>
