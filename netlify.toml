@@ -2,6 +2,14 @@
   command = "npm run build"
   publish = "dist"
 
+# 1. Serve the Service Worker as a JavaScript file
+[[redirects]]
+  from = "/sw.js"
+  to = "/sw.js"
+  status = 200
+  force = false
+
+# 2. Let React Router handle all other routes (but not static files)
 [[redirects]]
   from = "/*"
   to = "/index.html"
