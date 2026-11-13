@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import { allServices as services, categories } from "../content";
 import { Heart, ArrowUpRight } from "lucide-react";
 
@@ -7,27 +7,38 @@ import { Heart, ArrowUpRight } from "lucide-react";
 const getCategoryImage = (category: string) => {
   switch (category) {
     case "Nails":
-      return "https://images.unsplash.com/photo-1519014816548-bf5fe059e98b?q=80&w=600&auto=format&fit=crop";
+      return "/nails.png";
     case "Pedicure":
-      return "https://images.unsplash.com/photo-1519014816548-bf5fe059e98b?q=80&w=600&auto=format&fit=crop";
+      return "/perdicure.png";
     case "Waxing":
-      return "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?q=80&w=600&auto=format&fit=crop";
+      return "/waxing.png";
     case "Facials":
-      return "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?q=80&w=600&auto=format&fit=crop";
+      return "/facials.png";
     case "Massage":
-      return "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=600&auto=format&fit=crop";
+      return "/massage.png";
     case "Lashes":
-      return "https://images.unsplash.com/photo-1583002083751-9c4b11a5c22e?q=80&w=600&auto=format&fit=crop";
+      return "/lashes.png";
     case "Piercing":
-      return "https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?q=80&w=600&auto=format&fit=crop";
+      return "/piecing.png";
     default:
-      return "https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?q=80&w=600&auto=format&fit=crop";
+      return "/career.png"; // Fallback
   }
 };
 
 export function Services() {
-  const [activeCategory, setActiveCategory] = useState("All");
+  const [searchParams] = useSearchParams(); // Read the URL
+  const initialCategory = searchParams.get("category") || "All";
+
+  const [activeCategory, setActiveCategory] = useState(initialCategory);
   const [liked, setLiked] = useState<Record<string, boolean>>({});
+
+  // Add this to ensure if a user clicks a Home category, it updates the view
+  useEffect(() => {
+    const cat = searchParams.get("category");
+    if (cat) {
+      setActiveCategory(cat);
+    }
+  }, [searchParams]);
 
   const filteredServices =
     activeCategory === "All"
@@ -59,7 +70,7 @@ export function Services() {
               className={`px-6 py-2 rounded-full text-sm font-medium transition-colors ${
                 activeCategory === cat
                   ? "bg-burnt text-white-pure shadow-md"
-                  : "bg-white-pure text-elephant border border-black/5 hover:border-burnt"
+                  : "bg-white-pure text-elephant border border-black/10 hover:border-burnt"
               }`}>
               {cat}
             </button>
@@ -72,7 +83,6 @@ export function Services() {
             <Link
               key={service.id}
               to={`/book?service=${service.id}`}
-              // Changed to white background and black/30 border
               className="group flex flex-col bg-white-pure border border-black/10 rounded-[2rem] p-3 transition-transform hover:-translate-y-1 hover:shadow-xl">
               {/* Top Image Section */}
               <div className="relative w-full aspect-[4/3] rounded-[1.5rem] overflow-hidden bg-white-soft">
