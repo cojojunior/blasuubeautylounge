@@ -25,7 +25,7 @@ export function Header() {
             <img
               src="/icon-512.png"
               alt="Blasuu Beauty Lounge"
-              className="h-12 md:h-14 w-auto object-contain"
+              className="h-12 md:h-14 w-auto object-contain rounded:[2rem]"
             />
           </Link>
 

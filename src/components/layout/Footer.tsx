@@ -6,13 +6,15 @@ export function Footer() {
   return (
     <footer className="bg-elephant text-white-pure pt-16 pb-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
-          <div className="space-y-4">
-            <Link to="/" className="inline-block mb-4">
+        {/* Changed to 2 columns on mobile/tablet */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12 mb-12">
+          {/* Brand & About (Spans full width on mobile) */}
+          <div className="col-span-2 lg:col-span-1 space-y-4">
+            <Link to="/" className="flex-shrink-0 flex items-center">
               <img
                 src="/icon-512.png"
                 alt="Blasuu Beauty Lounge"
-                className="h-16 md:h-20 w-auto object-contain invert brightness-0"
+                className="h-12 md:h-14 w-auto object-contain rounded-[2rem]"
               />
             </Link>
 
@@ -98,8 +100,8 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Legal */}
-          <div>
+          {/* Legal (Starts on the left side of the second row on mobile) */}
+          <div className="col-span-1 lg:col-span-1">
             <h3 className="font-serif text-lg text-white-pure mb-4">Legal</h3>
             <ul className="space-y-3 text-sm text-elephant-light">
               <li>
@@ -135,7 +137,7 @@ export function Footer() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="pt-8 border-t border-white-pure/10 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-elephant-light">
+        <div className="pt-8 border-t border-white-pure/10 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-elephant-light text-center md:text-left">
           <p>
             &copy; {new Date().getFullYear()} {businessConfig.name}. All rights
             reserved.
