@@ -157,7 +157,7 @@ export function Availability() {
   };
 
   return (
-    <div className="py-20 bg-white-soft min-h-screen">
+    <div className="py-20 bg-white min-h-screen">
       <div className="max-w-xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-serif mb-4 text-elephant">

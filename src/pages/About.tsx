@@ -4,9 +4,9 @@ import { Sparkles, Heart, ShieldCheck } from "lucide-react";
 
 export function About() {
   return (
-    <div className="bg-white-soft min-h-screen">
+    <div className="bg-white min-h-screen">
       {/* Hero */}
-      <div className="py-24 bg-elephant text-white-pure text-center px-4">
+      <div className="py-24 bg-white  text-elephant text-center px-4">
         <div className="max-w-3xl mx-auto">
           <h1 className="text-4xl md:text-6xl font-serif mb-6 text-white-pure">
             Our Story
