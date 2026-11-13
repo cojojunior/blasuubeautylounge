@@ -32,15 +32,17 @@ export function LocationSection() {
           </div>
 
           <div className="h-80 rounded-3xl overflow-hidden bg-elephant/5 relative border border-elephant/10">
-            {/* Using a generic Google Maps embed for Accra */}
+            {/* PASTE YOUR EXACT GOOGLE MAPS SRC URL HERE */}
             <iframe
-              title="Location Map"
+              title="Blasuu Beauty Lounge Location"
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3970.411456140866!2d-0.1666173!3d5.6830527!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zLMKwNDEnMDAuMCJOIDDCsDA5JzU5LjgiVw!5e0!3m2!1sen!2sgh!4v1620000000000!5m2!1sen!2sgh"
               width="100%"
               height="100%"
-              style={{ border: 0 }}
+              style={{ border: 0 }} // <-- This is the fix: it's an object, not a string
               allowFullScreen
               loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              className="absolute inset-0"
             />
           </div>
         </div>
