@@ -10,7 +10,7 @@ export function Footer() {
           <div className="space-y-4">
             <Link to="/" className="inline-block mb-4">
               <img
-                src="/logo.png"
+                src="/icon-512.png"
                 alt="Blasuu Beauty Lounge"
                 className="h-16 md:h-20 w-auto object-contain invert brightness-0"
               />
