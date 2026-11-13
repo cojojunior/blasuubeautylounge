@@ -20,17 +20,21 @@ export function Header() {
     <header className="sticky top-0 z-50 w-full bg-white-soft/90 backdrop-blur-md border-b border-elephant/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
-
-          <Link to="/" className="flex-shrink-0 flex items-center">
+          {/* Logo & Brand Name */}
+          <Link to="/" className="flex-shrink-0 flex items-center gap-3">
             <img
               src="/icon-512.png"
-              alt="Blasuu Beauty Lounge"
-              className="h-12 md:h-14 w-auto object-contain rounded:[2rem]"
+              alt="Blasuu Logo"
+              className="h-10 md:h-12 w-auto object-contain"
             />
+            {/* Text is hidden on very small screens, shown on sm and up */}
+            <span className="hidden sm:block font-serif text-lg md:text-xl font-bold text-elephant tracking-tight leading-none">
+              Blasuu Beauty Lounge
+            </span>
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-8">
+          <nav className="hidden lg:flex items-center gap-6 xl:gap-8">
             {navLinks.map((link) => (
               <Link
                 key={link.name}
@@ -45,8 +49,8 @@ export function Header() {
             ))}
           </nav>
 
-          {/* Desktop CTA */}
-          <div className="hidden md:flex items-center gap-4">
+          {/* Desktop CTA (Hidden on tablet, shown on large desktop) */}
+          <div className="hidden lg:flex items-center gap-4">
             <a
               href={`tel:${businessConfig.phone}`}
               className="flex items-center gap-2 text-sm font-medium text-elephant hover:text-burnt transition-colors">
@@ -60,8 +64,8 @@ export function Header() {
             </Link>
           </div>
 
-          {/* Mobile Menu Button */}
-          <div className="md:hidden flex items-center">
+          {/* Mobile & Tablet Menu Button */}
+          <div className="lg:hidden flex items-center">
             <button
               onClick={() => setIsOpen(!isOpen)}
               className="text-elephant hover:text-burnt p-2"
@@ -72,9 +76,9 @@ export function Header() {
         </div>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile & Tablet Menu Dropdown */}
       {isOpen && (
-        <div className="md:hidden bg-white-soft border-b border-elephant/10">
+        <div className="lg:hidden bg-white-soft border-b border-elephant/10">
           <div className="px-4 pt-2 pb-6 space-y-2">
             {navLinks.map((link) => (
               <Link

@@ -6,19 +6,19 @@ export function Footer() {
   return (
     <footer className="bg-elephant text-white-pure pt-16 pb-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Changed to 2 columns on mobile/tablet */}
+        {/* 2 Columns on mobile, 4 on desktop */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12 mb-12">
-          {/* Brand & About (Spans full width on mobile) */}
-          <div className="col-span-2 lg:col-span-1 space-y-4">
+          {/* Brand - NO col-span */}
+          <div className="space-y-4">
             <Link to="/" className="flex-shrink-0 flex items-center">
               <img
                 src="/icon-512.png"
                 alt="Blasuu Beauty Lounge"
-                className="h-12 md:h-14 w-auto object-contain rounded-[2rem]"
+                className="h-12 md:h-14 w-auto object-contain rounded-2xl"
               />
             </Link>
 
-            <p className="text-elephant-light text-sm leading-relaxed max-w-xs mt-4">
+            <p className="text-elephant-light text-xs md:text-sm leading-relaxed mt-4">
               A premium beauty lounge offering luxury spa treatments, nails, and
               wellness in the heart of Accra.
             </p>
@@ -29,7 +29,7 @@ export function Footer() {
                 rel="noreferrer"
                 className="text-elephant-light hover:text-gold transition-colors"
                 aria-label="Instagram">
-                <Globe size={20} />
+                <Globe size={18} />
               </a>
               <a
                 href={businessConfig.socials.facebook}
@@ -37,7 +37,7 @@ export function Footer() {
                 rel="noreferrer"
                 className="text-elephant-light hover:text-gold transition-colors"
                 aria-label="Facebook">
-                <MessageCircle size={20} />
+                <MessageCircle size={18} />
               </a>
             </div>
           </div>
@@ -93,15 +93,15 @@ export function Footer() {
                 <Mail size={18} className="flex-shrink-0 text-gold" />
                 <a
                   href={`mailto:${businessConfig.email}`}
-                  className="hover:text-white-pure transition-colors">
+                  className="hover:text-white-pure transition-colors break-all">
                   {businessConfig.email}
                 </a>
               </li>
             </ul>
           </div>
 
-          {/* Legal (Starts on the left side of the second row on mobile) */}
-          <div className="col-span-1 lg:col-span-1">
+          {/* Legal */}
+          <div>
             <h3 className="font-serif text-lg text-white-pure mb-4">Legal</h3>
             <ul className="space-y-3 text-sm text-elephant-light">
               <li>
