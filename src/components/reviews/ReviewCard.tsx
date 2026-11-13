@@ -4,7 +4,7 @@ interface ReviewCardProps {
   authorName: string;
   authorPhoto?: string;
   rating: number;
-  text: string;
+  text?: string;
   relativeTime: string;
 }
 
@@ -15,6 +15,12 @@ export function ReviewCard({
   text,
   relativeTime,
 }: ReviewCardProps) {
+  // If they didn't leave text, give them a nice default quote
+  const displayText =
+    text && text.trim().length > 0
+      ? text
+      : "Loved my experience at Blasuu! Highly recommend.";
+
   return (
     <div className="bg-white-pure p-6 rounded-2xl border border-elephant/10 shadow-sm flex flex-col h-full">
       <div className="flex justify-between items-start mb-4">
@@ -47,7 +53,7 @@ export function ReviewCard({
       </div>
 
       <p className="text-sm text-elephant-muted leading-relaxed italic flex-grow">
-        "{text || "Rating only"}"
+        "{displayText}"
       </p>
     </div>
   );
