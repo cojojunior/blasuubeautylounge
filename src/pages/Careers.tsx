@@ -28,15 +28,26 @@ export function Careers() {
   return (
     <div className="min-h-screen bg-white-pure">
       {/* Hero Section */}
-      <div className="py-24 bg-elephant text-white-pure text-center px-4">
-        <div className="max-w-3xl mx-auto">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/10 mb-6">
-            <GraduationCap size={32} className="text-gold" />
+      <div className="relative py-32 text-white-pure text-center px-4 overflow-hidden">
+        {/* Background Image */}
+        <img
+          src="/career.png"
+          alt="Career background"
+          className="absolute inset-0 w-full h-full object-cover z-0"
+        />
+
+        {/* Dark Overlay for 25% brightness (approx 75% opacity black) */}
+        <div className="absolute inset-0 bg-black/75 z-10"></div>
+
+        {/* Content */}
+        <div className="relative z-20 max-w-3xl mx-auto">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/10 backdrop-blur-md mb-6 border border-white/20">
+            <GraduationCap size={32} className="text-white-pure" />
           </div>
-          <h1 className="text-4xl md:text-6xl font-serif mb-6 text-white-pure">
+          <h1 className="text-4xl md:text-6xl font-serif mb-6 text-white-pure drop-shadow-lg">
             Learn With Us
           </h1>
-          <p className="text-lg md:text-xl text-elephant-light leading-relaxed">
+          <p className="text-lg md:text-xl text-gray-200 leading-relaxed drop-shadow-md">
             Whether you are a seasoned professional looking for a new home, or a
             beginner wanting to master the craft, our doors are open. The owner
             personally mentors and trains passionate individuals.
