@@ -3,9 +3,9 @@ import { Button } from "../ui/Button";
 
 export function ContactCTA() {
   return (
-    <section className="py-20 bg-elephant text-white-pure text-center px-4">
+    <section className="py-20 bg-white-pure text-center px-4">
       <div className="max-w-3xl mx-auto">
-        <h2 className="text-3xl md:text-5xl font-serif mb-6 text-white-pure">
+        <h2 className="text-3xl md:text-5xl font-serif mb-6 text-elephant">
           Ready to Experience Blasuu?
         </h2>
         <p className="text-elephant-light mb-8 text-lg">

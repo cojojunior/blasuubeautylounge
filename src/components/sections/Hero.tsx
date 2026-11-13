@@ -3,37 +3,40 @@ import { ArrowRight, Star } from "lucide-react";
 
 export function Hero() {
   return (
-    <section className="relative w-full min-h-[85vh] flex items-center justify-center overflow-hidden">
-      {/* Background Image */}
+    // The section is slightly shorter and items are aligned to the bottom
+    <section className="relative w-full min-h-[90vh] flex items-end justify-center overflow-hidden">
+      {/* Background Image - Fixed to cover the area */}
       <img
-        src="/hero.png"
+        src="/hero-bg.jpg"
         alt="Blasuu Beauty Lounge"
-        className="absolute inset-0 w-full h-full object-cover z-0"
+        className="absolute inset-0 w-full h-full object-cover object-top z-0"
       />
 
-      {/* Dark Overlay for 35% brightness (approx 65% opacity black) */}
-      <div className="absolute inset-0 bg-black/65 z-10"></div>
+      {/* Dark Overlay: Stronger at the bottom to make text readable */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/20 z-10"></div>
 
-      {/* Content */}
-      <div className="relative z-20 text-center px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto py-24 lg:py-32 animate-fade-in">
-        {/* Trust Badge */}
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 shadow-lg mb-8">
-          <div className="flex -space-x-1">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <Star key={i} size={14} className="fill-gold text-gold" />
-            ))}
+      {/* Content - Pushed to the bottom */}
+      <div className="relative z-20 text-center px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto pb-16 lg:pb-24 w-full">
+        {/* Optional Trust Badge - Removed or kept minimal to not block the logo */}
+        <div className="flex justify-center mb-6">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 shadow-lg">
+            <div className="flex -space-x-1">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <Star key={i} size={14} className="fill-gold text-gold" />
+              ))}
+            </div>
+            <span className="text-xs font-medium text-white-pure ml-1">
+              Trusted by clients in Accra
+            </span>
           </div>
-          <span className="text-xs font-medium text-white-pure ml-1">
-            Trusted by clients in Accra
-          </span>
         </div>
 
-        <h1 className="text-5xl sm:text-6xl lg:text-7xl font-serif font-medium text-white-pure tracking-tight leading-[1.1] mb-6 drop-shadow-lg">
+        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-serif font-medium text-white-pure tracking-tight leading-[1.1] mb-6 drop-shadow-xl">
           Unveil Your <br />
           <span className="text-burnt italic">Radiant</span> Self.
         </h1>
 
-        <p className="text-lg sm:text-xl text-gray-200 mb-10 max-w-2xl mx-auto leading-relaxed drop-shadow-md">
+        <p className="text-base sm:text-lg text-gray-200 mb-10 max-w-2xl mx-auto leading-relaxed drop-shadow-md">
           Experience the pinnacle of beauty and wellness. From luxurious nails
           to transformative facials, we craft experiences tailored just for you.
         </p>
@@ -56,7 +59,7 @@ export function Hero() {
         </div>
 
         {/* Mini Stats */}
-        <div className="mt-16 flex flex-wrap justify-center items-center gap-8 border-t border-white/20 pt-8">
+        <div className="mt-12 flex flex-wrap justify-center items-center gap-8 border-t border-white/20 pt-8">
           <div className="text-center">
             <p className="text-2xl font-serif font-semibold text-white-pure drop-shadow-md">
               15+
