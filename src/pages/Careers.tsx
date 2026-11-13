@@ -36,7 +36,7 @@ export function Careers() {
           className="absolute inset-0 w-full h-full object-cover z-0"
         />
 
-        {/* Dark Overlay for 25% brightness (approx 75% opacity black) */}
+        {/* Dark Overlay for 25% brightness */}
         <div className="absolute inset-0 bg-black/75 z-10"></div>
 
         {/* Content */}
@@ -44,9 +44,12 @@ export function Careers() {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/10 backdrop-blur-md mb-6 border border-white/20">
             <GraduationCap size={32} className="text-white-pure" />
           </div>
-          <h1 className="text-4xl md:text-6xl font-serif mb-6 text-white-pure drop-shadow-lg">
+
+          {/* Updated heading to be bold and use a brighter burnt orange */}
+          <h1 className="text-4xl md:text-6xl font-serif font-bold mb-6 text-burnt">
             Learn With Us
           </h1>
+
           <p className="text-lg md:text-xl text-gray-200 leading-relaxed drop-shadow-md">
             Whether you are a seasoned professional looking for a new home, or a
             beginner wanting to master the craft, our doors are open. The owner

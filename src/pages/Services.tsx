@@ -28,7 +28,7 @@ const getCategoryImage = (category: string) => {
 export function Services() {
   const [searchParams] = useSearchParams(); // Read the URL
   const initialCategory = searchParams.get("category") || "All";
-
+  
   const [activeCategory, setActiveCategory] = useState(initialCategory);
   const [liked, setLiked] = useState<Record<string, boolean>>({});
 
@@ -84,6 +84,7 @@ export function Services() {
               key={service.id}
               to={`/book?service=${service.id}`}
               className="group flex flex-col bg-white-pure border border-black/10 rounded-[2rem] p-3 transition-transform hover:-translate-y-1 hover:shadow-xl">
+              
               {/* Top Image Section */}
               <div className="relative w-full aspect-[4/3] rounded-[1.5rem] overflow-hidden bg-white-soft">
                 <img
