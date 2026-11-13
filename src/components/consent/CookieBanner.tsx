@@ -1,21 +1,11 @@
-import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "../ui/Button";
+import { useConsent } from "../../hooks/useConsent"; // NEW
 
 export function CookieBanner() {
-  const [isVisible, setIsVisible] = useState(false);
+  const { hasConsented, acceptCookies } = useConsent(); // NEW
 
-  useEffect(() => {
-    const consent = localStorage.getItem("cookie-consent");
-    if (!consent) setIsVisible(true);
-  }, []);
-
-  const acceptCookies = () => {
-    localStorage.setItem("cookie-consent", "true");
-    setIsVisible(false);
-  };
-
-  if (!isVisible) return null;
+  if (hasConsented) return null;
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-elephant text-white-pure p-4 z-50 animate-slide-up shadow-2xl">

@@ -5,9 +5,9 @@ import { supabase } from "../lib/supabase";
 import { Button } from "../components/ui/Button";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { PolicyModal } from "../components/booking/PolicyModal";
-import { formatDateForDB } from "../lib/datetime"; // NEW
-import { generateBookingMessage, getWhatsAppLink } from "../lib/whatsapp"; // NEW
-import { formatCurrency } from "../lib/currency"; // NEW
+import { formatDateForDB } from "../lib/datetime";
+import { generateBookingMessage, getWhatsAppLink } from "../lib/whatsapp";
+import { formatCurrency } from "../lib/currency";
 
 const times = ["09:00", "10:00", "11:00", "13:00", "14:00", "15:00"];
 
@@ -38,7 +38,6 @@ export function Booking() {
   const selectedService =
     services.find((s) => s.id === selectedServiceId) || services[0];
 
-  // --- CALENDAR LOGIC ---
   const getDaysInMonth = (year: number, month: number) =>
     new Date(year, month + 1, 0).getDate();
   const getFirstDayOfMonth = (year: number, month: number) =>
@@ -154,7 +153,6 @@ export function Booking() {
 
       if (error) throw error;
 
-      // Use utilities for booking reference and WhatsApp message
       const bookingRef = data.id.split("-")[0].toUpperCase();
       const message = generateBookingMessage(
         bookingRef,
@@ -206,7 +204,6 @@ export function Booking() {
                 ))}
               </select>
               <p className="text-sm text-elephant-muted mt-1">
-                {/* Use formatCurrency here */}
                 {formatCurrency(selectedService.price)} •{" "}
                 {selectedService.durationMinutes} mins
               </p>

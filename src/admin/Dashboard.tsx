@@ -9,6 +9,10 @@ import {
   MessageCircle,
   Calendar,
 } from "lucide-react";
+import { formatCurrency } from "../lib/currency";
+import { formatDateDisplay, formatTimeDisplay } from "../lib/datetime";
+// Use the correct function for chatting with a customer
+import { getCustomerWhatsAppLink } from "../lib/whatsapp";
 
 export function Dashboard() {
   const [appointments, setAppointments] = useState<any[]>([]);
@@ -20,7 +24,6 @@ export function Dashboard() {
     fetchAppointments();
     checkCalendarStatus();
 
-    // Listen for the OAuth redirect
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (event === "SIGNED_IN" && session?.provider_refresh_token) {
@@ -48,14 +51,12 @@ export function Dashboard() {
   }, []);
 
   const checkCalendarStatus = async () => {
-    // 1. Check if URL indicates we just connected
     const params = new URLSearchParams(window.location.search);
     if (params.get("calendar") === "connected") {
       setIsCalendarConnected(true);
       return;
     }
 
-    // 2. Ask database if a token exists
     const { data: hasToken, error } = await supabase.rpc(
       "check_calendar_connection",
     );
@@ -63,7 +64,6 @@ export function Dashboard() {
     if (!error && hasToken) {
       setIsCalendarConnected(true);
     } else {
-      // 3. If no token exists, auto-trigger the connection
       connectCalendar();
     }
   };
@@ -75,10 +75,7 @@ export function Dashboard() {
         scopes:
           "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/calendar.events",
         redirectTo: `${window.location.origin}/admin/dashboard?calendar=connected`,
-        queryParams: {
-          access_type: "offline",
-          prompt: "consent",
-        },
+        queryParams: { access_type: "offline", prompt: "consent" },
       },
     });
     if (error) console.error("OAuth error:", error);
@@ -122,11 +119,9 @@ export function Dashboard() {
   };
 
   const openWhatsApp = (phone: string, name: string) => {
-    let formattedPhone = phone.replace(/\D/g, "");
-    if (formattedPhone.startsWith("0"))
-      formattedPhone = "233" + formattedPhone.substring(1);
-    const text = `Hello ${name}, this is Blasuu Beauty Lounge. We are confirming your appointment!`;
-    window.open(`https://wa.me/${formattedPhone}?text=${text}`, "_blank");
+    // Use the utility function here
+    const message = `Hello ${name}, this is Blasuu Beauty Lounge. We are confirming your appointment!`;
+    window.open(getCustomerWhatsAppLink(phone, message), "_blank");
   };
 
   return (
@@ -157,7 +152,6 @@ export function Dashboard() {
           </div>
         </header>
 
-        {/* Keep your appointments rendering code exactly the same here... */}
         {loading ? (
           <p className="text-elephant-muted text-center py-20">
             Loading appointments...
@@ -189,12 +183,13 @@ export function Dashboard() {
                     </span>
                   </div>
                   <p className="text-sm text-elephant-muted mb-1">
-                    <strong>Service:</strong> {apt.service_name} (GH₵{" "}
-                    {apt.total_price})
+                    <strong>Service:</strong> {apt.service_name} (
+                    {formatCurrency(apt.total_price)})
                   </p>
                   <p className="text-sm text-elephant-muted mb-1">
-                    <strong>Date:</strong> {apt.appointment_date} at{" "}
-                    {apt.appointment_time}
+                    <strong>Date:</strong>{" "}
+                    {formatDateDisplay(apt.appointment_date)} at{" "}
+                    {formatTimeDisplay(apt.appointment_time)}
                   </p>
                   <p className="text-sm text-elephant-muted mb-1">
                     <strong>Phone:</strong> {apt.customer_phone}

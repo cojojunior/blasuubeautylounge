@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { formatDateForDB, formatTimeDisplay } from "../lib/datetime"; // NEW
 
 const times = ["09:00", "10:00", "11:00", "13:00", "14:00", "15:00"];
 const HOLIDAYS = ["2026-12-25", "2026-12-26"]; // You can eventually pull this from your database
@@ -14,11 +15,6 @@ export function Availability() {
     {},
   );
   const [isLoading, setIsLoading] = useState(false);
-
-  // Safe date formatting for local time (YYYY-MM-DD)
-  const formatDate = (date: Date) => {
-    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-  };
 
   const getDaysInMonth = (year: number, month: number) =>
     new Date(year, month + 1, 0).getDate();
@@ -48,8 +44,8 @@ export function Availability() {
       try {
         const year = currentMonth.getFullYear();
         const month = currentMonth.getMonth();
-        const firstDay = formatDate(new Date(year, month, 1));
-        const lastDay = formatDate(new Date(year, month + 1, 0));
+        const firstDay = formatDateForDB(new Date(year, month, 1)); // NEW
+        const lastDay = formatDateForDB(new Date(year, month + 1, 0)); // NEW
 
         const { data, error } = await supabase
           .from("appointments")
@@ -60,7 +56,6 @@ export function Availability() {
 
         if (error) throw error;
 
-        // Group bookings by date
         const grouped: Record<string, string[]> = {};
         data.forEach((booking) => {
           if (!grouped[booking.appointment_date])
@@ -80,12 +75,8 @@ export function Availability() {
 
   // Fetch specific time slots when a user clicks a date
   useEffect(() => {
-    async function fetchSlots() {
-      const targetDate = formatDate(selectedDate);
-      // Use the already fetched monthBookings, or fetch again if you prefer
-      setBookedSlots(monthBookings[targetDate] || []);
-    }
-    fetchSlots();
+    const targetDate = formatDateForDB(selectedDate); // NEW
+    setBookedSlots(monthBookings[targetDate] || []);
   }, [selectedDate, monthBookings]);
 
   const renderCalendar = () => {
@@ -95,16 +86,13 @@ export function Availability() {
     const firstDay = getFirstDayOfMonth(year, month);
     const days = [];
 
-    // Empty spaces
     for (let i = 0; i < firstDay; i++) {
       days.push(<div key={`empty-${i}`} className="h-14"></div>);
     }
 
-    // Actual days
     for (let d = 1; d <= daysInMonth; d++) {
       const dateObj = new Date(year, month, d);
-      const dateString = formatDate(dateObj);
-
+      const dateString = formatDateForDB(dateObj); // NEW
       const today = new Date();
       today.setHours(0, 0, 0, 0);
 
@@ -251,10 +239,8 @@ export function Availability() {
           <div className="grid grid-cols-3 gap-3">
             {times.map((time) => {
               const isBooked = bookedSlots.includes(time);
-              const [hour, minute] = time.split(":");
-              const displayHour =
-                parseInt(hour) > 12 ? parseInt(hour) - 12 : hour;
-              const ampm = parseInt(hour) >= 12 ? "PM" : "AM";
+              // Use formatTimeDisplay here
+              const displayTime = formatTimeDisplay(time);
 
               return (
                 <div
@@ -264,7 +250,7 @@ export function Availability() {
                       ? "bg-elephant/5 text-elephant-muted border-transparent line-through opacity-60"
                       : "bg-white-pure border-elephant/20 text-elephant"
                   }`}>
-                  {displayHour}:{minute} {ampm}
+                  {displayTime}
                   <span className="block text-[10px] mt-1 opacity-70">
                     {isBooked ? "Booked" : "Available"}
                   </span>
@@ -275,7 +261,7 @@ export function Availability() {
 
           <div className="mt-8">
             <Link
-              to={`/book?date=${formatDate(selectedDate)}`}
+              to={`/book?date=${formatDateForDB(selectedDate)}`} // NEW
               className="block w-full text-center bg-burnt hover:bg-burnt-dark text-white-pure py-4 rounded-xl font-medium transition-colors">
               Book an Appointment for this day
             </Link>
