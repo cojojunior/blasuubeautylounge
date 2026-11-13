@@ -15,7 +15,7 @@ export function Footer() {
               <img
                 src="/icon-512.png"
                 alt="Blasuu Logo"
-                className="h-10 w-10 rounded-full object-contain bg-white"
+                className="h-15 w-15 rounded-full object-contain bg-white"
               />
               <div>
                 <p className="font-serif font-bold text-lg leading-tight text-white-pure">
