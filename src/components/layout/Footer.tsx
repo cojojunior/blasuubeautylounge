@@ -4,108 +4,79 @@ import { businessConfig } from "../../config/business";
 
 export function Footer() {
   return (
-    <footer className="bg-white-pure py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto bg-[#0F1115] rounded-3xl p-8 md:p-12 text-white-pure shadow-2xl">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
+    // Removed the outer padding and white background. The footer is now full width.
+    <footer className="w-full bg-[#0F1115] text-white-pure">
+      {/* Inner container to keep the text centered and readable */}
+      <div className="max-w-7xl mx-auto px-6 py-16 md:py-20">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
           {/* Brand, About & Contact Column */}
           <div className="lg:col-span-1">
-            <Link to="/" className="flex items-center gap-4 mb-4">
+            <Link to="/" className="flex items-center gap-2 mb-6">
               <img
                 src="/icon-512.png"
                 alt="Blasuu Logo"
-                className="h-15 w-15 rounded-[20%] object-contain"
+                className="h-10 w-10 rounded-full object-contain bg-white"
               />
               <div>
-                <p className="font-semibold text-2xl leading-normal text-white-pure">
+                <p className="font-serif font-bold text-lg leading-tight text-white-pure">
                   Blasuu
                 </p>
-                <p className="text-[20px] text-gray-400 leading-tight">
-                  Beauty Lounge
-                </p>
+                <p className="text-xs text-gray-400">Beauty Lounge</p>
               </div>
             </Link>
-            <p className="text-sm text-gray-400 leading-relaxed mb-6">
+            <p className="text-sm text-gray-400 leading-relaxed mb-8">
               Empowering your beauty journey with luxury spa treatments, nails,
               and wellness in the heart of Accra.
             </p>
 
             {/* Social Icons */}
-            <div className="flex gap-3 mb-6">
+            <div className="flex gap-3">
               <a
                 href={businessConfig.socials.instagram}
                 target="_blank"
                 rel="noreferrer"
-                className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-burnt transition-colors">
-                <Globe size={14} className="text-white-pure" />
+                className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-burnt hover:border-burnt transition-all">
+                <Globe size={18} className="text-white-pure" />
               </a>
               <a
                 href={businessConfig.socials.facebook}
                 target="_blank"
                 rel="noreferrer"
-                className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-burnt transition-colors">
-                <MessageCircle size={14} className="text-white-pure" />
+                className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-burnt hover:border-burnt transition-all">
+                <MessageCircle size={18} className="text-white-pure" />
               </a>
             </div>
-
-            {/* Contact Details (Now using the unused icons) */}
-            <ul className="space-y-3 text-sm text-gray-400">
-              <li className="flex items-start gap-2">
-                <MapPin
-                  size={16}
-                  className="text-gray-500 mt-0.5 flex-shrink-0"
-                />
-                <span>{businessConfig.address}</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Phone size={16} className="text-gray-500 flex-shrink-0" />
-                <a
-                  href={`tel:${businessConfig.phone}`}
-                  className="hover:text-white-pure transition-colors">
-                  {businessConfig.phone}
-                </a>
-              </li>
-              <li className="flex items-center gap-2">
-                <Mail size={16} className="text-gray-500 flex-shrink-0" />
-                <a
-                  href={`mailto:${businessConfig.email}`}
-                  className="hover:text-white-pure transition-colors">
-                  {businessConfig.email}
-                </a>
-              </li>
-            </ul>
           </div>
 
           {/* Explore Links */}
           <div>
-            <h3 className="font-semibold text-sm text-white-pure mb-4">
+            <h3 className="font-serif font-semibold text-lg text-white-pure mb-6">
               Explore
             </h3>
-            <ul className="space-y-3 text-sm text-gray-400">
+            <ul className="space-y-4 text-sm text-gray-400">
               <li>
                 <Link
                   to="/services"
-                  className="hover:text-white-pure transition-colors">
+                  className="hover:text-burnt transition-colors">
                   Services & Packages
                 </Link>
               </li>
               <li>
-                <Link
-                  to="/book"
-                  className="hover:text-white-pure transition-colors">
+                <Link to="/book" className="hover:text-burnt transition-colors">
                   Book an Appointment
                 </Link>
               </li>
               <li>
                 <Link
                   to="/reviews"
-                  className="hover:text-white-pure transition-colors">
+                  className="hover:text-burnt transition-colors">
                   Customer Reviews
                 </Link>
               </li>
               <li>
                 <Link
                   to="/availability"
-                  className="hover:text-white-pure transition-colors">
+                  className="hover:text-burnt transition-colors">
                   Live Availability
                 </Link>
               </li>
@@ -114,43 +85,70 @@ export function Footer() {
 
           {/* Company Links */}
           <div>
-            <h3 className="font-semibold text-sm text-white-pure mb-4">
+            <h3 className="font-serif font-semibold text-lg text-white-pure mb-6">
               Company
             </h3>
-            <ul className="space-y-3 text-sm text-gray-400">
+            <ul className="space-y-4 text-sm text-gray-400">
               <li>
                 <Link
                   to="/about"
-                  className="hover:text-white-pure transition-colors">
+                  className="hover:text-burnt transition-colors">
                   About Us
                 </Link>
               </li>
               <li>
                 <Link
                   to="/contact"
-                  className="hover:text-white-pure transition-colors">
+                  className="hover:text-burnt transition-colors">
                   Contact
                 </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-white-pure transition-colors">
-                  Careers
-                </a>
+                <Link
+                  to="/careers"
+                  className="hover:text-burnt transition-colors">
+                  Careers & Training
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-white-pure transition-colors">
+                <a href="#" className="hover:text-burnt transition-colors">
                   Press
                 </a>
               </li>
             </ul>
           </div>
 
-          {/* Legal Links & Contact */}
+          {/* Contact & Legal Links */}
           <div>
-            <h3 className="font-semibold text-sm text-white-pure mb-4">
-              Resources
+            <h3 className="font-serif font-semibold text-lg text-white-pure mb-6">
+              Contact & Legal
             </h3>
-            <ul className="space-y-3 text-sm text-gray-400">
+            <ul className="space-y-4 text-sm text-gray-400 mb-6">
+              <li className="flex items-start gap-3">
+                <MapPin
+                  size={18}
+                  className="text-gray-500 mt-0.5 flex-shrink-0"
+                />
+                <span>{businessConfig.address}</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <Phone size={18} className="text-gray-500 flex-shrink-0" />
+                <a
+                  href={`tel:${businessConfig.phone}`}
+                  className="hover:text-burnt transition-colors">
+                  {businessConfig.phone}
+                </a>
+              </li>
+              <li className="flex items-center gap-3">
+                <Mail size={18} className="text-gray-500 flex-shrink-0" />
+                <a
+                  href={`mailto:${businessConfig.email}`}
+                  className="hover:text-burnt transition-colors">
+                  {businessConfig.email}
+                </a>
+              </li>
+            </ul>
+            <ul className="space-y-2 text-xs text-gray-500">
               <li>
                 <Link
                   to="/policies/terms"
@@ -163,20 +161,6 @@ export function Footer() {
                   to="/policies/privacy"
                   className="hover:text-white-pure transition-colors">
                   Privacy Policy
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/policies/cancellation"
-                  className="hover:text-white-pure transition-colors">
-                  Cancellation Policy
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/policies/booking-fee"
-                  className="hover:text-white-pure transition-colors">
-                  Booking Fee Policy
                 </Link>
               </li>
             </ul>
@@ -208,11 +192,6 @@ export function Footer() {
               to="/policies/cookies"
               className="hover:text-white-pure transition-colors">
               Cookie Policy
-            </Link>
-            <Link
-              to="/policies/refund"
-              className="hover:text-white-pure transition-colors">
-              Security
             </Link>
           </div>
         </div>
