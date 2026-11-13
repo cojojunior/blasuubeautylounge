@@ -2,10 +2,12 @@ import { useState, useEffect, type FormEvent } from "react";
 import { useSearchParams } from "react-router-dom";
 import { allServices as services } from "../content";
 import { supabase } from "../lib/supabase";
-import { businessConfig } from "../config/business";
 import { Button } from "../components/ui/Button";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { PolicyModal } from "../components/booking/PolicyModal";
+import { formatDateForDB } from "../lib/datetime"; // NEW
+import { generateBookingMessage, getWhatsAppLink } from "../lib/whatsapp"; // NEW
+import { formatCurrency } from "../lib/currency"; // NEW
 
 const times = ["09:00", "10:00", "11:00", "13:00", "14:00", "15:00"];
 
@@ -13,19 +15,16 @@ export function Booking() {
   const [searchParams] = useSearchParams();
   const initialService = searchParams.get("service") || services[0].id;
 
-  // Calendar State
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [showMonthPicker, setShowMonthPicker] = useState(false);
 
-  // Booking State
   const [selectedTime, setSelectedTime] = useState<string>("");
   const [selectedServiceId, setSelectedServiceId] =
     useState<string>(initialService);
   const [bookedSlots, setBookedSlots] = useState<string[]>([]);
   const [isLoadingSlots, setIsLoadingSlots] = useState(false);
 
-  // Customer Details
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
@@ -38,13 +37,6 @@ export function Booking() {
 
   const selectedService =
     services.find((s) => s.id === selectedServiceId) || services[0];
-
-  const formatDate = (date: Date) => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  };
 
   // --- CALENDAR LOGIC ---
   const getDaysInMonth = (year: number, month: number) =>
@@ -101,7 +93,7 @@ export function Booking() {
 
     async function fetchBookings() {
       setIsLoadingSlots(true);
-      const targetDate = formatDate(selectedDate!);
+      const targetDate = formatDateForDB(selectedDate!);
 
       const { data, error } = await supabase
         .from("appointments")
@@ -127,7 +119,7 @@ export function Booking() {
     setIsSubmitting(true);
 
     try {
-      const dateString = formatDate(selectedDate);
+      const dateString = formatDateForDB(selectedDate);
 
       const { data: isAvailable, error: checkError } = await supabase.rpc(
         "check_booking_availability",
@@ -162,10 +154,18 @@ export function Booking() {
 
       if (error) throw error;
 
+      // Use utilities for booking reference and WhatsApp message
       const bookingRef = data.id.split("-")[0].toUpperCase();
-      const text = `Hello Blasuu Lounge! I'd like to confirm my booking.%0A%0A*Ref:* ${bookingRef}%0A*Service:* ${selectedService.name}%0A*Date:* ${dateString}%0A*Time:* ${selectedTime}%0A*Name:* ${formData.name}%0A*Deposit Due:* GH₵${selectedService.depositAmount}%0A%0APlease send payment details to confirm.`;
+      const message = generateBookingMessage(
+        bookingRef,
+        selectedService.name,
+        dateString,
+        selectedTime,
+        formData.name,
+        selectedService.depositAmount,
+      );
 
-      window.location.href = `https://wa.me/${businessConfig.whatsappNumber}?text=${text}`;
+      window.location.href = getWhatsAppLink(message);
     } catch (error) {
       console.error(error);
       alert("Error saving booking. Please try again.");
@@ -206,7 +206,8 @@ export function Booking() {
                 ))}
               </select>
               <p className="text-sm text-elephant-muted mt-1">
-                GH₵ {selectedService.price.toFixed(2)} •{" "}
+                {/* Use formatCurrency here */}
+                {formatCurrency(selectedService.price)} •{" "}
                 {selectedService.durationMinutes} mins
               </p>
             </div>

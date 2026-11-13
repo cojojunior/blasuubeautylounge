@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { services } from "../../content/services";
 import { SectionHeading } from "../common/SectionHeading";
+import { formatCurrency } from "../../lib/currency"; // NEW
 
 export function FeaturedTreatments() {
   const featured = services
@@ -18,12 +19,14 @@ export function FeaturedTreatments() {
           {featured.map((service) => (
             <div
               key={service.id}
-              className="bg-white-soft rounded-3xl p-8 border border-elephant/5 hover:shadow-xl transition-shadow">
-              <h3 className="text-xl font-serif font-semibold mb-2">
+              // Changed to bg-white-pure and added border-black/10 to match the new card style
+              className="bg-white-pure rounded-3xl p-8 border border-black/10 hover:border-burnt/30 hover:shadow-xl transition-all">
+              <h3 className="text-xl font-serif font-semibold mb-2 text-elephant">
                 {service.name}
               </h3>
               <p className="text-burnt font-medium mb-6">
-                GH₵ {service.price.toFixed(2)}
+                {/* Use formatCurrency */}
+                {formatCurrency(service.price)}
               </p>
               <Link
                 to={`/book?service=${service.id}`}
