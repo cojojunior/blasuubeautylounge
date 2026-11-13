@@ -11,6 +11,7 @@ import { Contact } from "./pages/Contact";
 import { Reviews } from "./pages/Reviews";
 import { NotFound } from "./pages/NotFound";
 import { BookingConfirmation } from "./pages/BookingConfirmation";
+import { Careers } from "./pages/Careers";
 
 // Policies
 import { Terms } from "./pages/policies/Terms";
@@ -38,6 +39,7 @@ export default function App() {
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/reviews" element={<Reviews />} />
+          <Route path="/careers" element={<Careers />} />
 
           <Route path="/policies/terms" element={<Terms />} />
           <Route path="/policies/privacy" element={<Privacy />} />
