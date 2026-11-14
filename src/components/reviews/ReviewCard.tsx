@@ -6,6 +6,11 @@ interface ReviewCardProps {
   rating: number;
   text?: string;
   relativeTime: string;
+  services?: string;
+  ownerResponse?: {
+    relativeTime: string;
+    text: string;
+  };
 }
 
 export function ReviewCard({
@@ -14,15 +19,16 @@ export function ReviewCard({
   rating,
   text,
   relativeTime,
+  services,
+  ownerResponse,
 }: ReviewCardProps) {
-  // If they didn't leave text, give them a nice default quote
   const displayText =
     text && text.trim().length > 0
       ? text
       : "Loved my experience at Blasuu! Highly recommend.";
 
   return (
-    <div className="bg-white-pure p-6 rounded-2xl border border-elephant/10 shadow-sm flex flex-col h-full">
+    <div className="bg-white-soft p-6 rounded-2xl border border-black/10 shadow-sm flex flex-col h-full">
       <div className="flex justify-between items-start mb-4">
         <div className="flex items-center gap-3">
           {authorPhoto ? (
@@ -55,6 +61,27 @@ export function ReviewCard({
       <p className="text-sm text-elephant-muted leading-relaxed italic flex-grow">
         "{displayText}"
       </p>
+
+      {services && (
+        <div className="mt-4">
+          <p className="text-xs font-semibold text-elephant">Services</p>
+          <p className="text-xs text-elephant-muted">{services}</p>
+        </div>
+      )}
+
+      {ownerResponse && (
+        <div className="mt-6 pt-4 border-t border-elephant/10">
+          <p className="text-xs font-semibold text-elephant mb-1">
+            Response from the owner{" "}
+            <span className="font-normal text-elephant-muted ml-1">
+              {ownerResponse.relativeTime}
+            </span>
+          </p>
+          <p className="text-xs text-elephant-muted leading-relaxed">
+            {ownerResponse.text}
+          </p>
+        </div>
+      )}
     </div>
   );
 }
