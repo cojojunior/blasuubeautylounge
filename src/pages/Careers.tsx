@@ -28,7 +28,7 @@ export function Careers() {
   return (
     <div className="min-h-screen bg-white-pure">
       {/* Hero Section */}
-      <div className="relative py-32 text-white-pure text-center px-4 overflow-hidden">
+      <div className="relative py-20 text-white-pure text-center px-4 overflow-hidden">
         {/* Background Image */}
         <img
           src="/career.png"
@@ -37,20 +37,20 @@ export function Careers() {
         />
 
         {/* Dark Overlay for 25% brightness */}
-        <div className="absolute inset-0 bg-black/75 z-10"></div>
+        <div className="absolute inset-0 bg-black/10 z-10"></div>
 
         {/* Content */}
         <div className="relative z-20 max-w-3xl mx-auto">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/10 backdrop-blur-md mb-6 border border-white/20">
-            <GraduationCap size={32} className="text-white-pure" />
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/10 backdrop-blur-md mb-6 border border-white/60">
+            <GraduationCap size={32} className="text-burnt" />
           </div>
 
           {/* Updated heading to be bold and use a brighter burnt orange */}
-          <h1 className="text-4xl md:text-6xl font-serif font-bold mb-6 text-burnt">
+          <h1 className="text-4xl md:text-5xl font-serif mb-4 !text-burnt">
             Learn With Us
           </h1>
 
-          <p className="text-lg md:text-xl text-gray-200 leading-relaxed drop-shadow-md">
+          <p className="text-lg md:text-xl text-elephant leading-released font-medium">
             Whether you are a seasoned professional looking for a new home, or a
             beginner wanting to master the craft, our doors are open. The owner
             personally mentors and trains passionate individuals.
@@ -105,7 +105,7 @@ export function Careers() {
       </div>
 
       {/* Training Programs Section */}
-      <div className="py-20 bg-elephant/5 px-4">
+      <div className="py-15 bg-elephant/5 px-4">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-serif mb-4">Our Programs</h2>

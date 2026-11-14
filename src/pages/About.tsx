@@ -6,9 +6,9 @@ export function About() {
   return (
     <div className="bg-white min-h-screen">
       {/* Hero */}
-      <div className="py-24 bg-white  text-elephant text-center px-4">
+      <div className="py-14 bg-white  text-elephant text-center px-4">
         <div className="max-w-3xl mx-auto">
-          <h1 className="text-4xl md:text-6xl font-serif mb-6 text-white-pure">
+          <h1 className="text-3xl md:text-4xl font-serif mb-6 text-elephant">
             Our Story
           </h1>
           <p className="text-lg md:text-xl text-elephant-light leading-relaxed">
@@ -59,7 +59,7 @@ export function About() {
       </div>
 
       {/* CTA */}
-      <div className="py-20 bg-white-pure text-center px-4 border-t border-elephant/10">
+      <div className="py-15 bg-white-pure text-center px-4 border-t border-elephant/10">
         <h2 className="text-3xl font-serif mb-6">
           Ready to Experience Blasuu?
         </h2>

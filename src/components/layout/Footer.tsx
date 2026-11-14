@@ -7,8 +7,8 @@ export function Footer() {
     // Removed the outer padding and white background. The footer is now full width.
     <footer className="w-full bg-[#0F1115] text-white-pure">
       {/* Inner container to keep the text centered and readable */}
-      <div className="max-w-7xl mx-auto px-6 py-16 md:py-20">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+      <div className="max-w-7xl mx-auto px-6 py-6 md:py-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-6">
           {/* Brand, About & Contact Column */}
           <div className="lg:col-span-1">
             <Link to="/" className="flex items-center gap-2 mb-6">
@@ -50,7 +50,7 @@ export function Footer() {
 
           {/* Explore Links */}
           <div>
-            <h3 className="font-serif font-semibold text-lg text-white-pure mb-6">
+            <h3 className="font-serif font-semibold text-lg !text-white mb-4">
               Explore
             </h3>
             <ul className="space-y-4 text-sm text-gray-400">
@@ -85,7 +85,7 @@ export function Footer() {
 
           {/* Company Links */}
           <div>
-            <h3 className="font-serif font-semibold text-lg text-white-pure mb-6">
+            <h3 className="font-serif font-semibold text-lg !text-white mb-4">
               Company
             </h3>
             <ul className="space-y-4 text-sm text-gray-400">
@@ -120,7 +120,7 @@ export function Footer() {
 
           {/* Contact & Legal Links */}
           <div>
-            <h3 className="font-serif font-semibold text-lg text-white-pure mb-6">
+            <h3 className="font-serif font-semibold text-lg !text-white mb-4">
               Contact & Legal
             </h3>
             <ul className="space-y-4 text-sm text-gray-400 mb-6">
@@ -168,7 +168,7 @@ export function Footer() {
         </div>
 
         {/* Divider Line */}
-        <div className="h-px w-full bg-white/10 mb-8"></div>
+        <div className="h-px w-full bg-white/10 mb-4"></div>
 
         {/* Bottom Bar */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-6">

@@ -51,7 +51,7 @@ export function Services() {
   };
 
   return (
-    <div className="py-20 bg-white min-h-screen">
+    <div className="py-10 bg-white min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-12">
