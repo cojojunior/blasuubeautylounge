@@ -34,14 +34,21 @@ export function Footer() {
               <a
                 href={businessConfig.socials.instagram}
                 target="_blank"
-                rel="noreferrer"
+                rel="https://www.instagram.com/blasuubeautylounge"
                 className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-burnt hover:border-burnt transition-all">
                 <Globe size={18} className="text-white-pure" />
               </a>
               <a
                 href={businessConfig.socials.facebook}
                 target="_blank"
-                rel="noreferrer"
+                rel="https://facebook.com/blasuubeautylounge"
+                className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-burnt hover:border-burnt transition-all">
+                <MessageCircle size={18} className="text-white-pure" />
+              </a>
+              <a
+                href={businessConfig.socials.tiktok}
+                target="_blank"
+                rel="https://www.tiktok.com/@blasuubeautylounge"
                 className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-burnt hover:border-burnt transition-all">
                 <MessageCircle size={18} className="text-white-pure" />
               </a>
@@ -109,11 +116,6 @@ export function Footer() {
                   className="hover:text-burnt transition-colors">
                   Careers & Training
                 </Link>
-              </li>
-              <li>
-                <a href="#" className="hover:text-burnt transition-colors">
-                  Press
-                </a>
               </li>
             </ul>
           </div>
