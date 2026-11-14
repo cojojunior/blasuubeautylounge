@@ -4,7 +4,7 @@ import { ArrowRight } from "lucide-react";
 export function Hero() {
   return (
     // Added -mt-px to pull it up under the header, and rounded-b-[2rem] to style the bottom
-    <section className="relative w-full h-[60vh] min-h-[500px] flex flex-col justify-end overflow-hidden -mt-px">
+    <section className="relative w-full h-[50vh] min-h-[550px] flex flex-col justify-end overflow-hidden -mt-px">
       {/* Background Image */}
       <img
         src="/hero.png"
