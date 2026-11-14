@@ -38,6 +38,9 @@ export function Booking() {
   const selectedService =
     services.find((s) => s.id === selectedServiceId) || services[0];
 
+  // Calculate 25% booking fee dynamically
+  const requiredDeposit = selectedService.price * 0.25;
+
   const getDaysInMonth = (year: number, month: number) =>
     new Date(year, month + 1, 0).getDate();
   const getFirstDayOfMonth = (year: number, month: number) =>
@@ -145,7 +148,7 @@ export function Booking() {
           customer_email: formData.email,
           customer_phone: formData.phone,
           total_price: selectedService.price,
-          deposit_amount: selectedService.depositAmount,
+          deposit_amount: requiredDeposit,
           status: "pending",
         })
         .select()
@@ -160,7 +163,7 @@ export function Booking() {
         dateString,
         selectedTime,
         formData.name,
-        selectedService.depositAmount,
+        requiredDeposit, // Using the dynamic 25% deposit here
       );
 
       window.location.href = getWhatsAppLink(message);
@@ -367,6 +370,28 @@ export function Booking() {
                   })}{" "}
                   <br />
                   at {selectedTime}
+                </div>
+              </div>
+
+              {/* NEW: Deposit Breakdown */}
+              <div className="bg-white-soft p-4 rounded-xl border border-elephant/10 mb-6 text-sm">
+                <div className="flex justify-between mb-1">
+                  <span className="text-elephant-muted">
+                    Total Service Price:
+                  </span>
+                  <span className="font-medium text-elephant">
+                    {formatCurrency(selectedService.price)}
+                  </span>
+                </div>
+                <div className="flex justify-between text-burnt font-medium">
+                  <span>Required Booking Fee (25%):</span>
+                  <span>{formatCurrency(requiredDeposit)}</span>
+                </div>
+                <div className="flex justify-between text-elephant-muted mt-1">
+                  <span>Balance Due at Salon:</span>
+                  <span>
+                    {formatCurrency(selectedService.price - requiredDeposit)}
+                  </span>
                 </div>
               </div>
 

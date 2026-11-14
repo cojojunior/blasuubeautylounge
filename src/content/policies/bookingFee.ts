@@ -1,11 +1,12 @@
 export const policyConfig = {
   cancellationWindowDays: 15,
-  refundablePercent: 60,
-  nonRefundablePercent: 40,
+  refundablePercent: 0,
+  nonRefundablePercent: 100,
+  bookingFeePercentage: 25,
 };
 
 export const policies = {
   bookingFee: {
-    content: `A booking fee is required to secure your appointment. 60% of your booking fee is refundable only if you cancel at least 15 days before your appointment date. The remaining 40% is non-refundable and covers administrative and reservation costs. Cancellations made within 15 days of the appointment, no-shows, and late arrivals are not refundable.`,
+    content: `A booking fee equivalent to 25% of the service price is required to secure your appointment. This booking fee is strictly non-refundable. If you cancel at least 15 days before your appointment, your deposit can be transferred to a future booking, but it will not be refunded to your original payment method. Cancellations made within 15 days, no-shows, and late arrivals will forfeit the booking fee entirely.`,
   },
 };
