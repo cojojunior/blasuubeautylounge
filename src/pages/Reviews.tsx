@@ -95,7 +95,7 @@ export function Reviews() {
 
         <div className="text-center mt-16">
           <a
-            href="https://maps.google.com"
+            href="https://maps.app.goo.gl/GR2wFQG2N9RkY5h3A"
             target="_blank"
             rel="noreferrer"
             className="inline-flex items-center gap-2 text-burnt font-medium hover:underline bg-burnt/5 px-6 py-3 rounded-full transition-colors">

@@ -92,13 +92,13 @@ export function Contact() {
           <div className="h-64 lg:h-auto bg-elephant/5 relative min-h-[400px]">
             <iframe
               title="Blasuu Beauty Lounge Location"
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3970.411456140866!2d-0.1666173!3d5.6830527!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zLMKwNDEnMDAuMCJOIDDCsDA5JzU5LjgiVw!5e0!3m2!1sen!2sgh!4v1620000000000!5m2!1sen!2sgh"
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3970.2130987062596!2d-0.17602312366569264!3d5.682310294299458!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xfdf9dc1fc27d59d%3A0x2d4db5648a04f2b3!2sBlasuu%20Beauty%20Lounge!5e0!3m2!1sen!2sgh!4v1794680173904!5m2!1sen!2sgh"
               width="100%"
               height="100%"
               style={{ border: 0 }}
-              allowFullScreen
+              allowFullScreen={true}
               loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
+              referrerPolicy="strict-origin-when-cross-origin"
               className="absolute inset-0"
             />
           </div>
