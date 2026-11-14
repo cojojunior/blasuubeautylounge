@@ -35,7 +35,8 @@ export function ReviewCard({
             <img
               src={authorPhoto}
               alt={authorName}
-              className="w-10 h-10 rounded-full object-cover"
+              // Added object-cover to prevent stretching
+              className="w-10 h-10 rounded-full object-cover border border-black/5"
             />
           ) : (
             <div className="w-10 h-10 rounded-full bg-elephant/10 flex items-center justify-center text-elephant font-bold font-serif">
