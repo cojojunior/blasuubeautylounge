@@ -1,9 +1,9 @@
 import { PolicyLayout } from "../../components/policy/PolicyLayout";
-import { policyConfig, policies } from "../../content/policies/bookingFee";
+import { policies, policyConfig } from "../../content/policies/bookingFee";
 
 export function BookingFee() {
   return (
-    <PolicyLayout title="Booking Fee & Refund Policy">
+    <PolicyLayout title="Booking Fee Policy">
       <p className="mb-6 text-elephant-muted leading-relaxed">
         {policies.bookingFee.content}
       </p>
@@ -14,16 +14,11 @@ export function BookingFee() {
         </h3>
         <ul className="space-y-2 text-sm text-elephant-muted">
           <li>
-            <strong>Booking Fee Amount:</strong>{" "}
-            {policyConfig.bookingFeePercentage}% of the service price
+            <strong>Fee Amount:</strong> {policyConfig.bookingFeePercentage}% of
+            the total service price.
           </li>
           <li>
-            <strong>Refundable Amount:</strong> {policyConfig.refundablePercent}
-            % (Non-refundable)
-          </li>
-          <li>
-            <strong>Cancellation Window:</strong>{" "}
-            {policyConfig.cancellationWindowDays} days before the appointment
+            <strong>Refund Status:</strong> Strictly Non-Refundable.
           </li>
         </ul>
       </div>
