@@ -10,7 +10,7 @@ export function CookieBanner() {
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-elephant text-white-pure p-4 z-50 animate-slide-up shadow-2xl">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-        <p className="text-sm text-elephant-light">
+        <p className="text-sm text-white-pure">
           We use cookies to improve your experience. By continuing, you agree to
           our{" "}
           <Link to="/policies/cookies" className="text-gold hover:underline">

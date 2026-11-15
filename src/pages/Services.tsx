@@ -3,36 +3,92 @@ import { Link, useSearchParams } from "react-router-dom";
 import { allServices as services, categories } from "../content";
 import { Heart, ArrowUpRight } from "lucide-react";
 
-// A helper to get generic placeholder images based on the service category
-const getCategoryImage = (category: string) => {
-  switch (category) {
-    case "Nails":
-      return "/nails.png";
-    case "Pedicure":
-      return "/perdicure.png";
-    case "Waxing":
-      return "/waxing.png";
-    case "Facials":
-      return "/facials.png";
-    case "Massage":
-      return "/massage.png";
-    case "Lashes":
-      return "/lashes.png";
-    case "Piercing":
-      return "/piecing.png";
+// A helper to map specific service IDs to your uploaded images
+const getServiceImage = (serviceId: string, category: string) => {
+  // Specific overrides based on your exact file structure
+  switch (serviceId) {
+    // Facials
+    case "f1":
+      return "/sevices/facials/basic.png";
+    case "f2":
+      return "/sevices/facials/deepcleansing.png";
+    case "f3":
+      return "/sevices/facials/acne.png";
+
+    // Lashes
+    case "l1":
+      return "/sevices/lashes/cluster.png";
+    case "l2":
+      return "/sevices/lashes/lift.png";
+    case "l3":
+      return "/sevices/lashes/tint.png";
+    case "l4":
+      return "/sevices/lashes/lift&tint.png";
+
+    // Massage
+    case "m1":
+      return "/sevices/massage/swidish.png";
+    case "m2":
+      return "/sevices/massage/deeptissue.png";
+    case "m3":
+      return "/sevices/massage/cocktail.png";
+    case "m4":
+      return "/sevices/massage/bodyparts.png";
+
+    // Waxing (Mapping specific IDs to your filenames)
+    case "w1":
+      return "/sevices/waxing/armpit.png";
+    case "w2":
+      return "/sevices/waxing/arm.png";
+    case "w3":
+      return "/sevices/waxing/bikini.png";
+    case "w4":
+      return "/sevices/waxing/brazillian.png";
+    case "w5":
+      return "/sevices/waxing/back.png";
+    case "w6":
+      return "/sevices/waxing/chest.png";
+    case "w7":
+      return "/sevices/waxing/thighs.png";
+    case "w8":
+      return "/sevices/waxing/legs.png";
+    case "w9":
+      return "/sevices/waxing/face.png";
+    case "w10":
+      return "/sevices/waxing/nose.png";
+    case "w11":
+      return "/sevices/waxing/ear.png";
+
     default:
-      return "/career.png"; // Fallback
+      // Fallback based on category if specific image isn't mapped
+      switch (category) {
+        case "Nails":
+          return "/nails.png";
+        case "Pedicure":
+          return "/perdicure.png";
+        case "Waxing":
+          return "/waxing.png";
+        case "Facials":
+          return "/facials.png";
+        case "Massage":
+          return "/massage.png";
+        case "Lashes":
+          return "/lashes.png";
+        case "Piercing":
+          return "/piecing.png";
+        default:
+          return "/career.png";
+      }
   }
 };
 
 export function Services() {
-  const [searchParams] = useSearchParams(); // Read the URL
+  const [searchParams] = useSearchParams();
   const initialCategory = searchParams.get("category") || "All";
-  
+
   const [activeCategory, setActiveCategory] = useState(initialCategory);
   const [liked, setLiked] = useState<Record<string, boolean>>({});
 
-  // Add this to ensure if a user clicks a Home category, it updates the view
   useEffect(() => {
     const cat = searchParams.get("category");
     if (cat) {
@@ -51,7 +107,7 @@ export function Services() {
   };
 
   return (
-    <div className="py-10 bg-white min-h-screen">
+    <div className="py-20 bg-white min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-12">
@@ -84,11 +140,10 @@ export function Services() {
               key={service.id}
               to={`/book?service=${service.id}`}
               className="group flex flex-col bg-white-pure border border-black/10 rounded-[2rem] p-3 transition-transform hover:-translate-y-1 hover:shadow-xl">
-              
               {/* Top Image Section */}
               <div className="relative w-full aspect-[4/3] rounded-[1.5rem] overflow-hidden bg-white-soft">
                 <img
-                  src={getCategoryImage(service.category)}
+                  src={getServiceImage(service.id, service.category)}
                   alt={service.name}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />

@@ -17,18 +17,18 @@ export function Header() {
   const location = useLocation();
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-white-soft/90 backdrop-blur-md border-b border-elephant/10">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
+    <header className="sticky top-0 z-50 w-full bg-white-pure/95 backdrop-blur-md border-b border-elephant/10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-4 lg:px-4">
+        <div className="flex justify-between items-center h-15">
           {/* Logo & Brand Name */}
           <Link to="/" className="flex-shrink-0 flex items-center gap-3">
             <img
               src="/icon-512.png"
               alt="Blasuu Logo"
-              className="h-10 md:h-12 w-auto object-contain"
+              className="h-12 md:h-12 w-auto object-contain"
             />
             {/* Text is hidden on very small screens, shown on sm and up */}
-            <span className="hidden sm:block font-serif text-lg md:text-xl font-bold text-elephant tracking-tight leading-none">
+            <span className=" sm:block font-serif text-lg md:text-xl font-bold text-elephant tracking-tight leading-none">
               Blasuu Beauty Lounge
             </span>
           </Link>
