@@ -2,19 +2,21 @@
   command = "npm run build"
   publish = "dist"
 
-# 1. Force correct MIME type for JS files
-[[headers]]
-  for = "/*.js"
-  [headers.values]
-    Content-Type = "text/javascript; charset=utf-8"
+# 1. Serve the Service Worker
+[[redirects]]
+  from = "/sw.js"
+  to = "/sw.js"
+  status = 200
+  force = false
 
-# 2. CRITICAL: Tell the browser to NEVER cache the index.html file
-[[headers]]
-  for = "/index.html"
-  [headers.values]
-    Cache-Control = "no-cache, no-store, must-revalidate"
+# 2. EXCLUDE the assets folder from the SPA fallback
+[[redirects]]
+  from = "/assets/*"
+  to = "/assets/:splat"
+  status = 200
+  force = false
 
-# 3. SPA Fallback
+# 3. Catch-all for React Router (No "force = true" here!)
 [[redirects]]
   from = "/*"
   to = "/index.html"
