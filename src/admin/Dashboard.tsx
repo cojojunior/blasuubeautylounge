@@ -8,7 +8,7 @@ import {
   XCircle,
   MessageCircle,
   Calendar,
-  Trash2, // NEW: Import the Trash icon
+  Trash2,
 } from "lucide-react";
 import { formatCurrency } from "../lib/currency";
 import { formatDateDisplay, formatTimeDisplay } from "../lib/datetime";
@@ -118,7 +118,6 @@ export function Dashboard() {
     fetchAppointments();
   };
 
-  // NEW: Function to delete the appointment
   const deleteAppointment = async (id: string) => {
     const confirmDelete = window.confirm(
       "Are you sure you want to permanently delete this cancelled appointment? This cannot be undone.",
@@ -130,7 +129,7 @@ export function Dashboard() {
     if (error) {
       alert("Error deleting appointment: " + error.message);
     } else {
-      fetchAppointments(); // Refresh the list
+      fetchAppointments();
     }
   };
 
@@ -149,17 +148,16 @@ export function Dashboard() {
           </div>
 
           <div className="flex flex-wrap gap-3">
-            <Button
-              variant="outline"
-              onClick={connectCalendar}
-              className={
-                isCalendarConnected
-                  ? "text-green-600 border-green-200 bg-green-50"
-                  : "text-blue-600 border-blue-200"
-              }>
-              <Calendar size={16} className="mr-2" />
-              {isCalendarConnected ? "Calendar Connected" : "Connect Calendar"}
-            </Button>
+            {/* Only show the Connect Calendar button if it's NOT connected */}
+            {!isCalendarConnected && (
+              <Button
+                variant="outline"
+                onClick={connectCalendar}
+                className="text-blue-600 border-blue-200">
+                <Calendar size={16} className="mr-2" />
+                Connect Calendar
+              </Button>
+            )}
 
             <Button variant="outline" onClick={handleLogout}>
               <LogOut size={16} className="mr-2" /> Logout
@@ -212,7 +210,6 @@ export function Dashboard() {
                 </div>
 
                 <div className="flex flex-col md:flex-row gap-2 md:items-center flex-shrink-0 border-t md:border-t-0 md:border-l border-elephant/10 pt-4 md:pt-0 md:pl-6">
-                  {/* Show Confirm & Chat only if not cancelled */}
                   {apt.status !== "cancelled" && (
                     <>
                       <Button
@@ -242,7 +239,6 @@ export function Dashboard() {
                     </>
                   )}
 
-                  {/* Show Delete ONLY if cancelled */}
                   {apt.status === "cancelled" && (
                     <Button
                       size="sm"
