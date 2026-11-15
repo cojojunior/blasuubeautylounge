@@ -36,11 +36,11 @@ export function Reviews() {
 
   const formattedApiReviews: ManualReview[] = apiReviews.map((review) => ({
     id: review.name || Math.random().toString(),
-    author: review.authorAttribution?.displayName || "Google User",
-    authorPhoto: review.authorAttribution?.photoUri,
-    rating: review.rating,
+    author: review.authorAttribution?.displayName || "Google User", // Fallback here
+    authorPhoto: review.authorAttribution?.photoUri || undefined, // Fallback here
+    rating: review.rating || 5,
     text: review.text?.text || "",
-    relativeTime: review.relativePublishTimeDescription,
+    relativeTime: review.relativePublishTimeDescription || "Recently",
   }));
 
   const allReviews: ManualReview[] = [...formattedApiReviews, ...manualReviews];
