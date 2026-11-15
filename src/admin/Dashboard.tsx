@@ -141,26 +141,33 @@ export function Dashboard() {
   return (
     <div className="min-h-screen bg-white-soft p-4 md:p-8">
       <div className="max-w-6xl mx-auto">
-        <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 pb-4 border-b border-elephant/10 gap-4">
+        <header className="flex flex-row justify-between items-center mb-8 pb-4 border-b border-elephant/10">
           <div>
-            <h1 className="text-3xl font-serif text-elephant">Dashboard</h1>
+            <h1 className="text-2xl md:text-3xl font-serif text-elephant">
+              Dashboard
+            </h1>
             <p className="text-sm text-elephant-muted">Manage your bookings</p>
           </div>
 
-          <div className="flex flex-wrap gap-3">
-            {/* Only show the Connect Calendar button if it's NOT connected */}
+          <div className="flex items-center gap-2 md:gap-3">
+            {/* Only show if not connected */}
             {!isCalendarConnected && (
               <Button
                 variant="outline"
                 onClick={connectCalendar}
-                className="text-blue-600 border-blue-200">
-                <Calendar size={16} className="mr-2" />
-                Connect Calendar
+                className="text-blue-600 border-blue-200 px-3 md:px-4">
+                <Calendar size={16} className="md:mr-2" />
+                <span className="hidden md:inline">Connect Calendar</span>
               </Button>
             )}
 
-            <Button variant="outline" onClick={handleLogout}>
-              <LogOut size={16} className="mr-2" /> Logout
+            {/* Logout Button - Icon only on mobile, Text on desktop */}
+            <Button
+              variant="outline"
+              onClick={handleLogout}
+              className="px-3 md:px-4">
+              <LogOut size={16} className="md:mr-2" />
+              <span className="hidden md:inline">Logout</span>
             </Button>
           </div>
         </header>
