@@ -1,7 +1,7 @@
 import { Star } from "lucide-react";
 
 interface ReviewCardProps {
-  authorName: string;
+  authorName?: string; // Made optional to prevent crashes
   authorPhoto?: string;
   rating: number;
   text?: string;
@@ -27,6 +27,10 @@ export function ReviewCard({
       ? text
       : "Loved my experience at Blasuu! Highly recommend.";
 
+  // Safety fallback for the name
+  const safeName = authorName || "Google User";
+  const initial = safeName.charAt(0).toUpperCase();
+
   return (
     <div className="bg-white-soft p-6 rounded-2xl border border-black/10 shadow-sm flex flex-col h-full">
       <div className="flex justify-between items-start mb-4">
@@ -34,17 +38,17 @@ export function ReviewCard({
           {authorPhoto ? (
             <img
               src={authorPhoto}
-              alt={authorName}
-              // Added object-cover to prevent stretching
+              alt={safeName}
               className="w-10 h-10 rounded-full object-cover border border-black/5"
             />
           ) : (
             <div className="w-10 h-10 rounded-full bg-elephant/10 flex items-center justify-center text-elephant font-bold font-serif">
-              {authorName.charAt(0)}
+              {/* Use the safe initial here */}
+              {initial}
             </div>
           )}
           <div>
-            <p className="font-semibold text-sm text-elephant">{authorName}</p>
+            <p className="font-semibold text-sm text-elephant">{safeName}</p>
             <p className="text-xs text-elephant-muted">{relativeTime}</p>
           </div>
         </div>
