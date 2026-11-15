@@ -8,10 +8,10 @@ import {
   XCircle,
   MessageCircle,
   Calendar,
+  Trash2, // NEW: Import the Trash icon
 } from "lucide-react";
 import { formatCurrency } from "../lib/currency";
 import { formatDateDisplay, formatTimeDisplay } from "../lib/datetime";
-// Use the correct function for chatting with a customer
 import { getCustomerWhatsAppLink } from "../lib/whatsapp";
 
 export function Dashboard() {
@@ -118,8 +118,23 @@ export function Dashboard() {
     fetchAppointments();
   };
 
+  // NEW: Function to delete the appointment
+  const deleteAppointment = async (id: string) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to permanently delete this cancelled appointment? This cannot be undone.",
+    );
+    if (!confirmDelete) return;
+
+    const { error } = await supabase.from("appointments").delete().eq("id", id);
+
+    if (error) {
+      alert("Error deleting appointment: " + error.message);
+    } else {
+      fetchAppointments(); // Refresh the list
+    }
+  };
+
   const openWhatsApp = (phone: string, name: string) => {
-    // Use the utility function here
     const message = `Hello ${name}, this is Blasuu Beauty Lounge. We are confirming your appointment!`;
     window.open(getCustomerWhatsAppLink(phone, message), "_blank");
   };
@@ -197,30 +212,46 @@ export function Dashboard() {
                 </div>
 
                 <div className="flex flex-col md:flex-row gap-2 md:items-center flex-shrink-0 border-t md:border-t-0 md:border-l border-elephant/10 pt-4 md:pt-0 md:pl-6">
-                  <Button
-                    size="sm"
-                    className="bg-green-600 hover:bg-green-700 text-white"
-                    onClick={() => updateStatus(apt.id, "confirmed", apt)}
-                    disabled={apt.status === "confirmed"}>
-                    <CheckCircle size={16} className="mr-2" /> Confirm
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="text-red-600 border-red-200 hover:bg-red-50"
-                    onClick={() => updateStatus(apt.id, "cancelled", apt)}
-                    disabled={apt.status === "cancelled"}>
-                    <XCircle size={16} className="mr-2" /> Cancel
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="text-green-600 border-green-200 hover:bg-green-50"
-                    onClick={() =>
-                      openWhatsApp(apt.customer_phone, apt.customer_name)
-                    }>
-                    <MessageCircle size={16} className="mr-2" /> Chat
-                  </Button>
+                  {/* Show Confirm & Chat only if not cancelled */}
+                  {apt.status !== "cancelled" && (
+                    <>
+                      <Button
+                        size="sm"
+                        className="bg-green-600 hover:bg-green-700 text-white"
+                        onClick={() => updateStatus(apt.id, "confirmed", apt)}
+                        disabled={apt.status === "confirmed"}>
+                        <CheckCircle size={16} className="mr-2" /> Confirm
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-red-600 border-red-200 hover:bg-red-50"
+                        onClick={() => updateStatus(apt.id, "cancelled", apt)}
+                        disabled={apt.status === "cancelled"}>
+                        <XCircle size={16} className="mr-2" /> Cancel
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-green-600 border-green-200 hover:bg-green-50"
+                        onClick={() =>
+                          openWhatsApp(apt.customer_phone, apt.customer_name)
+                        }>
+                        <MessageCircle size={16} className="mr-2" /> Chat
+                      </Button>
+                    </>
+                  )}
+
+                  {/* Show Delete ONLY if cancelled */}
+                  {apt.status === "cancelled" && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="text-red-600 border-red-200 hover:bg-red-50 bg-red-50"
+                      onClick={() => deleteAppointment(apt.id)}>
+                      <Trash2 size={16} className="mr-2" /> Delete
+                    </Button>
+                  )}
                 </div>
               </div>
             ))}
