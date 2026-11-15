@@ -29,8 +29,11 @@ export function ReviewCard({
 
   // Explicitly check for null or empty strings
   const safeName =
-    authorName && authorName.trim() !== "" ? authorName : "Google User";
-  const initial = safeName ? safeName.charAt(0).toUpperCase() : "G";
+    authorName && typeof authorName === "string" && authorName.trim() !== ""
+      ? authorName
+      : "Google User";
+
+  const initial = safeName.charAt(0).toUpperCase();
 
   return (
     <div className="bg-white-soft p-6 rounded-2xl border border-black/10 shadow-sm flex flex-col h-full">
