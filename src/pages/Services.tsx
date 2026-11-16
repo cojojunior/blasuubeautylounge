@@ -72,7 +72,7 @@ const getServiceImage = (serviceId: string, category: string) => {
     case "pkg-her-mani": return "/sevices/special/her-treat-manicure.png";
     case "pkg-her-massage": return "/sevices/special/her-treat-massage.png";
     case "pkg-her-facial": return "/sevices/special/her-treat-facial.png";
-    case "pkg-couples-ultimate": return "/sevices/special/us-facials.png"; // Mapping to facials image
+    case "pkg-couples-ultimate": return "/sevices/special/us-facials.png";
     case "pkg-couples-lashes": return "/sevices/special/us-extensions.png";
 
     default:
