@@ -8,22 +8,22 @@ export interface Service {
 }
 
 export const services: Service[] = [
-  // NAILS
+  // --- NAILS & EXTENSIONS ---
   {
     id: "n1",
     category: "Nails",
     name: "Regular Manicure",
     price: 50,
     durationMinutes: 45,
-    depositAmount: 50,
+    depositAmount: 12.5,
   },
   {
     id: "n2",
     category: "Nails",
     name: "Manicure + Gel",
-    price: 100,
+    price: 80,
     durationMinutes: 60,
-    depositAmount: 50,
+    depositAmount: 20,
   },
   {
     id: "n3",
@@ -31,16 +31,67 @@ export const services: Service[] = [
     name: "Russian Manicure",
     price: 100,
     durationMinutes: 90,
-    depositAmount: 50,
+    depositAmount: 25,
   },
-  // PEDICURE
+
+  // Nail Extensions
+  {
+    id: "n4",
+    category: "Nails",
+    name: "Nail Extensions - Short",
+    price: 80,
+    durationMinutes: 90,
+    depositAmount: 20,
+  },
+  {
+    id: "n5",
+    category: "Nails",
+    name: "Nail Extensions - Medium",
+    price: 90,
+    durationMinutes: 105,
+    depositAmount: 22.5,
+  },
+  {
+    id: "n6",
+    category: "Nails",
+    name: "Nail Extensions - Long",
+    price: 100,
+    durationMinutes: 120,
+    depositAmount: 25,
+  },
+  {
+    id: "n7",
+    category: "Nails",
+    name: "Toe Nails Extensions",
+    price: 70,
+    durationMinutes: 60,
+    depositAmount: 17.5,
+  },
+  {
+    id: "n8",
+    category: "Nails",
+    name: "Nail Accessories",
+    price: 20,
+    durationMinutes: 15,
+    depositAmount: 5,
+  },
+  {
+    id: "n9",
+    category: "Nails",
+    name: "Gel Polish (Add-on)",
+    price: 50,
+    durationMinutes: 30,
+    depositAmount: 12.5,
+  },
+
+  // --- PEDICURE ---
   {
     id: "p1",
     category: "Pedicure",
     name: "Classic / Sporty Pedicure",
     price: 150,
     durationMinutes: 60,
-    depositAmount: 50,
+    depositAmount: 37.5,
   },
   {
     id: "p2",
@@ -48,7 +99,7 @@ export const services: Service[] = [
     name: "Citrus Pedicure",
     price: 150,
     durationMinutes: 60,
-    depositAmount: 50,
+    depositAmount: 37.5,
   },
   {
     id: "p3",
@@ -56,7 +107,7 @@ export const services: Service[] = [
     name: "Cocktail Pedicure",
     price: 150,
     durationMinutes: 60,
-    depositAmount: 50,
+    depositAmount: 37.5,
   },
   {
     id: "p4",
@@ -74,14 +125,15 @@ export const services: Service[] = [
     durationMinutes: 90,
     depositAmount: 50,
   },
-  // WAXING
+
+  // --- WAXING ---
   {
     id: "w1",
     category: "Waxing",
     name: "Armpits",
     price: 60,
     durationMinutes: 15,
-    depositAmount: 50,
+    depositAmount: 15,
   },
   {
     id: "w2",
@@ -89,7 +141,7 @@ export const services: Service[] = [
     name: "Arms",
     price: 120,
     durationMinutes: 30,
-    depositAmount: 50,
+    depositAmount: 30,
   },
   {
     id: "w3",
@@ -97,7 +149,7 @@ export const services: Service[] = [
     name: "Bikini",
     price: 250,
     durationMinutes: 30,
-    depositAmount: 50,
+    depositAmount: 62.5,
   },
   {
     id: "w4",
@@ -105,7 +157,7 @@ export const services: Service[] = [
     name: "Brazilian (FNB)",
     price: 420,
     durationMinutes: 45,
-    depositAmount: 50,
+    depositAmount: 105,
   },
   {
     id: "w5",
@@ -129,7 +181,7 @@ export const services: Service[] = [
     name: "Thighs",
     price: 150,
     durationMinutes: 30,
-    depositAmount: 50,
+    depositAmount: 37.5,
   },
   {
     id: "w8",
@@ -137,7 +189,7 @@ export const services: Service[] = [
     name: "Legs",
     price: 150,
     durationMinutes: 45,
-    depositAmount: 50,
+    depositAmount: 37.5,
   },
   {
     id: "w9",
@@ -145,7 +197,7 @@ export const services: Service[] = [
     name: "Face",
     price: 100,
     durationMinutes: 20,
-    depositAmount: 50,
+    depositAmount: 25,
   },
   {
     id: "w10",
@@ -153,7 +205,7 @@ export const services: Service[] = [
     name: "Nose",
     price: 50,
     durationMinutes: 10,
-    depositAmount: 50,
+    depositAmount: 12.5,
   },
   {
     id: "w11",
@@ -161,16 +213,17 @@ export const services: Service[] = [
     name: "Ears",
     price: 50,
     durationMinutes: 10,
-    depositAmount: 50,
+    depositAmount: 12.5,
   },
-  // FACIALS
+
+  // --- FACIALS ---
   {
     id: "f1",
     category: "Facials",
     name: "Basic Facial",
     price: 100,
     durationMinutes: 45,
-    depositAmount: 50,
+    depositAmount: 25,
   },
   {
     id: "f2",
@@ -178,7 +231,7 @@ export const services: Service[] = [
     name: "Deep Cleansing Facial",
     price: 250,
     durationMinutes: 60,
-    depositAmount: 50,
+    depositAmount: 62.5,
   },
   {
     id: "f3",
@@ -186,9 +239,10 @@ export const services: Service[] = [
     name: "Acne Treatments",
     price: 400,
     durationMinutes: 60,
-    depositAmount: 50,
+    depositAmount: 100,
   },
-  // MASSAGE
+
+  // --- MASSAGE ---
   {
     id: "m1",
     category: "Massage",
@@ -203,7 +257,7 @@ export const services: Service[] = [
     name: "Deep Tissue Massage (45 mins)",
     price: 250,
     durationMinutes: 45,
-    depositAmount: 50,
+    depositAmount: 62.5,
   },
   {
     id: "m3",
@@ -211,7 +265,7 @@ export const services: Service[] = [
     name: "Cocktail Massage (45 mins)",
     price: 350,
     durationMinutes: 45,
-    depositAmount: 50,
+    depositAmount: 87.5,
   },
   {
     id: "m4",
@@ -219,16 +273,17 @@ export const services: Service[] = [
     name: "Body Parts Massage (15 mins)",
     price: 100,
     durationMinutes: 15,
-    depositAmount: 50,
+    depositAmount: 25,
   },
-  // LASHES
+
+  // --- LASHES ---
   {
     id: "l1",
     category: "Lashes",
     name: "Cluster Lashes",
     price: 100,
     durationMinutes: 45,
-    depositAmount: 50,
+    depositAmount: 25,
   },
   {
     id: "l2",
@@ -236,7 +291,7 @@ export const services: Service[] = [
     name: "Lash Lift",
     price: 100,
     durationMinutes: 45,
-    depositAmount: 50,
+    depositAmount: 25,
   },
   {
     id: "l3",
@@ -244,7 +299,7 @@ export const services: Service[] = [
     name: "Lash Tinting",
     price: 100,
     durationMinutes: 30,
-    depositAmount: 50,
+    depositAmount: 25,
   },
   {
     id: "l4",
@@ -252,16 +307,17 @@ export const services: Service[] = [
     name: "Lash Lift & Tint",
     price: 180,
     durationMinutes: 60,
-    depositAmount: 50,
+    depositAmount: 45,
   },
-  // PIERCING
+
+  // --- PIERCING ---
   {
     id: "pr1",
     category: "Piercing",
     name: "Ear Lobe",
     price: 50,
     durationMinutes: 15,
-    depositAmount: 50,
+    depositAmount: 12.5,
   },
   {
     id: "pr2",
@@ -269,7 +325,7 @@ export const services: Service[] = [
     name: "Helix",
     price: 30,
     durationMinutes: 15,
-    depositAmount: 30,
+    depositAmount: 7.5,
   },
   {
     id: "pr3",
@@ -277,7 +333,7 @@ export const services: Service[] = [
     name: "Tragus",
     price: 50,
     durationMinutes: 15,
-    depositAmount: 50,
+    depositAmount: 12.5,
   },
   {
     id: "pr4",
@@ -285,7 +341,7 @@ export const services: Service[] = [
     name: "Nose",
     price: 50,
     durationMinutes: 15,
-    depositAmount: 50,
+    depositAmount: 12.5,
   },
   {
     id: "pr5",
@@ -293,7 +349,7 @@ export const services: Service[] = [
     name: "Septum",
     price: 60,
     durationMinutes: 15,
-    depositAmount: 50,
+    depositAmount: 15,
   },
   {
     id: "pr6",
@@ -301,7 +357,7 @@ export const services: Service[] = [
     name: "Daith",
     price: 70,
     durationMinutes: 15,
-    depositAmount: 50,
+    depositAmount: 17.5,
   },
   {
     id: "pr7",
@@ -309,7 +365,7 @@ export const services: Service[] = [
     name: "Rook",
     price: 50,
     durationMinutes: 15,
-    depositAmount: 50,
+    depositAmount: 12.5,
   },
   {
     id: "pr8",
@@ -317,7 +373,7 @@ export const services: Service[] = [
     name: "Industrial",
     price: 100,
     durationMinutes: 20,
-    depositAmount: 50,
+    depositAmount: 25,
   },
   {
     id: "pr9",
@@ -325,32 +381,17 @@ export const services: Service[] = [
     name: "Navel",
     price: 80,
     durationMinutes: 15,
-    depositAmount: 50,
+    depositAmount: 20,
   },
-  // SPECIALS
+
+  // --- SKIN TAG ---
   {
-    id: "s1",
-    category: "Special Packages",
-    name: "His Treats: Deep Facial + Full Body Massage + Wine",
-    price: 600,
-    durationMinutes: 120,
-    depositAmount: 100,
-  },
-  {
-    id: "s2",
-    category: "Special Packages",
-    name: "Her Treats: Manicure + Pedicure + Facials",
-    price: 500,
-    durationMinutes: 150,
-    depositAmount: 100,
-  },
-  {
-    id: "s3",
-    category: "Special Packages",
-    name: "Us (Couples): Facials + Mani + Massage + Pedi + Waxing + Skin Tag",
-    price: 1800,
-    durationMinutes: 240,
-    depositAmount: 200,
+    id: "st1",
+    category: "Skin Tag",
+    name: "Skin Tag Removal",
+    price: 100,
+    durationMinutes: 30,
+    depositAmount: 25,
   },
 ];
 
@@ -363,5 +404,6 @@ export const categories = [
   "Massage",
   "Lashes",
   "Piercing",
+  "Skin Tag",
   "Special Packages",
 ];
