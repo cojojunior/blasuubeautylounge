@@ -3,7 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { allServices as services } from "../content";
 import { supabase } from "../lib/supabase";
 import { Button } from "../components/ui/Button";
-import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2, Check } from "lucide-react";
 import { PolicyModal } from "../components/booking/PolicyModal";
 import { formatDateForDB } from "../lib/datetime";
 import { generateBookingMessage, getWhatsAppLink } from "../lib/whatsapp";
@@ -13,15 +13,18 @@ const times = ["09:00", "10:00", "11:00", "13:00", "14:00", "15:00"];
 
 export function Booking() {
   const [searchParams] = useSearchParams();
-  const initialService = searchParams.get("service") || services[0].id;
+  const initialService = searchParams.get("service");
 
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [showMonthPicker, setShowMonthPicker] = useState(false);
 
   const [selectedTime, setSelectedTime] = useState<string>("");
-  const [selectedServiceId, setSelectedServiceId] =
-    useState<string>(initialService);
+  // Changed to an array to hold multiple service IDs
+  const [selectedServiceIds, setSelectedServiceIds] = useState<string[]>(
+    initialService ? [initialService] : [services[0].id],
+  );
+
   const [bookedSlots, setBookedSlots] = useState<string[]>([]);
   const [isLoadingSlots, setIsLoadingSlots] = useState(false);
 
@@ -35,16 +38,38 @@ export function Booking() {
   const [showDetailsForm, setShowDetailsForm] = useState(false);
   const [isPolicyModalOpen, setIsPolicyModalOpen] = useState(false);
 
-  const selectedService =
-    services.find((s) => s.id === selectedServiceId) || services[0];
+  // Find all selected service objects
+  const selectedServices = services.filter((s) =>
+    selectedServiceIds.includes(s.id),
+  );
 
-  // Calculate 25% booking fee dynamically
-  const requiredDeposit = selectedService.price * 0.25;
+  // Calculate totals
+  const totalPrice = selectedServices.reduce(
+    (sum, service) => sum + service.price,
+    0,
+  );
+  const requiredDeposit = totalPrice * 0.25; // 25% of the total
+  const combinedServiceNames = selectedServices.map((s) => s.name).join(" + ");
+  const totalDuration = selectedServices.reduce(
+    (sum, service) => sum + service.durationMinutes,
+    0,
+  );
 
   const getDaysInMonth = (year: number, month: number) =>
     new Date(year, month + 1, 0).getDate();
   const getFirstDayOfMonth = (year: number, month: number) =>
     new Date(year, month, 1).getDay();
+
+  const toggleService = (id: string) => {
+    setSelectedServiceIds((prev) => {
+      if (prev.includes(id)) {
+        // Don't allow removing the last service
+        if (prev.length === 1) return prev;
+        return prev.filter((sId) => sId !== id);
+      }
+      return [...prev, id];
+    });
+  };
 
   const renderCalendar = () => {
     const year = currentMonth.getFullYear();
@@ -123,6 +148,9 @@ export function Booking() {
     try {
       const dateString = formatDateForDB(selectedDate);
 
+      // Note: The availability check in Supabase will only check if the SLOT is taken.
+      // It doesn't account for the total duration of multiple services overlapping.
+      // For now, we are just checking the start time.
       const { data: isAvailable, error: checkError } = await supabase.rpc(
         "check_booking_availability",
         { p_date: dateString, p_time: selectedTime },
@@ -131,7 +159,9 @@ export function Booking() {
       if (checkError) throw checkError;
 
       if (!isAvailable) {
-        alert("Sorry, this slot was just taken. Please choose another time.");
+        alert(
+          "Sorry, this time slot was just taken. Please choose another time.",
+        );
         setIsSubmitting(false);
         setSelectedTime("");
         return;
@@ -140,14 +170,14 @@ export function Booking() {
       const { data, error } = await supabase
         .from("appointments")
         .insert({
-          service_id: selectedService.id,
-          service_name: selectedService.name,
+          service_id: selectedServiceIds.join(", "), // Save combined IDs
+          service_name: combinedServiceNames, // Save combined names
           appointment_date: dateString,
           appointment_time: selectedTime,
           customer_name: formData.name,
           customer_email: formData.email,
           customer_phone: formData.phone,
-          total_price: selectedService.price,
+          total_price: totalPrice,
           deposit_amount: requiredDeposit,
           status: "pending",
         })
@@ -157,13 +187,14 @@ export function Booking() {
       if (error) throw error;
 
       const bookingRef = data.id.split("-")[0].toUpperCase();
+
       const message = generateBookingMessage(
         bookingRef,
-        selectedService.name,
+        combinedServiceNames, // Pass the combined string
         dateString,
         selectedTime,
         formData.name,
-        requiredDeposit, // Using the dynamic 25% deposit here
+        requiredDeposit,
       );
 
       window.location.href = getWhatsAppLink(message);
@@ -188,28 +219,52 @@ export function Booking() {
         </div>
 
         <div className="p-6 flex-1 overflow-y-auto">
-          <div className="flex items-center gap-4 mb-8">
-            <div className="w-12 h-12 rounded-full bg-burnt/10 flex items-center justify-center text-burnt font-bold text-xl">
-              B
+          {/* SERVICES SELECTION */}
+          <div className="mb-8">
+            <p className="text-xs text-elephant-muted uppercase tracking-wider mb-3">
+              Select Services (You can choose multiple)
+            </p>
+            <div className="grid grid-cols-1 gap-2 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+              {services.map((service) => {
+                const isSelected = selectedServiceIds.includes(service.id);
+                return (
+                  <button
+                    key={service.id}
+                    type="button"
+                    onClick={() => toggleService(service.id)}
+                    className={`flex items-center justify-between p-3 rounded-xl border text-left transition-all ${
+                      isSelected
+                        ? "bg-burnt/5 border-burnt"
+                        : "bg-white-pure border-elephant/10 hover:border-burnt/30"
+                    }`}>
+                    <div>
+                      <p className="font-medium text-sm text-elephant">
+                        {service.name}
+                      </p>
+                      <p className="text-xs text-elephant-muted">
+                        {formatCurrency(service.price)} •{" "}
+                        {service.durationMinutes} mins
+                      </p>
+                    </div>
+                    <div
+                      className={`w-6 h-6 rounded-full flex items-center justify-center border ${
+                        isSelected
+                          ? "bg-burnt border-burnt text-white-pure"
+                          : "border-elephant/20"
+                      }`}>
+                      {isSelected && <Check size={14} />}
+                    </div>
+                  </button>
+                );
+              })}
             </div>
-            <div className="flex-1">
-              <p className="text-xs text-elephant-muted uppercase tracking-wider mb-1">
-                Selected Service
-              </p>
-              <select
-                className="w-full font-semibold text-lg text-elephant bg-transparent outline-none appearance-none cursor-pointer"
-                value={selectedServiceId}
-                onChange={(e) => setSelectedServiceId(e.target.value)}>
-                {services.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name}
-                  </option>
-                ))}
-              </select>
-              <p className="text-sm text-elephant-muted mt-1">
-                {formatCurrency(selectedService.price)} •{" "}
-                {selectedService.durationMinutes} mins
-              </p>
+
+            {/* Selection Summary */}
+            <div className="mt-4 p-3 bg-white-soft rounded-xl border border-elephant/10 flex justify-between text-sm">
+              <span className="text-elephant-muted">Selected Total:</span>
+              <span className="font-medium text-elephant">
+                {formatCurrency(totalPrice)} ({totalDuration} mins)
+              </span>
             </div>
           </div>
 
@@ -350,9 +405,13 @@ export function Booking() {
             <div className="mt-auto pt-4">
               <Button
                 className="w-full py-4 rounded-xl text-lg shadow-lg"
-                disabled={!selectedTime || isLoadingSlots}
+                disabled={
+                  !selectedTime ||
+                  isLoadingSlots ||
+                  selectedServiceIds.length === 0
+                }
                 onClick={() => setShowDetailsForm(true)}>
-                Confirm Booking
+                Confirm Selection
               </Button>
             </div>
           ) : (
@@ -373,14 +432,14 @@ export function Booking() {
                 </div>
               </div>
 
-              {/* NEW: Deposit Breakdown */}
+              {/* Updated Deposit Breakdown for Multiple Services */}
               <div className="bg-white-soft p-4 rounded-xl border border-elephant/10 mb-6 text-sm">
                 <div className="flex justify-between mb-1">
                   <span className="text-elephant-muted">
                     Total Service Price:
                   </span>
                   <span className="font-medium text-elephant">
-                    {formatCurrency(selectedService.price)}
+                    {formatCurrency(totalPrice)}
                   </span>
                 </div>
                 <div className="flex justify-between text-burnt font-medium">
@@ -389,9 +448,7 @@ export function Booking() {
                 </div>
                 <div className="flex justify-between text-elephant-muted mt-1">
                   <span>Balance Due at Salon:</span>
-                  <span>
-                    {formatCurrency(selectedService.price - requiredDeposit)}
-                  </span>
+                  <span>{formatCurrency(totalPrice - requiredDeposit)}</span>
                 </div>
               </div>
 
