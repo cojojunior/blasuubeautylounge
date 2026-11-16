@@ -5,9 +5,28 @@ import { Heart, ArrowUpRight } from "lucide-react";
 
 // A helper to map specific service IDs to your uploaded images
 const getServiceImage = (serviceId: string, category: string) => {
-  // Specific overrides based on your exact file structure
   switch (serviceId) {
-    // Facials
+    // --- NAILS ---
+    case "n1":
+      return "/sevices/nails/manicure.png"; // Fallback if you have a specific one
+    case "n2":
+      return "/sevices/nails/gel.png";
+    case "n3":
+      return "/sevices/nails/russian.png";
+
+    // --- PEDICURE (NEW IMAGES MAPPED) ---
+    case "p1":
+      return "/sevices/perdicure/sporty.jpg";
+    case "p2":
+      return "/sevices/perdicure/citrus.jpg";
+    case "p3":
+      return "/sevices/perdicure/cocktail.jpg";
+    case "p4":
+      return "/sevices/perdicure/jelly.jpg"; 
+    case "p5":
+      return "/sevices/perdicure/russian.png";
+
+    // --- FACIALS ---
     case "f1":
       return "/sevices/facials/basic.png";
     case "f2":
@@ -15,7 +34,7 @@ const getServiceImage = (serviceId: string, category: string) => {
     case "f3":
       return "/sevices/facials/acne.png";
 
-    // Lashes
+    // --- LASHES ---
     case "l1":
       return "/sevices/lashes/cluster.png";
     case "l2":
@@ -25,7 +44,7 @@ const getServiceImage = (serviceId: string, category: string) => {
     case "l4":
       return "/sevices/lashes/lift&tint.png";
 
-    // Massage
+    // --- MASSAGE ---
     case "m1":
       return "/sevices/massage/swidish.png";
     case "m2":
@@ -35,7 +54,7 @@ const getServiceImage = (serviceId: string, category: string) => {
     case "m4":
       return "/sevices/massage/bodyparts.png";
 
-    // Waxing (Mapping specific IDs to your filenames)
+    // --- WAXING ---
     case "w1":
       return "/sevices/waxing/armpit.png";
     case "w2":
