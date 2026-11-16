@@ -7,130 +7,86 @@ import { Heart, ArrowUpRight } from "lucide-react";
 const getServiceImage = (serviceId: string, category: string) => {
   switch (serviceId) {
     // --- NAILS & EXTENSIONS ---
-    case "n1":
-      return "/sevices/manicure/regular.png";
-    case "n2":
-      return "/sevices/manicure/gel.png";
-    case "n3":
-      return "/sevices/manicure/russian.png";
-    case "n4":
-      return "/sevices/manicure/short.png";
-    case "n5":
-      return "/sevices/manicure/medium.png";
-    case "n6":
-      return "/sevices/manicure/long.png";
-    case "n7":
-      return "/sevices/manicure/toenail.png";
-    case "n8":
-      return "/sevices/manicure/accessories.png";
-    case "n9":
-      return "/sevices/manicure/gelpolish.png";
+    case "n1": return "/sevices/manicure/regular.png";
+    case "n2": return "/sevices/manicure/gel.png";
+    case "n3": return "/sevices/manicure/russian.png";
+    case "n4": return "/sevices/manicure/short.png";
+    case "n5": return "/sevices/manicure/medium.png";
+    case "n6": return "/sevices/manicure/long.png";
+    case "n7": return "/sevices/manicure/toenail.png";
+    case "n8": return "/sevices/manicure/accessories.png";
+    case "n9": return "/sevices/manicure/gelpolish.png";
 
     // --- PEDICURE ---
-    case "p1":
-      return "/sevices/perdicure/sporty.jpg";
-    case "p2":
-      return "/sevices/perdicure/citrus.jpg";
-    case "p3":
-      return "/sevices/perdicure/cocktail.jpg";
-    case "p4":
-      return "/sevices/perdicure/jelly.jpg";
-    case "p5":
-      return "/sevices/perdicure/sporty.jpg";
+    case "p1": return "/sevices/perdicure/sporty.jpg";
+    case "p2": return "/sevices/perdicure/citrus.jpg";
+    case "p3": return "/sevices/perdicure/cocktail.jpg";
+    case "p4": return "/sevices/perdicure/jelly.jpg";
+    case "p5": return "/sevices/perdicure/sporty.jpg"; 
 
     // --- FACIALS ---
-    case "f1":
-      return "/sevices/facials/basic.png";
-    case "f2":
-      return "/sevices/facials/deepcleansing.png";
-    case "f3":
-      return "/sevices/facials/acne.png";
-
+    case "f1": return "/sevices/facials/basic.png";
+    case "f2": return "/sevices/facials/deepcleansing.png";
+    case "f3": return "/sevices/facials/acne.png";
+    
     // --- LASHES ---
-    case "l1":
-      return "/sevices/lashes/cluster.png";
-    case "l2":
-      return "/sevices/lashes/lift.png";
-    case "l3":
-      return "/sevices/lashes/tint.png";
-    case "l4":
-      return "/sevices/lashes/lift&tint.png";
-
+    case "l1": return "/sevices/lashes/cluster.png";
+    case "l2": return "/sevices/lashes/lift.png";
+    case "l3": return "/sevices/lashes/tint.png";
+    case "l4": return "/sevices/lashes/lift&tint.png";
+    
     // --- MASSAGE ---
-    case "m1":
-      return "/sevices/massage/swidish.png";
-    case "m2":
-      return "/sevices/massage/deeptissue.png";
-    case "m3":
-      return "/sevices/massage/cocktail.png";
-    case "m4":
-      return "/sevices/massage/bodyparts.png";
-
+    case "m1": return "/sevices/massage/swidish.png";
+    case "m2": return "/sevices/massage/deeptissue.png";
+    case "m3": return "/sevices/massage/cocktail.png";
+    case "m4": return "/sevices/massage/bodyparts.png";
+    
     // --- WAXING ---
-    case "w1":
-      return "/sevices/waxing/armpit.png";
-    case "w2":
-      return "/sevices/waxing/arm.png";
-    case "w3":
-      return "/sevices/waxing/bikini.png";
-    case "w4":
-      return "/sevices/waxing/brazillian.png";
-    case "w5":
-      return "/sevices/waxing/back.png";
-    case "w6":
-      return "/sevices/waxing/chest.png";
-    case "w7":
-      return "/sevices/waxing/thighs.png";
-    case "w8":
-      return "/sevices/waxing/legs.png";
-    case "w9":
-      return "/sevices/waxing/face.png";
-    case "w10":
-      return "/sevices/waxing/nose.png";
-    case "w11":
-      return "/sevices/waxing/ear.png";
+    case "w1": return "/sevices/waxing/armpit.png";
+    case "w2": return "/sevices/waxing/arm.png";
+    case "w3": return "/sevices/waxing/bikini.png";
+    case "w4": return "/sevices/waxing/brazillian.png";
+    case "w5": return "/sevices/waxing/back.png";
+    case "w6": return "/sevices/waxing/chest.png";
+    case "w7": return "/sevices/waxing/thighs.png";
+    case "w8": return "/sevices/waxing/legs.png";
+    case "w9": return "/sevices/waxing/face.png";
+    case "w10": return "/sevices/waxing/nose.png";
+    case "w11": return "/sevices/waxing/ear.png";
 
     // --- PIERCING ---
-    case "pr1":
-      return "/sevices/piercing/ear lobe.jpg";
-    case "pr2":
-      return "/sevices/piercing/helix.jpg";
-    case "pr3":
-      return "/sevices/piercing/tragus.jpg";
-    case "pr4":
-      return "/sevices/piercing/nose.jpg";
-    case "pr5":
-      return "/sevices/piercing/septum.jpg";
-    case "pr6":
-      return "/sevices/piercing/daith.jpg";
-    case "pr7":
-      return "/sevices/piercing/rook.jpg";
-    case "pr8":
-      return "/sevices/piercing/industrial.jpg";
-    case "pr9":
-      return "/sevices/piercing/neval.jpg";
+    case "pr1": return "/sevices/piercing/ear lobe.jpg";
+    case "pr2": return "/sevices/piercing/helix.jpg";
+    case "pr3": return "/sevices/piercing/tragus.jpg";
+    case "pr4": return "/sevices/piercing/nose.jpg";
+    case "pr5": return "/sevices/piercing/septum.jpg";
+    case "pr6": return "/sevices/piercing/daith.jpg";
+    case "pr7": return "/sevices/piercing/rook.jpg";
+    case "pr8": return "/sevices/piercing/industrial.jpg";
+    case "pr9": return "/sevices/piercing/neval.jpg"; 
+
+    // --- SPECIAL PACKAGES ---
+    case "pkg-his-deep": return "/sevices/special/HIS-TREATS–DEEP.png";
+    case "pkg-his-sport": return "/sevices/special/his-treat-spoty.png";
+    case "pkg-his-body": return "/sevices/special/his-treat-body.png";
+    case "pkg-her-mani": return "/sevices/special/her-treat-manicure.png";
+    case "pkg-her-massage": return "/sevices/special/her-treat-massage.png";
+    case "pkg-her-facial": return "/sevices/special/her-treat-facial.png";
+    case "pkg-couples-ultimate": return "/sevices/special/us-facials.png"; // Mapping to facials image
+    case "pkg-couples-lashes": return "/sevices/special/us-extensions.png";
 
     default:
       // Fallback based on category
       switch (category) {
-        case "Nails":
-          return "/nails.png";
-        case "Pedicure":
-          return "/perdicure.png";
-        case "Waxing":
-          return "/waxing.png";
-        case "Facials":
-          return "/facials.png";
-        case "Massage":
-          return "/massage.png";
-        case "Lashes":
-          return "/lashes.png";
-        case "Piercing":
-          return "/piecing.png";
-        case "Special Packages":
-          return "/career.png";
-        default:
-          return "/career.png";
+        case "Nails": return "/nails.png";
+        case "Pedicure": return "/perdicure.png";
+        case "Waxing": return "/waxing.png";
+        case "Facials": return "/facials.png";
+        case "Massage": return "/massage.png";
+        case "Lashes": return "/lashes.png";
+        case "Piercing": return "/piecing.png";
+        case "Special Packages": return "/career.png";
+        default: return "/career.png"; 
       }
   }
 };
