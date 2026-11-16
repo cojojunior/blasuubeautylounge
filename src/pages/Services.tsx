@@ -6,16 +6,16 @@ import { Heart, ArrowUpRight } from "lucide-react";
 // A helper to map specific service IDs to your uploaded images
 const getServiceImage = (serviceId: string, category: string) => {
   switch (serviceId) {
-    // --- NAILS & EXTENSIONS ---
+    // --- NAILS & EXTENSIONS (UPDATED) ---
     case "n1": return "/sevices/manicure/regular.png";
     case "n2": return "/sevices/manicure/gel.png";
     case "n3": return "/sevices/manicure/russian.png";
-    case "n4": return "/nails.png"; // Fallback for Short Extensions
-    case "n5": return "/nails.png"; // Fallback for Medium Extensions
-    case "n6": return "/nails.png"; // Fallback for Long Extensions
-    case "n7": return "/nails.png"; // Fallback for Toe Nails
-    case "n8": return "/nails.png"; // Fallback for Accessories
-    case "n9": return "/sevices/manicure/gel.png"; // Fallback for Gel Polish Add-on
+    case "n4": return "/sevices/manicure/short.png";
+    case "n5": return "/sevices/manicure/medium.png";
+    case "n6": return "/sevices/manicure/long.png";
+    case "n7": return "/sevices/manicure/toenail.png";
+    case "n8": return "/sevices/manicure/accessories.png";
+    case "n9": return "/sevices/manicure/gelpolish.png";
 
     // --- PEDICURE ---
     case "p1": return "/sevices/perdicure/sporty.jpg";
