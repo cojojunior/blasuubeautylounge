@@ -6,17 +6,23 @@ import { Heart, ArrowUpRight } from "lucide-react";
 // A helper to map specific service IDs to your uploaded images
 const getServiceImage = (serviceId: string, category: string) => {
   switch (serviceId) {
-    // --- NAILS ---
-    case "n1": return "/sevices/nails/manicure.png";
-    case "n2": return "/sevices/nails/gel.png";
-    case "n3": return "/sevices/nails/russian.png";
+    // --- NAILS & EXTENSIONS ---
+    case "n1": return "/sevices/manicure/regular.png";
+    case "n2": return "/sevices/manicure/gel.png";
+    case "n3": return "/sevices/manicure/russian.png";
+    case "n4": return "/nails.png"; // Fallback for Short Extensions
+    case "n5": return "/nails.png"; // Fallback for Medium Extensions
+    case "n6": return "/nails.png"; // Fallback for Long Extensions
+    case "n7": return "/nails.png"; // Fallback for Toe Nails
+    case "n8": return "/nails.png"; // Fallback for Accessories
+    case "n9": return "/sevices/manicure/gel.png"; // Fallback for Gel Polish Add-on
 
     // --- PEDICURE ---
     case "p1": return "/sevices/perdicure/sporty.jpg";
     case "p2": return "/sevices/perdicure/citrus.jpg";
     case "p3": return "/sevices/perdicure/cocktail.jpg";
     case "p4": return "/sevices/perdicure/jelly.jpg";
-    case "p5": return "/sevices/perdicure/sporty.jpg"; // Fallback
+    case "p5": return "/sevices/perdicure/sporty.jpg"; 
 
     // --- FACIALS ---
     case "f1": return "/sevices/facials/basic.png";
@@ -49,7 +55,7 @@ const getServiceImage = (serviceId: string, category: string) => {
     case "w11": return "/sevices/waxing/ear.png";
 
     // --- PIERCING ---
-    case "pr1": return "/sevices/piercing/earlobe.jpg";
+    case "pr1": return "/sevices/piercing/ear lobe.jpg";
     case "pr2": return "/sevices/piercing/helix.jpg";
     case "pr3": return "/sevices/piercing/tragus.jpg";
     case "pr4": return "/sevices/piercing/nose.jpg";
@@ -57,7 +63,7 @@ const getServiceImage = (serviceId: string, category: string) => {
     case "pr6": return "/sevices/piercing/daith.jpg";
     case "pr7": return "/sevices/piercing/rook.jpg";
     case "pr8": return "/sevices/piercing/industrial.jpg";
-    case "pr9": return "/sevices/piercing/neval.jpg"; // Note: spelled 'neval' as per your file
+    case "pr9": return "/sevices/piercing/neval.jpg"; 
 
     default:
       // Fallback based on category if specific image isn't mapped
