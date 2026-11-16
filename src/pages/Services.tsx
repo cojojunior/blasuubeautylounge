@@ -22,7 +22,7 @@ const getServiceImage = (serviceId: string, category: string) => {
     case "p2": return "/sevices/perdicure/citrus.jpg";
     case "p3": return "/sevices/perdicure/cocktail.jpg";
     case "p4": return "/sevices/perdicure/jelly.jpg";
-    case "p5": return "/sevices/perdicure/sporty.jpg"; 
+    case "p5": return "/sevices/perdicure/russian.jpg"; 
 
     // --- FACIALS ---
     case "f1": return "/sevices/facials/basic.png";
