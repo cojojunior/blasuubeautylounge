@@ -6,76 +6,131 @@ import { Heart, ArrowUpRight } from "lucide-react";
 // A helper to map specific service IDs to your uploaded images
 const getServiceImage = (serviceId: string, category: string) => {
   switch (serviceId) {
-    // --- NAILS & EXTENSIONS (UPDATED) ---
-    case "n1": return "/sevices/manicure/regular.png";
-    case "n2": return "/sevices/manicure/gel.png";
-    case "n3": return "/sevices/manicure/russian.png";
-    case "n4": return "/sevices/manicure/short.png";
-    case "n5": return "/sevices/manicure/medium.png";
-    case "n6": return "/sevices/manicure/long.png";
-    case "n7": return "/sevices/manicure/toenail.png";
-    case "n8": return "/sevices/manicure/accessories.png";
-    case "n9": return "/sevices/manicure/gelpolish.png";
+    // --- NAILS & EXTENSIONS ---
+    case "n1":
+      return "/sevices/manicure/regular.png";
+    case "n2":
+      return "/sevices/manicure/gel.png";
+    case "n3":
+      return "/sevices/manicure/russian.png";
+    case "n4":
+      return "/sevices/manicure/short.png";
+    case "n5":
+      return "/sevices/manicure/medium.png";
+    case "n6":
+      return "/sevices/manicure/long.png";
+    case "n7":
+      return "/sevices/manicure/toenail.png";
+    case "n8":
+      return "/sevices/manicure/accessories.png";
+    case "n9":
+      return "/sevices/manicure/gelpolish.png";
 
     // --- PEDICURE ---
-    case "p1": return "/sevices/perdicure/sporty.jpg";
-    case "p2": return "/sevices/perdicure/citrus.jpg";
-    case "p3": return "/sevices/perdicure/cocktail.jpg";
-    case "p4": return "/sevices/perdicure/jelly.jpg";
-    case "p5": return "/sevices/perdicure/sporty.jpg"; 
+    case "p1":
+      return "/sevices/perdicure/sporty.jpg";
+    case "p2":
+      return "/sevices/perdicure/citrus.jpg";
+    case "p3":
+      return "/sevices/perdicure/cocktail.jpg";
+    case "p4":
+      return "/sevices/perdicure/jelly.jpg";
+    case "p5":
+      return "/sevices/perdicure/sporty.jpg";
 
     // --- FACIALS ---
-    case "f1": return "/sevices/facials/basic.png";
-    case "f2": return "/sevices/facials/deepcleansing.png";
-    case "f3": return "/sevices/facials/acne.png";
-    
+    case "f1":
+      return "/sevices/facials/basic.png";
+    case "f2":
+      return "/sevices/facials/deepcleansing.png";
+    case "f3":
+      return "/sevices/facials/acne.png";
+
     // --- LASHES ---
-    case "l1": return "/sevices/lashes/cluster.png";
-    case "l2": return "/sevices/lashes/lift.png";
-    case "l3": return "/sevices/lashes/tint.png";
-    case "l4": return "/sevices/lashes/lift&tint.png";
-    
+    case "l1":
+      return "/sevices/lashes/cluster.png";
+    case "l2":
+      return "/sevices/lashes/lift.png";
+    case "l3":
+      return "/sevices/lashes/tint.png";
+    case "l4":
+      return "/sevices/lashes/lift&tint.png";
+
     // --- MASSAGE ---
-    case "m1": return "/sevices/massage/swidish.png";
-    case "m2": return "/sevices/massage/deeptissue.png";
-    case "m3": return "/sevices/massage/cocktail.png";
-    case "m4": return "/sevices/massage/bodyparts.png";
-    
+    case "m1":
+      return "/sevices/massage/swidish.png";
+    case "m2":
+      return "/sevices/massage/deeptissue.png";
+    case "m3":
+      return "/sevices/massage/cocktail.png";
+    case "m4":
+      return "/sevices/massage/bodyparts.png";
+
     // --- WAXING ---
-    case "w1": return "/sevices/waxing/armpit.png";
-    case "w2": return "/sevices/waxing/arm.png";
-    case "w3": return "/sevices/waxing/bikini.png";
-    case "w4": return "/sevices/waxing/brazillian.png";
-    case "w5": return "/sevices/waxing/back.png";
-    case "w6": return "/sevices/waxing/chest.png";
-    case "w7": return "/sevices/waxing/thighs.png";
-    case "w8": return "/sevices/waxing/legs.png";
-    case "w9": return "/sevices/waxing/face.png";
-    case "w10": return "/sevices/waxing/nose.png";
-    case "w11": return "/sevices/waxing/ear.png";
+    case "w1":
+      return "/sevices/waxing/armpit.png";
+    case "w2":
+      return "/sevices/waxing/arm.png";
+    case "w3":
+      return "/sevices/waxing/bikini.png";
+    case "w4":
+      return "/sevices/waxing/brazillian.png";
+    case "w5":
+      return "/sevices/waxing/back.png";
+    case "w6":
+      return "/sevices/waxing/chest.png";
+    case "w7":
+      return "/sevices/waxing/thighs.png";
+    case "w8":
+      return "/sevices/waxing/legs.png";
+    case "w9":
+      return "/sevices/waxing/face.png";
+    case "w10":
+      return "/sevices/waxing/nose.png";
+    case "w11":
+      return "/sevices/waxing/ear.png";
 
     // --- PIERCING ---
-    case "pr1": return "/sevices/piercing/ear lobe.jpg";
-    case "pr2": return "/sevices/piercing/helix.jpg";
-    case "pr3": return "/sevices/piercing/tragus.jpg";
-    case "pr4": return "/sevices/piercing/nose.jpg";
-    case "pr5": return "/sevices/piercing/septum.jpg";
-    case "pr6": return "/sevices/piercing/daith.jpg";
-    case "pr7": return "/sevices/piercing/rook.jpg";
-    case "pr8": return "/sevices/piercing/industrial.jpg";
-    case "pr9": return "/sevices/piercing/neval.jpg"; 
+    case "pr1":
+      return "/sevices/piercing/ear lobe.jpg";
+    case "pr2":
+      return "/sevices/piercing/helix.jpg";
+    case "pr3":
+      return "/sevices/piercing/tragus.jpg";
+    case "pr4":
+      return "/sevices/piercing/nose.jpg";
+    case "pr5":
+      return "/sevices/piercing/septum.jpg";
+    case "pr6":
+      return "/sevices/piercing/daith.jpg";
+    case "pr7":
+      return "/sevices/piercing/rook.jpg";
+    case "pr8":
+      return "/sevices/piercing/industrial.jpg";
+    case "pr9":
+      return "/sevices/piercing/neval.jpg";
 
     default:
-      // Fallback based on category if specific image isn't mapped
+      // Fallback based on category
       switch (category) {
-        case "Nails": return "/nails.png";
-        case "Pedicure": return "/perdicure.png";
-        case "Waxing": return "/waxing.png";
-        case "Facials": return "/facials.png";
-        case "Massage": return "/massage.png";
-        case "Lashes": return "/lashes.png";
-        case "Piercing": return "/piecing.png";
-        default: return "/career.png"; 
+        case "Nails":
+          return "/nails.png";
+        case "Pedicure":
+          return "/perdicure.png";
+        case "Waxing":
+          return "/waxing.png";
+        case "Facials":
+          return "/facials.png";
+        case "Massage":
+          return "/massage.png";
+        case "Lashes":
+          return "/lashes.png";
+        case "Piercing":
+          return "/piecing.png";
+        case "Special Packages":
+          return "/career.png";
+        default:
+          return "/career.png";
       }
   }
 };
@@ -133,57 +188,64 @@ export function Services() {
 
         {/* Services Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredServices.map((service) => (
-            <Link
-              key={service.id}
-              to={`/book?service=${service.id}`}
-              className="group flex flex-col bg-white-pure border border-black/10 rounded-[2rem] p-3 transition-transform hover:-translate-y-1 hover:shadow-xl">
-              {/* Top Image Section */}
-              <div className="relative w-full aspect-[4/3] rounded-[1.5rem] overflow-hidden bg-white-soft">
-                <img
-                  src={getServiceImage(service.id, service.category)}
-                  alt={service.name}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
+          {filteredServices.map((service) => {
+            const isSpecialPackage = service.category === "Special Packages";
 
-                {/* Heart Button */}
-                <button
-                  onClick={(e) => toggleLike(e, service.id)}
-                  className="absolute top-3 right-3 w-10 h-10 bg-white-pure/80 backdrop-blur-md rounded-full flex items-center justify-center text-elephant border border-black/10 transition-colors hover:bg-burnt hover:text-white-pure">
-                  <Heart
-                    size={18}
-                    className={liked[service.id] ? "fill-burnt text-burnt" : ""}
+            return (
+              <Link
+                key={service.id}
+                to={`/book?service=${service.id}`}
+                className="group flex flex-col bg-white-pure border border-black/10 rounded-[2rem] p-3 transition-transform hover:-translate-y-1 hover:shadow-xl">
+                {/* Top Image Section */}
+                <div className="relative w-full aspect-[4/3] rounded-[1.5rem] overflow-hidden bg-white-soft">
+                  <img
+                    src={getServiceImage(service.id, service.category)}
+                    alt={service.name}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
-                </button>
-              </div>
 
-              {/* Bottom Text Section */}
-              <div className="px-3 pt-4 pb-2 flex-grow flex flex-col justify-between">
-                <div>
-                  <h3 className="font-semibold text-lg text-elephant leading-tight truncate">
-                    {service.name}
-                  </h3>
-                  <p className="text-sm text-elephant-muted mt-1">
-                    {service.category}
-                  </p>
+                  {/* Heart Button */}
+                  <button
+                    onClick={(e) => toggleLike(e, service.id)}
+                    className="absolute top-3 right-3 w-10 h-10 bg-white-pure/80 backdrop-blur-md rounded-full flex items-center justify-center text-elephant border border-black/10 transition-colors hover:bg-burnt hover:text-white-pure">
+                    <Heart
+                      size={18}
+                      className={
+                        liked[service.id] ? "fill-burnt text-burnt" : ""
+                      }
+                    />
+                  </button>
                 </div>
 
-                {/* Price and Action Button */}
-                <div className="flex items-end justify-between mt-6">
-                  <p className="text-3xl font-medium text-elephant">
-                    <span className="text-lg text-elephant-muted mr-1">
-                      GH₵
-                    </span>
-                    {service.price}
-                  </p>
+                {/* Bottom Text Section */}
+                <div className="px-3 pt-4 pb-2 flex-grow flex flex-col justify-between">
+                  <div>
+                    <h3
+                      className={`font-semibold text-lg text-elephant leading-tight ${isSpecialPackage ? "whitespace-normal pb-2" : "truncate"}`}>
+                      {service.name}
+                    </h3>
+                    <p className="text-sm text-elephant-muted mt-1">
+                      {service.category}
+                    </p>
+                  </div>
 
-                  <div className="w-12 h-12 bg-elephant/5 rounded-2xl flex items-center justify-center text-elephant group-hover:bg-burnt group-hover:text-white-pure transition-colors border border-black/5">
-                    <ArrowUpRight size={24} />
+                  {/* Price and Action Button */}
+                  <div className="flex items-end justify-between mt-4">
+                    <p className="text-3xl font-medium text-elephant">
+                      <span className="text-lg text-elephant-muted mr-1">
+                        GH₵
+                      </span>
+                      {service.price}
+                    </p>
+
+                    <div className="w-12 h-12 bg-elephant/5 rounded-2xl flex items-center justify-center text-elephant group-hover:bg-burnt group-hover:text-white-pure transition-colors border border-black/5">
+                      <ArrowUpRight size={24} />
+                    </div>
                   </div>
                 </div>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            );
+          })}
         </div>
       </div>
     </div>
