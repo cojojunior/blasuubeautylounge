@@ -55,7 +55,7 @@ const getServiceImage = (serviceId: string, category: string) => {
     case "w11": return "/sevices/waxing/ear.png";
 
     // --- PIERCING ---
-    case "pr1": return "/sevices/piercing/ear lobe.jpg";
+    case "pr1": return "/sevices/piercing/earlobe.jpg";
     case "pr2": return "/sevices/piercing/helix.jpg";
     case "pr3": return "/sevices/piercing/tragus.jpg";
     case "pr4": return "/sevices/piercing/nose.jpg";
