@@ -55,7 +55,7 @@ const getServiceImage = (serviceId: string, category: string) => {
     case "w11": return "/sevices/waxing/ear.webp";
 
     // --- PIERCING ---
-    case "pr1": return "/sevices/piercing/ear lobe.webp";
+    case "pr1": return "/sevices/piercing/earlobe.webp";
     case "pr2": return "/sevices/piercing/helix.webp";
     case "pr3": return "/sevices/piercing/tragus.webp";
     case "pr4": return "/sevices/piercing/nose.webp";
@@ -161,6 +161,7 @@ export function Services() {
                   <img
                     src={getServiceImage(service.id, service.category)}
                     alt={service.name}
+                    loading="lazy"
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
 
