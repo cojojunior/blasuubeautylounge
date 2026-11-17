@@ -7,7 +7,7 @@ export function Hero() {
     <section className="relative w-full h-[50vh] min-h-[550px] flex flex-col justify-end overflow-hidden -mt-px">
       {/* Background Image */}
       <img
-        src="/hero.png"
+        src="/hero.webp"
         alt="Blasuu Beauty Lounge"
         className="absolute inset-0 w-full h-full object-cover object-top z-0"
       />

@@ -1,13 +1,13 @@
 import { Link } from "react-router-dom";
 
 const categories = [
-  { name: "Nails", image: "/nails.png" },
-  { name: "Pedicure", image: "/perdicure.png" },
-  { name: "Waxing", image: "/waxing.png" },
-  { name: "Facials", image: "/facials.png" },
-  { name: "Massage", image: "/massage.png" },
-  { name: "Lashes", image: "/lashes.png" },
-  { name: "Piercing", image: "/piecing.png" },
+  { name: "Nails", image: "/nails.webp" },
+  { name: "Pedicure", image: "/perdicure.webp" },
+  { name: "Waxing", image: "/waxing.webp" },
+  { name: "Facials", image: "/facials.webp" },
+  { name: "Massage", image: "/massage.webp" },
+  { name: "Lashes", image: "/lashes.webp" },
+  { name: "Piercing", image: "/piecing.webp" },
 ];
 
 export function ShopByCategory() {
@@ -23,12 +23,6 @@ export function ShopByCategory() {
           </p>
         </div>
 
-        {/* 
-          UNIFIED COLLAGE GRID (Mobile, Tablet, Desktop)
-          - 4 columns total.
-          - Left side: 2 columns wide, 3 rows tall (uses 3 images).
-          - Right side: 2 columns wide (1 image top left, 1 tall image top right, 2 stacked images at bottom).
-        */}
         <div className="grid grid-cols-4 grid-rows-4 gap-3 md:gap-4 lg:gap-6 h-[600px] md:h-[700px] lg:h-[800px]">
           {/* 1. Top Left (Tall) */}
           <Link

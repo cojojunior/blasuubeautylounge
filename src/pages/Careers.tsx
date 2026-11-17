@@ -31,7 +31,7 @@ export function Careers() {
       <div className="relative py-20 text-white-pure text-center px-4 overflow-hidden">
         {/* Background Image */}
         <img
-          src="/career.png"
+          src="/career.webp"
           alt="Career background"
           className="absolute inset-0 w-full h-full object-cover z-0"
         />
