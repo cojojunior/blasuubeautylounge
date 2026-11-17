@@ -16,7 +16,7 @@ export const manualReviews: ManualReview[] = [
   {
     id: "rev-1",
     author: "Josephine Cann",
-    authorPhoto: "/reviews/josephine.png",
+    authorPhoto: "/reviews/josephine.webp",
     rating: 5,
     relativeTime: "6 months ago",
     text: "This was my second stick-on nails done by them and they came out so good and lasted so long. I'd definitely recommend her service if you're looking for quality and affordability",
@@ -28,7 +28,7 @@ export const manualReviews: ManualReview[] = [
   {
     id: "rev-2",
     author: "Odarkor Ankrah-Addison",
-    authorPhoto: "/reviews/Odarkor.png",
+    authorPhoto: "/reviews/Odarkor.webp",
     rating: 5,
     relativeTime: "7 months ago",
     text: "Good customer service. I did Russian pedicure and fixed my nails, and I must say I had the best experience ever. Everything was so on point and I recommend their services.",
@@ -41,7 +41,7 @@ export const manualReviews: ManualReview[] = [
   {
     id: "rev-3",
     author: "Jewel Frempong",
-    authorPhoto: "/reviews/jewel.png",
+    authorPhoto: "/reviews/jewel.webp",
     rating: 5,
     relativeTime: "6 months ago",
     text: "If you are ever in Ghana and need a place to get your nails, eyebrows and other beauty stuff blasuu beauty lounge is your number stop. The lady is very professional, welcoming, warm and very respectful. She went extra miles to make sure I ...",
@@ -53,7 +53,7 @@ export const manualReviews: ManualReview[] = [
   {
     id: "rev-4",
     author: "Janet B Wisseh",
-    authorPhoto: "/reviews/janet.png",
+    authorPhoto: "/reviews/janet.webp",
     rating: 5,
     relativeTime: "11 months ago",
     text: "She's amazing. The best customer service award in Accra, Ghana goes to this lady. Her professionalism is top-notch. She even went the extreme to help me get some items from the market nearby. She's amazing! She has master...her craft... I recommend Blasuu Beauty Lounge. Thank you Blasuu.",
@@ -66,7 +66,7 @@ export const manualReviews: ManualReview[] = [
   {
     id: "rev-5",
     author: "Antoinette Sena Yali",
-    authorPhoto: "/reviews/antoinette.png",
+    authorPhoto: "/reviews/antoinette.webp",
     rating: 5,
     relativeTime: "2 years ago",
     text: "I had well detailed facials today. Consultation was on point. The therapist was very patient took her time in delivering. Gave after service maintenance tips for a healthy glowing skin. I enjoyed a glass of sweet red wine as well. Guys keep up the good work.",
@@ -79,7 +79,7 @@ export const manualReviews: ManualReview[] = [
   {
     id: "rev-6",
     author: "Emmanuel Osei",
-    authorPhoto: "/reviews/emmanuel.png",
+    authorPhoto: "/reviews/emmanuel.webp",
     rating: 5,
     relativeTime: "3 months ago",
     text: "I had a massage and  I slept like a baby I felt relieved , relaxed and calmed afterwards. The therapist was very patient and very detailed oriented I recommend their services anytime anyday.",
@@ -92,7 +92,7 @@ export const manualReviews: ManualReview[] = [
   {
     id: "rev-7",
     author: "Benjamin Worlanyo",
-    authorPhoto: "/reviews/ben.png",
+    authorPhoto: "/reviews/ben.webp",
     rating: 5,
     relativeTime: "3 months ago",
     text: "Blasuu is an exceptional beautician and masseuse. She’s highly skilled, professional, and deeply passionate about her work. She talks you through every step, creating a calm, reassuring atmosphere. Each session is thoughtful, relaxing, and truly restorative.",
