@@ -2,10 +2,12 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
-import { formatDateForDB, formatTimeDisplay } from "../lib/datetime"; // NEW
+import { formatDateForDB, formatTimeDisplay } from "../lib/datetime";
+import { Seo } from "../components/seo/Seo";
+import { siteConfig } from "../config/site";
 
 const times = ["09:00", "10:00", "11:00", "13:00", "14:00", "15:00"];
-const HOLIDAYS = ["2026-12-25", "2026-12-26"]; // You can eventually pull this from your database
+const HOLIDAYS = ["2026-12-25", "2026-12-26"];
 
 export function Availability() {
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -146,6 +148,11 @@ export function Availability() {
 
   return (
     <div className="py-10 bg-white min-h-screen">
+      <Seo
+        title="Live Availability Calendar"
+        description="View our live calendar to see exactly which dates and times are available for your next appointment at Blasuu Beauty Lounge."
+        url={`${siteConfig.url}/availability`}
+      />
       <div className="max-w-xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-serif mb-4 text-elephant">

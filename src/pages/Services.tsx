@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { allServices as services, categories } from "../content";
 import { Heart, ArrowUpRight } from "lucide-react";
+import { Seo } from "../components/seo/Seo";
+import { siteConfig } from "../config/site";
 
 // A helper to map specific service IDs to your uploaded images
 const getServiceImage = (serviceId: string, category: string) => {
@@ -122,6 +124,11 @@ export function Services() {
   return (
     <div className="py-20 bg-white min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <Seo
+          title="Our Services & Prices"
+          description="Explore our full menu of luxury spa treatments. From Russian manicures to deep tissue massages, find your next glow-up at Blasuu Beauty Lounge."
+          url={`${siteConfig.url}/services`}
+        />
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-serif mb-4">Our Services</h1>

@@ -1,10 +1,17 @@
 import { Link } from "react-router-dom";
 import { Button } from "../components/ui/Button";
 import { Sparkles, Heart, ShieldCheck } from "lucide-react";
+import { Seo } from "../components/seo/Seo";
+import { siteConfig } from "../config/site";
 
 export function About() {
   return (
     <div className="bg-white min-h-screen">
+      <Seo
+        title="About Us"
+        description="Learn about Blasuu Beauty Lounge, our story, and our commitment to providing luxury beauty and wellness services in Accra, Ghana."
+        url={`${siteConfig.url}/about`}
+      />
       {/* Hero */}
       <div className="py-14 bg-white  text-elephant text-center px-4">
         <div className="max-w-3xl mx-auto">

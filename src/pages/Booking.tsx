@@ -8,6 +8,8 @@ import { PolicyModal } from "../components/booking/PolicyModal";
 import { formatDateForDB } from "../lib/datetime";
 import { generateBookingMessage, getWhatsAppLink } from "../lib/whatsapp";
 import { formatCurrency } from "../lib/currency";
+import { Seo } from "../components/seo/Seo";
+import { siteConfig } from "../config/site";
 
 const times = ["09:00", "10:00", "11:00", "13:00", "14:00", "15:00"];
 
@@ -207,6 +209,11 @@ export function Booking() {
 
   return (
     <div className="min-h-screen bg-white-pure flex justify-center">
+      <Seo
+        title="Book an Appointment"
+        description="Secure your slot at Blasuu Beauty Lounge. Select your preferred date and time, and confirm your booking in seconds."
+        url={`${siteConfig.url}/book`}
+      />
       <div className="w-full max-w-lg bg-white-pure relative flex flex-col">
         <div className="sticky top-0 bg-white-pure z-20 px-6 py-4 border-b border-elephant/10 flex items-center justify-between">
           <button

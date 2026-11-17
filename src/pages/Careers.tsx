@@ -8,6 +8,8 @@ import {
 } from "lucide-react";
 import { getWhatsAppLink } from "../lib/whatsapp";
 import { Button } from "../components/ui/Button";
+import { Seo } from "../components/seo/Seo";
+import { siteConfig } from "../config/site";
 
 export function Careers() {
   const [formData, setFormData] = useState({
@@ -27,6 +29,11 @@ export function Careers() {
 
   return (
     <div className="min-h-screen bg-white-pure">
+      <Seo
+        title="Careers & Training Academy"
+        description="Join the Blasuu Beauty Lounge team or enroll in our beauty academy. The owner personally mentors and trains passionate individuals."
+        url={`${siteConfig.url}/careers`}
+      />
       {/* Hero Section */}
       <div className="relative py-20 text-white-pure text-center px-4 overflow-hidden">
         {/* Background Image */}

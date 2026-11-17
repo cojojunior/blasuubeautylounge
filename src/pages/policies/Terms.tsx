@@ -1,11 +1,18 @@
 import { Link } from "react-router-dom";
 import { PolicyLayout } from "../../components/policy/PolicyLayout";
 import { policyConfig } from "../../content/policies/bookingFee";
+import { Seo } from "../../components/seo/Seo";
+import { siteConfig } from "../../config/site";
 
 export function Terms() {
   return (
     <PolicyLayout title="Terms & Conditions">
       <div className="mb-10 text-sm text-elephant-muted">
+        <Seo
+          title="Terms & Conditions"
+          description="Read the terms, booking fee, cancellation, and privacy policies for Blasuu Beauty Lounge."
+          url={`${siteConfig.url}/policies/terms`}
+        />
         <p>Last Updated: November 2026</p>
       </div>
 

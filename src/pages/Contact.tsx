@@ -1,10 +1,17 @@
 import { MapPin, Phone, Mail, Clock } from "lucide-react";
 import { businessConfig } from "../config/business";
 import { Button } from "../components/ui/Button";
+import { Seo } from "../components/seo/Seo";
+import { siteConfig } from "../config/site";
 
 export function Contact() {
   return (
     <div className="py-10 bg-white min-h-screen">
+      <Seo
+        title="Contact Us"
+        description="Get in touch with Blasuu Beauty Lounge. Find our location in Madina, Accra, our phone number, and our WhatsApp contact."
+        url={`${siteConfig.url}/contact`}
+      />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h1 className="text-4xl md:text-5xl font-serif mb-4 text-elephant">
@@ -96,8 +103,8 @@ export function Contact() {
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3970.2130987062596!2d-0.17602312366569264!3d5.682310294299458!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xfdf9dc1fc27d59d%3A0x2d4db5648a04f2b3!2sBlasuu%20Beauty%20Lounge!5e0!3m2!1sen!2sgh!4v1794680173904!5m2!1sen!2sgh"
               width="100%"
               height="100%"
-              style={{ border: 0 }} 
-              allowFullScreen={true} 
+              style={{ border: 0 }}
+              allowFullScreen={true}
               loading="lazy"
               referrerPolicy="strict-origin-when-cross-origin"
               className="absolute inset-0"

@@ -3,6 +3,8 @@ import { supabase } from "../lib/supabase";
 import { ReviewCard } from "../components/reviews/ReviewCard";
 import { Star, ExternalLink, Loader2 } from "lucide-react";
 import { manualReviews, type ManualReview } from "../content/manualReviews";
+import { Seo } from "../components/seo/Seo";
+import { siteConfig } from "../config/site";
 
 export function Reviews() {
   const [apiReviews, setApiReviews] = useState<any[]>([]);
@@ -47,6 +49,11 @@ export function Reviews() {
 
   return (
     <div className="py-10 bg-white-pure min-h-screen">
+      <Seo
+        title="Client Reviews"
+        description="Read what our amazing clients have to say about their experience at Blasuu Beauty Lounge in Madina, Accra."
+        url={`${siteConfig.url}/reviews`}
+      />
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h1 className="text-4xl md:text-5xl font-serif mb-4 text-elephant">
