@@ -5,6 +5,7 @@ export interface Service {
   price: number;
   durationMinutes: number;
   depositAmount: number;
+  note?: string;
 }
 
 export const services: Service[] = [
@@ -392,6 +393,7 @@ export const services: Service[] = [
     price: 100,
     durationMinutes: 30,
     depositAmount: 25,
+    note: "For Multiple Skin-Tags Removal, Price is determined after Assessment Consultation. Appointments Only.",
   },
 ];
 

@@ -192,6 +192,14 @@ export function Services() {
                       className={`font-semibold text-lg text-elephant leading-tight ${isSpecialPackage ? "whitespace-normal pb-2" : "truncate"}`}>
                       {service.name}
                     </h3>
+
+                    {service.note && (
+                      <p className="text-[11px] font-medium text-burnt leading-tight mt-1 mb-1">
+                        * {service.note}
+                      </p>
+                    )}
+
+                    
                     <p className="text-sm text-elephant-muted mt-1">
                       {service.category}
                     </p>
