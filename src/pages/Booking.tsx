@@ -140,73 +140,72 @@ export function Booking() {
     fetchBookings();
   }, [selectedDate]);
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!formData.agreeTerms) return alert("You must agree to the terms.");
-    if (!selectedDate) return;
+const handleSubmit = async (e: FormEvent) => {
+  e.preventDefault();
+  if (!formData.agreeTerms) return alert("You must agree to the terms.");
+  if (!selectedDate) return;
 
-    setIsSubmitting(true);
+  setIsSubmitting(true);
 
-    try {
-      const dateString = formatDateForDB(selectedDate);
+  try {
+    const dateString = formatDateForDB(selectedDate);
 
-      // Note: The availability check in Supabase will only check if the SLOT is taken.
-      // It doesn't account for the total duration of multiple services overlapping.
-      // For now, we are just checking the start time.
-      const { data: isAvailable, error: checkError } = await supabase.rpc(
-        "check_booking_availability",
-        { p_date: dateString, p_time: selectedTime },
-      );
+    // 1. Save booking as pending payment
+    const { data, error } = await supabase
+      .from("appointments")
+      .insert({
+        service_id: selectedServiceIds.join(", "),
+        service_name: combinedServiceNames,
+        appointment_date: dateString,
+        appointment_time: selectedTime,
+        customer_name: formData.name,
+        customer_email: formData.email,
+        customer_phone: formData.phone,
+        total_price: totalPrice,
+        deposit_amount: requiredDeposit,
+        status: "pending_payment", // Changed status!
+      })
+      .select()
+      .single();
 
-      if (checkError) throw checkError;
+    if (error) throw error;
 
-      if (!isAvailable) {
-        alert(
-          "Sorry, this time slot was just taken. Please choose another time.",
-        );
-        setIsSubmitting(false);
-        setSelectedTime("");
-        return;
-      }
+    const bookingRef = data.id; // Use the full UUID for Moolre
 
-      const { data, error } = await supabase
-        .from("appointments")
-        .insert({
-          service_id: selectedServiceIds.join(", "), // Save combined IDs
-          service_name: combinedServiceNames, // Save combined names
-          appointment_date: dateString,
-          appointment_time: selectedTime,
-          customer_name: formData.name,
-          customer_email: formData.email,
-          customer_phone: formData.phone,
-          total_price: totalPrice,
-          deposit_amount: requiredDeposit,
-          status: "pending",
-        })
-        .select()
-        .single();
+    // 2. Generate Moolre payment link
+    const { data: moolreData, error: moolreError } =
+      await supabase.functions.invoke("create-moolre-link", {
+        body: {
+          amount: requiredDeposit,
+          email: formData.email,
+          reference: bookingRef,
+          callbackUrl: `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/moolre-webhook`,
+          redirectUrl: `${window.location.origin}/booking-confirmation?ref=${bookingRef}`,
+        },
+      });
 
-      if (error) throw error;
-
-      const bookingRef = data.id.split("-")[0].toUpperCase();
-
+    if (moolreError || !moolreData?.url) {
+      // Fallback: If Moolre fails, let them book via WhatsApp anyway
       const message = generateBookingMessage(
-        bookingRef,
-        combinedServiceNames, // Pass the combined string
+        bookingRef.split("-")[0].toUpperCase(),
+        combinedServiceNames,
         dateString,
         selectedTime,
         formData.name,
         requiredDeposit,
       );
-
       window.location.href = getWhatsAppLink(message);
-    } catch (error) {
-      console.error(error);
-      alert("Error saving booking. Please try again.");
-      setIsSubmitting(false);
+      return;
     }
-  };
 
+    // 3. Redirect to Moolre Checkout
+    window.location.href = moolreData.url;
+  } catch (error) {
+    console.error(error);
+    alert("Error saving booking. Please try again.");
+    setIsSubmitting(false);
+  }
+};
   return (
     <div className="min-h-screen bg-white-pure flex justify-center">
       <Seo
