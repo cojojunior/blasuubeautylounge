@@ -1,5 +1,5 @@
 export const siteConfig = {
-  url: "https://blasuugroup.netlify.app",
+  url: "https://blasuugroup.com",
   name: "Blasuu Beauty Lounge",
   title: "Blasuu Beauty Lounge | Luxury Spa & Nails in Accra",
   description:
