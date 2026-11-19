@@ -106,7 +106,7 @@ export const services: Service[] = [
     id: "p3",
     category: "Pedicure",
     name: "Cocktail Pedicure",
-    price: 150,
+    price: 200,
     durationMinutes: 60,
     depositAmount: 37.5,
   },

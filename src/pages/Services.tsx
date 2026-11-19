@@ -24,7 +24,7 @@ const getServiceImage = (serviceId: string, category: string) => {
     case "p2": return "/sevices/perdicure/citrus.webp";
     case "p3": return "/sevices/perdicure/cocktail.webp";
     case "p4": return "/sevices/perdicure/jelly.webp";
-    case "p5": return "/sevices/perdicure/sporty.webp"; 
+    case "p5": return "/sevices/perdicure/russian.webp"; 
 
     // --- FACIALS ---
     case "f1": return "/sevices/facials/basic.webp";
@@ -199,7 +199,7 @@ export function Services() {
                       </p>
                     )}
 
-                    
+
                     <p className="text-sm text-elephant-muted mt-1">
                       {service.category}
                     </p>
