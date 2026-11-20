@@ -7,6 +7,8 @@ import { getWhatsAppLink } from "../lib/whatsapp";
 export function BookingConfirmation() {
   const [searchParams] = useSearchParams();
   const bookingId = searchParams.get("ref");
+  const isTest = searchParams.get("test_paid") === "true";
+
   const [status, setStatus] = useState<"loading" | "confirmed" | "pending">(
     "loading",
   );
@@ -15,32 +17,59 @@ export function BookingConfirmation() {
   useEffect(() => {
     if (!bookingId) return;
 
-    const checkStatus = async () => {
+    const verifyPayment = async () => {
+      // 1. If it's a test, manually update the database to confirmed
+      if (isTest) {
+        console.log("TEST MODE: Simulating Moolre Webhook...");
+        const { error: updateError } = await supabase
+          .from("appointments")
+          .update({ status: "confirmed" })
+          .eq("id", bookingId);
+
+        if (updateError) {
+          console.error("Failed to update status:", updateError);
+          alert("Test Error: Could not update database. Check console.");
+        } else {
+          console.log("TEST MODE: Database updated successfully to confirmed.");
+        }
+      }
+
+      // 2. Fetch the latest data
       const { data, error } = await supabase
         .from("appointments")
         .select("*")
         .eq("id", bookingId)
         .single();
 
-      if (!error && data) {
+      if (error) {
+        console.error("Fetch error:", error);
+        setStatus("pending");
+        return false;
+      }
+
+      if (data) {
         setBookingData(data);
         if (data.status === "confirmed") {
           setStatus("confirmed");
           return true; // Stop polling
+        } else {
+          setStatus("pending");
         }
       }
       return false;
     };
 
-    // Check immediately, then poll every 3 seconds
-    checkStatus();
+    // Run immediately
+    verifyPayment();
+
+    // Poll every 2 seconds just in case
     const interval = setInterval(async () => {
-      const isDone = await checkStatus();
+      const isDone = await verifyPayment();
       if (isDone) clearInterval(interval);
-    }, 3000);
+    }, 2000);
 
     return () => clearInterval(interval);
-  }, [bookingId]);
+  }, [bookingId, isTest]);
 
   const handleWhatsApp = () => {
     if (!bookingData) return;
@@ -58,9 +87,7 @@ export function BookingConfirmation() {
               className="animate-spin text-burnt mx-auto mb-4"
             />
             <h2 className="text-2xl font-serif mb-2">Verifying Payment</h2>
-            <p className="text-elephant-muted text-sm">
-              Please wait while we confirm your transaction with Moolre...
-            </p>
+            <p className="text-elephant-muted text-sm">Please wait...</p>
           </>
         )}
 
@@ -88,8 +115,8 @@ export function BookingConfirmation() {
             />
             <h2 className="text-2xl font-serif mb-2">Payment Pending</h2>
             <p className="text-elephant-muted text-sm mb-6">
-              We haven't received confirmation yet. If you just paid, please
-              wait a moment.
+              We haven't received confirmation yet. If you are testing, check
+              the browser console for errors.
             </p>
             <Link to="/" className="text-burnt hover:underline text-sm">
               Return Home
