@@ -1,24 +1,20 @@
-### Update `README.md`
-
-Replace the contents of your `README.md` file with this:
-
-```markdown
 # Blasuu Beauty Lounge 💅✨
 
 A premium, mobile-first web application for **Blasuu Beauty Lounge** located in Madina, Accra. 
 
 Built with React, TypeScript, Vite, Tailwind CSS v4, and Supabase. Features a luxurious, modern design system using Elephant Gray, Burnt Orange, White, and Gold.
 
----
+ 
 
 ## 🚀 Features
 
 ### Public Facing
 - **Luxury UI/UX:** Custom design system with smooth animations, responsive layouts, and native-app feel (SF Font).
-- **Services & Packages:** Dynamic filtering by category, with custom images for every service.
-- **Multi-Service Booking:** Customers can select multiple services in one booking. The system automatically calculates the total price and the 25% deposit.
+- **Services & Packages:** Dynamic filtering by category, with custom images and notes for every service (e.g., Skin Tag Consultation).
+- **Multi-Service Booking:** Customers can select multiple services in one booking. The system automatically calculates the total price, duration, and the 25% booking fee.
 - **Live Availability:** Visual calendar showing available, filling fast, fully booked, and holiday slots.
 - **Authentic Google Reviews:** Fetches live reviews from Google Places API, combined with manual verified text reviews and author photos.
+- **Moolre Payments:** Secure deposit collection via Moolre Hosted Checkout. Bookings are only marked as `confirmed` after Moolre's webhook verifies the payment.
 - **Careers & Training:** Academy application flow highlighting owner-led mentorship.
 - **Contact & Map:** Integrated Google Maps (free iframe), WhatsApp float, and contact details.
 - **Policies:** Centralized Terms, Privacy, Booking Fee, and Cancellation policies.
@@ -27,11 +23,11 @@ Built with React, TypeScript, Vite, Tailwind CSS v4, and Supabase. Features a lu
 
 ### Admin Dashboard
 - **Secure Login:** Google OAuth and Email/Password.
-- **Booking Management:** View, confirm, cancel, or delete appointments.
+- **Booking Management:** View, confirm, cancel, or delete appointments. Unpaid bookings show as "Awaiting Payment".
 - **Calendar Sync:** Automatically sync confirmed bookings to the owner's Google Calendar via OAuth.
 - **WhatsApp Integration:** Direct chat links to customers.
 
----
+ 
 
 ## 🛠️ Tech Stack
 - **Frontend:** React 19, TypeScript, Vite
@@ -41,7 +37,7 @@ Built with React, TypeScript, Vite, Tailwind CSS v4, and Supabase. Features a lu
 - **Backend & DB:** Supabase (PostgreSQL, Edge Functions, Auth)
 - **Integrations:** Google Places API, Google Calendar API, WhatsApp, Moolre (Payments)
 
----
+ 
 
 ## 📦 Setup & Installation
 
@@ -73,7 +69,7 @@ npm run dev
 npm run build
 ```
 
----
+ 
 
 ## 🔐 Supabase Setup
 
@@ -82,7 +78,7 @@ You need to run the following SQL in your Supabase SQL Editor to set up the sche
 
 **1. Appointments Table**
 ```sql
-create type booking_status as enum ('pending', 'confirmed', 'cancelled', 'completed');
+create type booking_status as enum ('pending', 'pending_payment', 'confirmed', 'cancelled', 'completed');
 
 create table public.appointments (
   id uuid default gen_random_uuid() primary key,
@@ -112,12 +108,11 @@ create table if not exists public.owner_integrations (
 );
 
 alter table public.owner_integrations enable row level security;
-```
+
 
 **3. RLS Policies & Functions**
 *(Run the policies provided in the setup guide to allow anon inserts, public availability reads, and admin-only updates).*
 
----
 
 ## 🔗 Edge Functions
 
@@ -138,9 +133,7 @@ Creates a secure payment link via Moolre for the 25% deposit. Saves the booking 
 ### 5. `moolre-webhook`
 Listens for Moolre's payment confirmation. Verifies the transaction and updates the booking status to `confirmed`.
 
-*(See the project documentation for the full code of these functions).*
 
----
 
 ## 🌐 Deployment (Netlify)
 
@@ -150,7 +143,7 @@ Listens for Moolre's payment confirmation. Verifies the transaction and updates 
 4. Add your `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` to the Environment Variables in Netlify.
 5. Ensure your `netlify.toml` is configured for SPA routing and caching:
 
-```toml
+toml
 [build]
   command = "npm run build"
   publish = "dist"
@@ -175,9 +168,8 @@ Listens for Moolre's payment confirmation. Verifies the transaction and updates 
   to = "/index.html"
   status = 200
   force = false
-```
 
----
+
 
 ## 🎨 Design System
 
@@ -190,8 +182,7 @@ Listens for Moolre's payment confirmation. Verifies the transaction and updates 
 - **Icons:** Lucide React, React Icons.
 - **Images:** All served in `.webp` format for optimal performance.
 
----
+
 
 ## 📄 License
 This project is proprietary and built exclusively for Blasuu Beauty Lounge. All rights reserved.
-```
