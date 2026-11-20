@@ -120,11 +120,11 @@ export function Booking() {
       setIsLoadingSlots(true);
       const targetDate = formatDateForDB(selectedDate!);
 
+      // FIX 1: Query the secure 'booked_slots' view instead of the appointments table
       const { data, error } = await supabase
-        .from("appointments")
+        .from("booked_slots")
         .select("appointment_time")
-        .eq("appointment_date", targetDate)
-        .neq("status", "cancelled");
+        .eq("appointment_date", targetDate);
 
       if (!error && data) {
         setBookedSlots(data.map((b) => b.appointment_time));
@@ -146,27 +146,21 @@ export function Booking() {
     try {
       const dateString = formatDateForDB(selectedDate);
 
-      // 1. Save booking as pending payment
-      const { data, error } = await supabase
-        .from("appointments")
-        .insert({
-          service_id: selectedServiceIds.join(", "),
-          service_name: combinedServiceNames,
-          appointment_date: dateString,
-          appointment_time: selectedTime,
-          customer_name: formData.name,
-          customer_email: formData.email,
-          customer_phone: formData.phone,
-          total_price: totalPrice,
-          deposit_amount: requiredDeposit,
-          status: "pending_payment",
-        })
-        .select()
-        .single();
+      // FIX 2: Use the secure RPC to insert the booking
+      const { data: bookingRef, error } = await supabase.rpc("create_booking", {
+        p_service_id: selectedServiceIds.join(", "),
+        p_service_name: combinedServiceNames,
+        p_appointment_date: dateString,
+        p_appointment_time: selectedTime,
+        p_customer_name: formData.name,
+        p_customer_email: formData.email,
+        p_customer_phone: formData.phone,
+        p_total_price: totalPrice,
+        p_deposit_amount: requiredDeposit,
+      });
 
       if (error) throw error;
-
-      const bookingRef = data.id;
+      if (!bookingRef) throw new Error("No booking reference returned.");
 
       // 2. Generate Moolre payment link
       const { data: moolreData, error: moolreError } =
@@ -196,9 +190,10 @@ export function Booking() {
 
       // 3. Redirect to Moolre Checkout
       window.location.href = moolreData.url;
-    } catch (error) {
-      console.error(error);
-      alert("Error saving booking. Please try again.");
+    } catch (error: any) {
+      // Show the actual error in the console for debugging
+      console.error("Booking Failed:", error);
+      alert("Error saving booking: " + (error.message || "Please try again."));
       setIsSubmitting(false);
     }
   };
