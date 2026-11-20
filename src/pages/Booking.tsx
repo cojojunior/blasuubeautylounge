@@ -6,6 +6,7 @@ import { Button } from "../components/ui/Button";
 import { ChevronLeft, ChevronRight, Loader2, Check } from "lucide-react";
 import { PolicyModal } from "../components/booking/PolicyModal";
 import { formatDateForDB } from "../lib/datetime";
+import { generateBookingMessage, getWhatsAppLink } from "../lib/whatsapp";
 import { formatCurrency } from "../lib/currency";
 import { Seo } from "../components/seo/Seo";
 import { siteConfig } from "../config/site";
@@ -145,6 +146,7 @@ export function Booking() {
     try {
       const dateString = formatDateForDB(selectedDate);
 
+      // 1. Save booking as pending payment
       const { data, error } = await supabase
         .from("appointments")
         .insert({
@@ -166,26 +168,20 @@ export function Booking() {
 
       const bookingRef = data.id;
 
-      // --- TESTING OVERRIDE START ---
-      // Temporarily bypass Moolre to test the rest of the flow
-      console.log("Simulating Moolre Payment...");
-      window.location.href = `/booking-confirmation?ref=${bookingRef}&test_paid=true`;
-      return;
-      // --- TESTING OVERRIDE END ---
-
-      /* 
-      // LIVE MOOLRE CODE (Uncomment this when you are ready to go live)
-      const { data: moolreData, error: moolreError } = await supabase.functions.invoke("create-moolre-link", {
-        body: {
-          amount: requiredDeposit,
-          email: formData.email,
-          reference: bookingRef,
-          callbackUrl: `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/moolre-webhook`,
-          redirectUrl: `${window.location.origin}/booking-confirmation?ref=${bookingRef}`,
-        },
-      });
+      // 2. Generate Moolre payment link
+      const { data: moolreData, error: moolreError } =
+        await supabase.functions.invoke("create-moolre-link", {
+          body: {
+            amount: requiredDeposit,
+            email: formData.email,
+            reference: bookingRef,
+            callbackUrl: `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/moolre-webhook`,
+            redirectUrl: `${window.location.origin}/booking-confirmation?ref=${bookingRef}`,
+          },
+        });
 
       if (moolreError || !moolreData?.url) {
+        // Fallback: If Moolre fails, let them book via WhatsApp anyway
         const message = generateBookingMessage(
           bookingRef.split("-")[0].toUpperCase(),
           combinedServiceNames,
@@ -198,8 +194,8 @@ export function Booking() {
         return;
       }
 
+      // 3. Redirect to Moolre Checkout
       window.location.href = moolreData.url;
-      */
     } catch (error) {
       console.error(error);
       alert("Error saving booking. Please try again.");
