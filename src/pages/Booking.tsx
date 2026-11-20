@@ -6,7 +6,6 @@ import { Button } from "../components/ui/Button";
 import { ChevronLeft, ChevronRight, Loader2, Check } from "lucide-react";
 import { PolicyModal } from "../components/booking/PolicyModal";
 import { formatDateForDB } from "../lib/datetime";
-import { generateBookingMessage, getWhatsAppLink } from "../lib/whatsapp";
 import { formatCurrency } from "../lib/currency";
 import { Seo } from "../components/seo/Seo";
 import { siteConfig } from "../config/site";
@@ -22,7 +21,6 @@ export function Booking() {
   const [showMonthPicker, setShowMonthPicker] = useState(false);
 
   const [selectedTime, setSelectedTime] = useState<string>("");
-  // Changed to an array to hold multiple service IDs
   const [selectedServiceIds, setSelectedServiceIds] = useState<string[]>(
     initialService ? [initialService] : [services[0].id],
   );
@@ -40,19 +38,15 @@ export function Booking() {
   const [showDetailsForm, setShowDetailsForm] = useState(false);
   const [isPolicyModalOpen, setIsPolicyModalOpen] = useState(false);
 
-  // Find all selected service objects
   const selectedServices = services.filter((s) =>
     selectedServiceIds.includes(s.id),
   );
 
-  // Calculate totals
   const totalPrice = selectedServices.reduce(
     (sum, service) => sum + service.price,
     0,
   );
-
   const requiredDeposit = Math.round(totalPrice * 0.25);
-
   const combinedServiceNames = selectedServices.map((s) => s.name).join(" + ");
   const totalDuration = selectedServices.reduce(
     (sum, service) => sum + service.durationMinutes,
@@ -67,7 +61,6 @@ export function Booking() {
   const toggleService = (id: string) => {
     setSelectedServiceIds((prev) => {
       if (prev.includes(id)) {
-        // Don't allow removing the last service
         if (prev.length === 1) return prev;
         return prev.filter((sId) => sId !== id);
       }
@@ -152,7 +145,6 @@ export function Booking() {
     try {
       const dateString = formatDateForDB(selectedDate);
 
-      // 1. Save booking as pending payment
       const { data, error } = await supabase
         .from("appointments")
         .insert({
@@ -165,29 +157,35 @@ export function Booking() {
           customer_phone: formData.phone,
           total_price: totalPrice,
           deposit_amount: requiredDeposit,
-          status: "pending_payment", // Changed status!
+          status: "pending_payment",
         })
         .select()
         .single();
 
       if (error) throw error;
 
-      const bookingRef = data.id; // Use the full UUID for Moolre
+      const bookingRef = data.id;
 
-      // 2. Generate Moolre payment link
-      const { data: moolreData, error: moolreError } =
-        await supabase.functions.invoke("create-moolre-link", {
-          body: {
-            amount: requiredDeposit,
-            email: formData.email,
-            reference: bookingRef,
-            callbackUrl: `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/moolre-webhook`,
-            redirectUrl: `${window.location.origin}/booking-confirmation?ref=${bookingRef}`,
-          },
-        });
+      // --- TESTING OVERRIDE START ---
+      // Temporarily bypass Moolre to test the rest of the flow
+      console.log("Simulating Moolre Payment...");
+      window.location.href = `/booking-confirmation?ref=${bookingRef}&test_paid=true`;
+      return;
+      // --- TESTING OVERRIDE END ---
+
+      /* 
+      // LIVE MOOLRE CODE (Uncomment this when you are ready to go live)
+      const { data: moolreData, error: moolreError } = await supabase.functions.invoke("create-moolre-link", {
+        body: {
+          amount: requiredDeposit,
+          email: formData.email,
+          reference: bookingRef,
+          callbackUrl: `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/moolre-webhook`,
+          redirectUrl: `${window.location.origin}/booking-confirmation?ref=${bookingRef}`,
+        },
+      });
 
       if (moolreError || !moolreData?.url) {
-        // Fallback: If Moolre fails, let them book via WhatsApp anyway
         const message = generateBookingMessage(
           bookingRef.split("-")[0].toUpperCase(),
           combinedServiceNames,
@@ -200,14 +198,15 @@ export function Booking() {
         return;
       }
 
-      // 3. Redirect to Moolre Checkout
       window.location.href = moolreData.url;
+      */
     } catch (error) {
       console.error(error);
       alert("Error saving booking. Please try again.");
       setIsSubmitting(false);
     }
   };
+
   return (
     <div className="min-h-screen bg-white-pure flex justify-center">
       <Seo
@@ -227,7 +226,6 @@ export function Booking() {
         </div>
 
         <div className="p-6 flex-1 overflow-y-auto">
-          {/* SERVICES SELECTION */}
           <div className="mb-8">
             <p className="text-xs text-elephant-muted uppercase tracking-wider mb-3">
               Select Services (You can choose multiple)
@@ -253,6 +251,11 @@ export function Booking() {
                         {formatCurrency(service.price)} •{" "}
                         {service.durationMinutes} mins
                       </p>
+                      {service.note && (
+                        <p className="text-[10px] text-burnt mt-1">
+                          {service.note}
+                        </p>
+                      )}
                     </div>
                     <div
                       className={`w-6 h-6 rounded-full flex items-center justify-center border ${
@@ -267,7 +270,6 @@ export function Booking() {
               })}
             </div>
 
-            {/* Selection Summary */}
             <div className="mt-4 p-3 bg-white-soft rounded-xl border border-elephant/10 flex justify-between text-sm">
               <span className="text-elephant-muted">Selected Total:</span>
               <span className="font-medium text-elephant">
@@ -440,7 +442,6 @@ export function Booking() {
                 </div>
               </div>
 
-              {/* Updated Deposit Breakdown for Multiple Services */}
               <div className="bg-white-soft p-4 rounded-xl border border-elephant/10 mb-6 text-sm">
                 <div className="flex justify-between mb-1">
                   <span className="text-elephant-muted">
