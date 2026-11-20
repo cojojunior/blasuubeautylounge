@@ -1,36 +1,54 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { supabase } from "../lib/supabase";
-import { CheckCircle2, Loader2, MessageCircle } from "lucide-react";
+import { CheckCircle2, Loader2, MessageCircle, XCircle } from "lucide-react";
 import { getWhatsAppLink } from "../lib/whatsapp";
 
 export function BookingConfirmation() {
   const [searchParams] = useSearchParams();
   const bookingId = searchParams.get("ref");
 
-  const [status, setStatus] = useState<"loading" | "confirmed" | "pending">(
-    "loading",
-  );
+  // Added "notfound" to the status types
+  const [status, setStatus] = useState<
+    "loading" | "confirmed" | "pending" | "notfound"
+  >("loading");
   const [bookingData, setBookingData] = useState<any>(null);
 
   useEffect(() => {
-    if (!bookingId) return;
+    // If there's no ref ID in the URL, show not found immediately
+    if (!bookingId) {
+      setStatus("notfound");
+      return;
+    }
 
     const checkStatus = async () => {
-      const { data, error } = await supabase
-        .from("appointments")
-        .select("*")
-        .eq("id", bookingId)
-        .single();
+      // Use the secure RPC we created in the SQL editor
+      const { data, error } = await supabase.rpc("get_booking_by_ref", {
+        booking_id: bookingId,
+      });
 
-      if (!error && data) {
-        setBookingData(data);
-        if (data.status === "confirmed") {
-          setStatus("confirmed");
-          return true;
-        }
+      if (error) {
+        console.error("Error fetching booking:", error);
+        return true; // Stop polling on network/database error
       }
-      return false;
+
+      // RPC returns an array. Grab the first item, or null if empty.
+      const booking = data && data.length > 0 ? data[0] : null;
+
+      if (!booking) {
+        setStatus("notfound");
+        return true; // Stop polling. The booking doesn't exist.
+      }
+
+      setBookingData(booking);
+
+      if (booking.status === "confirmed") {
+        setStatus("confirmed");
+        return true; // Stop polling. We are done.
+      }
+
+      setStatus("pending");
+      return false; // Keep polling. The webhook hasn't confirmed it yet.
     };
 
     checkStatus();
@@ -90,6 +108,20 @@ export function BookingConfirmation() {
             <p className="text-elephant-muted text-sm mb-6">
               We haven't received confirmation yet. If you just paid, please
               wait a moment.
+            </p>
+            <Link to="/" className="text-burnt hover:underline text-sm">
+              Return Home
+            </Link>
+          </>
+        )}
+
+        {status === "notfound" && (
+          <>
+            <XCircle size={48} className="text-red-500 mx-auto mb-4" />
+            <h2 className="text-2xl font-serif mb-2">Booking Not Found</h2>
+            <p className="text-elephant-muted text-sm mb-6">
+              We couldn't find this booking. Please check your link or contact
+              us.
             </p>
             <Link to="/" className="text-burnt hover:underline text-sm">
               Return Home
