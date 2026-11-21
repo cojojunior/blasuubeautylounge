@@ -3,10 +3,15 @@ import { useSearchParams } from "react-router-dom";
 import { allServices as services, categories } from "../content";
 import { supabase } from "../lib/supabase";
 import { Button } from "../components/ui/Button";
-import { ChevronLeft, ChevronRight, Loader2, Check } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Loader2,
+  Check,
+  WifiOff,
+} from "lucide-react";
 import { PolicyModal } from "../components/booking/PolicyModal";
 import { formatDateForDB } from "../lib/datetime";
-import { generateBookingMessage, getWhatsAppLink } from "../lib/whatsapp";
 import { formatCurrency } from "../lib/currency";
 import { Seo } from "../components/seo/Seo";
 import { siteConfig } from "../config/site";
@@ -21,7 +26,7 @@ export function Booking() {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [showMonthPicker, setShowMonthPicker] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState("All"); // For the filter tabs
+  const [selectedCategory, setSelectedCategory] = useState("All");
 
   const [selectedTime, setSelectedTime] = useState<string>("");
   const [selectedServiceIds, setSelectedServiceIds] = useState<string[]>(
@@ -38,6 +43,7 @@ export function Booking() {
     agreeTerms: false,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null); // New state for error display
   const [showDetailsForm, setShowDetailsForm] = useState(false);
   const [isPolicyModalOpen, setIsPolicyModalOpen] = useState(false);
 
@@ -65,7 +71,7 @@ export function Booking() {
   const toggleService = (id: string) => {
     setSelectedServiceIds((prev) => {
       if (prev.includes(id)) {
-        if (prev.length === 1) return prev; // Prevent deselecting the last service
+        if (prev.length === 1) return prev;
         return prev.filter((sId) => sId !== id);
       }
       return [...prev, id];
@@ -80,12 +86,10 @@ export function Booking() {
     const firstDay = getFirstDayOfMonth(year, month);
     const days = [];
 
-    // Empty slots for days before the 1st
     for (let i = 0; i < firstDay; i++) {
       days.push(<div key={`empty-${i}`} className="h-12"></div>);
     }
 
-    // Actual day buttons
     for (let d = 1; d <= daysInMonth; d++) {
       const dateObj = new Date(year, month, d);
       const today = new Date();
@@ -119,7 +123,7 @@ export function Booking() {
     return days;
   };
 
-  // --- FETCH BOOKED SLOTS (When date changes) ---
+  // --- FETCH BOOKED SLOTS ---
   useEffect(() => {
     if (!selectedDate) return;
 
@@ -127,7 +131,6 @@ export function Booking() {
       setIsLoadingSlots(true);
       const targetDate = formatDateForDB(selectedDate!);
 
-      // Query the secure 'booked_slots' view
       const { data, error } = await supabase
         .from("booked_slots")
         .select("appointment_time")
@@ -150,12 +153,12 @@ export function Booking() {
     if (!selectedDate) return;
 
     setIsSubmitting(true);
+    setSubmitError(null); // Clear any previous errors
     const dateString = formatDateForDB(selectedDate);
-    let bookingRef = "";
 
     try {
       // 1. Save booking via secure RPC
-      const { data, error } = await supabase.rpc("create_booking", {
+      const { data: bookingRef, error } = await supabase.rpc("create_booking", {
         p_service_id: selectedServiceIds.join(", "),
         p_service_name: combinedServiceNames,
         p_appointment_date: dateString,
@@ -168,9 +171,7 @@ export function Booking() {
       });
 
       if (error) throw error;
-      if (!data) throw new Error("No booking reference returned.");
-
-      bookingRef = data;
+      if (!bookingRef) throw new Error("No booking reference returned.");
 
       // 2. Generate Moolre payment link
       const { data: moolreData, error: moolreError } =
@@ -185,7 +186,9 @@ export function Booking() {
         });
 
       if (moolreError || !moolreData?.url) {
-        throw new Error("Moolre failed to generate a payment link.");
+        throw new Error(
+          "Moolre failed to generate a payment link. Please try again.",
+        );
       }
 
       // 3. Redirect to Moolre Checkout
@@ -193,24 +196,17 @@ export function Booking() {
     } catch (error: any) {
       console.error("Booking Failed:", error);
 
-      // 🚨 OFFLINE / ERROR FALLBACK 🚨
-      // If DB fails or internet drops, send them to WhatsApp with details
-      const fallbackRef = bookingRef
-        ? bookingRef.split("-")[0].toUpperCase()
-        : "OFFLINE-" + Math.floor(Math.random() * 10000);
-
-      const message = generateBookingMessage(
-        fallbackRef,
-        combinedServiceNames,
-        dateString,
-        selectedTime,
-        formData.name,
-        requiredDeposit,
-      );
-
-      window.location.href = getWhatsAppLink(message);
-    } finally {
-      setIsSubmitting(false);
+      // 4. Handle Connection Error (Fallback removed)
+      if (error.message === "TypeError: Failed to fetch" || !navigator.onLine) {
+        setSubmitError(
+          "Network error: Please check your internet connection and try again.",
+        );
+      } else {
+        setSubmitError(
+          error.message || "Something went wrong. Please try again.",
+        );
+      }
+      setIsSubmitting(false); // Keep them on the form to retry
     }
   };
 
@@ -242,7 +238,6 @@ export function Booking() {
               </p>
             </div>
 
-            {/* Category Filter Tabs */}
             <div className="flex gap-2 overflow-x-auto pb-3 mb-2 custom-scrollbar">
               {categories
                 .filter((c) => c !== "All" && c !== "Special Packages")
@@ -265,7 +260,6 @@ export function Booking() {
                 ))}
             </div>
 
-            {/* Filtered Services List */}
             <div className="grid grid-cols-1 gap-2 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
               {services
                 .filter(
@@ -342,7 +336,6 @@ export function Booking() {
             </button>
           </div>
 
-          {/* Month/Year Picker Dropdown */}
           {showMonthPicker && (
             <div className="bg-white-pure border border-elephant/10 rounded-2xl p-4 mb-6 shadow-lg absolute z-30 right-6 w-64">
               <div className="flex justify-between items-center mb-4">
@@ -398,7 +391,6 @@ export function Booking() {
             </div>
           )}
 
-          {/* Calendar Grid */}
           <div className="grid grid-cols-7 gap-1 mb-2 text-center">
             {["S", "M", "T", "W", "T", "F", "S"].map((day, i) => (
               <div
@@ -408,6 +400,7 @@ export function Booking() {
               </div>
             ))}
           </div>
+
           <div className="grid grid-cols-7 gap-y-2 gap-x-1 mb-8">
             {renderCalendar()}
           </div>
@@ -474,6 +467,17 @@ export function Booking() {
             <form
               onSubmit={handleSubmit}
               className="space-y-4 animate-fade-in pt-6 border-t border-elephant/10">
+              {/* ERROR DISPLAY */}
+              {submitError && (
+                <div className="p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl flex items-start gap-3">
+                  <WifiOff size={20} className="flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-semibold text-sm">Connection Issue</p>
+                    <p className="text-xs mt-1">{submitError}</p>
+                  </div>
+                </div>
+              )}
+
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold text-xl text-elephant">
                   Your Details
@@ -488,7 +492,6 @@ export function Booking() {
                 </div>
               </div>
 
-              {/* Deposit Summary */}
               <div className="bg-white-soft p-4 rounded-xl border border-elephant/10 mb-6 text-sm">
                 <div className="flex justify-between mb-1">
                   <span className="text-elephant-muted">
@@ -571,7 +574,11 @@ export function Booking() {
                   type="submit"
                   className="w-2/3 py-4"
                   disabled={isSubmitting || !formData.agreeTerms}>
-                  {isSubmitting ? "Saving..." : "Book via WhatsApp"}
+                  {isSubmitting
+                    ? "Saving..."
+                    : submitError
+                      ? "Try Again"
+                      : "Book Appointment"}
                 </Button>
               </div>
             </form>
