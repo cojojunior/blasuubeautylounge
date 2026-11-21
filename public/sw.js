@@ -1,4 +1,4 @@
-const CACHE_NAME = "blasuu-cache-v2"; // Bumped version to force update
+const CACHE_NAME = "blasuu-cache-v3"; // Bumped to v3 to force update again
 const urlsToCache = ["/", "/index.html", "/manifest.json"];
 
 self.addEventListener("install", (event) => {
@@ -7,33 +7,39 @@ self.addEventListener("install", (event) => {
       return cache.addAll(urlsToCache);
     }),
   );
-  self.skipWaiting(); // Force the waiting service worker to become the active service worker
+  self.skipWaiting();
 });
 
 self.addEventListener("fetch", (event) => {
-  // Only handle GET requests (ignore POST, etc.)
+  // 1. Only handle GET requests (never cache POST/PUT/DELETE to Supabase)
   if (event.request.method !== "GET") return;
 
-  event.respondWith(
-    caches
-      .match(event.request)
-      .then((response) => {
-        // 1. Return cached response if found
-        if (response) {
-          return response;
-        }
+  // 2. Ignore Supabase API calls completely. Let them go straight to the network.
+  if (event.request.url.includes("supabase.co")) return;
 
-        // 2. If not in cache, fetch from network
-        return fetch(event.request).then((networkResponse) => {
-          // Optional: You can add logic here to cache new pages dynamically
-          return networkResponse;
-        });
-      })
-      .catch(() => {
-        // 3. If BOTH cache and network fail, return the cached index.html
-        // This allows React Router to handle the route client-side
+  // 3. Handle Page Navigations (React Router) - Network First, fallback to cache
+  if (event.request.mode === "navigate") {
+    event.respondWith(
+      fetch(event.request).catch(() => {
+        // If network fails (offline), serve the cached index.html
         return caches.match("/index.html");
       }),
+    );
+    return;
+  }
+
+  // 4. Handle Static Assets (Images, JS, CSS) - Cache First, fallback to network
+  event.respondWith(
+    caches.match(event.request).then((response) => {
+      // Return cached asset if we have it
+      if (response) return response;
+
+      // Otherwise fetch from network
+      return fetch(event.request).catch(() => {
+        // If it's an image and network fails, you can return a placeholder here
+        // For now, we just let it fail silently in the background
+      });
+    }),
   );
 });
 
@@ -51,6 +57,6 @@ self.addEventListener("activate", (event) => {
           }),
         );
       })
-      .then(() => self.clients.claim()), // Take control of all pages immediately
+      .then(() => self.clients.claim()),
   );
 });
