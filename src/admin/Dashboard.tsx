@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { Button } from "../components/ui/Button";
@@ -9,10 +9,13 @@ import {
   MessageCircle,
   Calendar,
   Trash2,
+  PlusCircle,
+  X,
 } from "lucide-react";
 import { formatCurrency } from "../lib/currency";
 import { formatDateDisplay, formatTimeDisplay } from "../lib/datetime";
 import { getCustomerWhatsAppLink } from "../lib/whatsapp";
+import { allServices as services } from "../content";
 
 export function Dashboard() {
   const [appointments, setAppointments] = useState<any[]>([]);
@@ -20,11 +23,22 @@ export function Dashboard() {
   const [isCalendarConnected, setIsCalendarConnected] = useState(false);
   const navigate = useNavigate();
 
+  // --- OFFLINE BOOKING STATE ---
+  const [isOfflineModalOpen, setIsOfflineModalOpen] = useState(false);
+  const [offlineForm, setOfflineForm] = useState({
+    name: "",
+    phone: "",
+    email: "",
+    serviceId: services[0].id,
+    date: "",
+    time: "09:00",
+  });
+
   useEffect(() => {
     fetchAppointments();
     checkCalendarStatus();
 
-    let handled = false; // Prevents OAuth spam
+    let handled = false;
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (handled) return;
@@ -107,7 +121,6 @@ export function Dashboard() {
       .eq("id", id);
     if (error) return alert("Error updating status: " + error.message);
 
-    // Only sync to calendar if we are CONFIRMING the booking
     if (newStatus === "confirmed") {
       try {
         await supabase.functions.invoke("sync-booking-to-calendar", {
@@ -142,6 +155,63 @@ export function Dashboard() {
     window.open(getCustomerWhatsAppLink(phone, message), "_blank");
   };
 
+  // --- OFFLINE BOOKING SUBMIT ---
+  const handleOfflineSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+
+    const service = services.find((s) => s.id === offlineForm.serviceId);
+    if (!service) return;
+
+    const totalPrice = service.price;
+    const requiredDeposit = Math.round(totalPrice * 0.25);
+
+    try {
+      // 1. Insert directly into Supabase
+      const { data, error } = await supabase
+        .from("appointments")
+        .insert({
+          service_id: service.id,
+          service_name: service.name,
+          appointment_date: offlineForm.date, // HTML date input provides YYYY-MM-DD
+          appointment_time: offlineForm.time,
+          customer_name: offlineForm.name,
+          customer_email: offlineForm.email || "no-email@blasuu.com",
+          customer_phone: offlineForm.phone,
+          total_price: totalPrice,
+          deposit_amount: requiredDeposit,
+          status: "confirmed", // Automatically confirmed
+          booking_source: "offline", // Tag as offline
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // 2. Sync to Google Calendar
+      await supabase.functions.invoke("sync-booking-to-calendar", {
+        body: { appointment: { ...data, status: "confirmed" } },
+      });
+
+      alert("Offline booking added and synced to Calendar!");
+      setIsOfflineModalOpen(false);
+
+      // Reset form
+      setOfflineForm({
+        name: "",
+        phone: "",
+        email: "",
+        serviceId: services[0].id,
+        date: "",
+        time: "09:00",
+      });
+
+      // Refresh the list
+      fetchAppointments();
+    } catch (err: any) {
+      alert("Error adding offline booking: " + err.message);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white-soft p-4 md:p-8">
       <div className="max-w-6xl mx-auto">
@@ -154,6 +224,15 @@ export function Dashboard() {
           </div>
 
           <div className="flex items-center gap-2 md:gap-3">
+            {/* ADD WALK-IN BUTTON */}
+            <Button
+              variant="outline"
+              onClick={() => setIsOfflineModalOpen(true)}
+              className="text-burnt border-burnt/30 hover:bg-burnt/5 px-3 md:px-4">
+              <PlusCircle size={16} className="md:mr-2" />
+              <span className="hidden md:inline">Add Walk-in</span>
+            </Button>
+
             {!isCalendarConnected && (
               <Button
                 variant="outline"
@@ -207,6 +286,11 @@ export function Dashboard() {
                         ? "AWAITING PAYMENT"
                         : apt.status.toUpperCase()}
                     </span>
+                    {apt.booking_source === "offline" && (
+                      <span className="text-xs px-2 py-1 rounded-full bg-gray-200 text-gray-700">
+                        WALK-IN
+                      </span>
+                    )}
                   </div>
                   <p className="text-sm text-elephant-muted mb-1">
                     <strong>Service:</strong> {apt.service_name} (
@@ -220,15 +304,9 @@ export function Dashboard() {
                   <p className="text-sm text-elephant-muted mb-1">
                     <strong>Phone:</strong> {apt.customer_phone}
                   </p>
-                  {apt.payment_url && (
-                    <p className="text-sm text-burnt mb-1 mt-2">
-                      <strong>Payment Link Generated:</strong> Yes
-                    </p>
-                  )}
                 </div>
 
                 <div className="flex flex-col md:flex-row gap-2 md:items-center flex-shrink-0 border-t md:border-t-0 md:border-l border-elephant/10 pt-4 md:pt-0 md:pl-6">
-                  {/* Show Confirm for pending_payment OR pending */}
                   {(apt.status === "pending" ||
                     apt.status === "pending_payment") && (
                     <Button
@@ -239,7 +317,6 @@ export function Dashboard() {
                     </Button>
                   )}
 
-                  {/* Show Cancel & Chat for confirmed/pending */}
                   {apt.status !== "cancelled" && (
                     <>
                       <Button
@@ -262,7 +339,6 @@ export function Dashboard() {
                     </>
                   )}
 
-                  {/* Show Delete for cancelled OR pending_payment */}
                   {(apt.status === "cancelled" ||
                     apt.status === "pending_payment") && (
                     <Button
@@ -279,6 +355,106 @@ export function Dashboard() {
           </div>
         )}
       </div>
+
+      {/* OFFLINE BOOKING MODAL */}
+      {isOfflineModalOpen && (
+        <div className="fixed inset-0 bg-elephant/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white-pure rounded-2xl p-6 w-full max-w-md shadow-xl relative animate-fade-in">
+            <button
+              onClick={() => setIsOfflineModalOpen(false)}
+              className="absolute top-4 right-4 text-elephant-muted hover:text-elephant">
+              <X size={20} />
+            </button>
+            <h2 className="text-xl font-serif text-elephant mb-4">
+              Add Walk-in Booking
+            </h2>
+
+            <form onSubmit={handleOfflineSubmit} className="space-y-4">
+              <input
+                required
+                type="text"
+                placeholder="Customer Name"
+                className="w-full p-3 border border-elephant/20 rounded-xl bg-white-soft text-sm"
+                value={offlineForm.name}
+                onChange={(e) =>
+                  setOfflineForm({ ...offlineForm, name: e.target.value })
+                }
+              />
+
+              <input
+                required
+                type="tel"
+                placeholder="Phone Number"
+                className="w-full p-3 border border-elephant/20 rounded-xl bg-white-soft text-sm"
+                value={offlineForm.phone}
+                onChange={(e) =>
+                  setOfflineForm({ ...offlineForm, phone: e.target.value })
+                }
+              />
+
+              <input
+                type="email"
+                placeholder="Email (Optional)"
+                className="w-full p-3 border border-elephant/20 rounded-xl bg-white-soft text-sm"
+                value={offlineForm.email}
+                onChange={(e) =>
+                  setOfflineForm({ ...offlineForm, email: e.target.value })
+                }
+              />
+
+              <select
+                className="w-full p-3 border border-elephant/20 rounded-xl bg-white-soft text-sm"
+                value={offlineForm.serviceId}
+                onChange={(e) =>
+                  setOfflineForm({ ...offlineForm, serviceId: e.target.value })
+                }>
+                {services.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name} - {formatCurrency(s.price)}
+                  </option>
+                ))}
+              </select>
+
+              <div className="flex gap-2">
+                <input
+                  required
+                  type="date"
+                  className="w-1/2 p-3 border border-elephant/20 rounded-xl bg-white-soft text-sm"
+                  value={offlineForm.date}
+                  onChange={(e) =>
+                    setOfflineForm({ ...offlineForm, date: e.target.value })
+                  }
+                />
+
+                <select
+                  className="w-1/2 p-3 border border-elephant/20 rounded-xl bg-white-soft text-sm"
+                  value={offlineForm.time}
+                  onChange={(e) =>
+                    setOfflineForm({ ...offlineForm, time: e.target.value })
+                  }>
+                  {[
+                    "09:00",
+                    "10:00",
+                    "11:00",
+                    "13:00",
+                    "14:00",
+                    "15:00",
+                    "16:00",
+                  ].map((t) => (
+                    <option key={t} value={t}>
+                      {t}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <Button type="submit" className="w-full py-3 mt-4">
+                Save & Sync to Calendar
+              </Button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
