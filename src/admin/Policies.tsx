@@ -47,7 +47,7 @@ export function Policies() {
   if (loading) return <div className="p-8">Loading policies...</div>;
 
   return (
-    <div className="p-8 max-w-4xl mx-auto">
+    <div className="max-w-4xl mx-auto">
       <h1 className="text-2xl font-serif text-elephant mb-2">Policy Editor</h1>
       <p className="text-sm text-elephant-muted mb-8">
         Update the legal text for your website without touching the code.
@@ -57,8 +57,8 @@ export function Policies() {
         {policies.map((policy) => (
           <div
             key={policy.id}
-            className="bg-white-pure p-6 rounded-2xl border border-elephant/10 shadow-sm">
-            <div className="flex justify-between items-center mb-4">
+            className="bg-white-pure p-6 rounded-2xl border border-elephant/10 shadow-sm overflow-hidden">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-elephant/5 rounded-lg text-elephant">
                   <FileText size={20} />
@@ -84,7 +84,7 @@ export function Policies() {
                   value={editContent}
                   onChange={(e) => setEditContent(e.target.value)}
                 />
-                <div className="flex justify-end gap-2 mt-4">
+                <div className="flex flex-wrap justify-end gap-2 mt-4">
                   <Button variant="outline" onClick={() => setEditingId(null)}>
                     Cancel
                   </Button>
@@ -97,7 +97,7 @@ export function Policies() {
                 </div>
               </div>
             ) : (
-              <div className="text-sm text-elephant-muted bg-white-soft p-4 rounded-xl whitespace-pre-wrap max-h-[200px] overflow-y-auto">
+              <div className="text-sm text-elephant-muted bg-white-soft p-4 rounded-xl whitespace-pre-wrap max-h-[300px] overflow-y-auto">
                 {policy.content}
               </div>
             )}
