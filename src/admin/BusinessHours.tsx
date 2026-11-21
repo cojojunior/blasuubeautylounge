@@ -13,7 +13,7 @@ export function BusinessHours() {
 
   // --- FETCH BLOCKED DATES ---
   const fetchBlockedDates = async () => {
-    // We only fetch dates where blocked_time is null (whole days)
+    // Fetch only "Whole Day" blocks (where blocked_time is null)
     const { data, error } = await supabase
       .from("blocked_slots")
       .select("id, blocked_date")
@@ -42,7 +42,7 @@ export function BusinessHours() {
 
     setIsSubmitting(true);
 
-    // We use the secure RPC function to bypass RLS for inserting
+    // Use secure RPC to bypass RLS for inserting
     const { error } = await supabase.rpc("admin_add_block", {
       p_date: newDate,
       p_time: null, // Null time means the whole day is blocked
@@ -62,10 +62,10 @@ export function BusinessHours() {
   const handleDelete = async (id: string) => {
     if (!window.confirm("Are you sure you want to unblock this date?")) return;
 
-    const { error } = await supabase
-      .from("blocked_slots")
-      .delete()
-      .eq("id", id);
+    // ⚠️ FIX: Use secure RPC to bypass RLS for deleting
+    const { error } = await supabase.rpc("admin_delete_block", {
+      p_id: id,
+    });
 
     if (error) {
       alert("Error unblocking date: " + error.message);

@@ -46,10 +46,10 @@ export function BlockedSlots() {
 
   const handleDelete = async (id: string) => {
     if (!window.confirm("Remove this block?")) return;
-    const { error } = await supabase
-      .from("blocked_slots")
-      .delete()
-      .eq("id", id);
+
+    // ⚠️ FIX: Use secure RPC to bypass RLS for deleting
+    const { error } = await supabase.rpc("admin_delete_block", { p_id: id });
+
     if (!error) fetchBlockedSlots();
     else alert("Error deleting: " + error.message);
   };
