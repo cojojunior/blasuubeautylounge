@@ -194,7 +194,7 @@ export function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-white-soft p-4 md:p-8">
+    <>
       <div className="max-w-6xl mx-auto">
         {/* --- HEADER --- */}
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 pb-4 border-b border-elephant/10 gap-4">
@@ -455,6 +455,6 @@ export function Dashboard() {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }

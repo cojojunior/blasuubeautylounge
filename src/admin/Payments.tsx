@@ -94,71 +94,89 @@ export function Payments() {
       </div>
 
       {/* Payment Table */}
+      {/* Payment Table */}
       <div className="bg-white-pure rounded-2xl border border-elephant/10 overflow-hidden">
-        <table className="w-full text-left text-sm">
-          <thead className="bg-elephant/5 border-b border-elephant/10">
-            <tr>
-              <th className="p-4 font-semibold">Date</th>
-              <th className="p-4 font-semibold">Customer</th>
-              <th className="p-4 font-semibold">Service</th>
-              <th className="p-4 font-semibold">Status</th>
-              <th className="p-4 font-semibold text-right">Total</th>
-              <th className="p-4 font-semibold text-right">Deposit</th>
-              <th className="p-4 font-semibold text-right">Balance</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-elephant/10">
-            {payments.length === 0 ? (
+        {/* The overflow-x-auto class makes it scrollable horizontally on mobile */}
+        <div className="overflow-x-auto w-full">
+          <table className="w-full text-left text-sm min-w-[800px]">
+            <thead className="bg-elephant/5 border-b border-elephant/10">
               <tr>
-                <td colSpan={7} className="p-8 text-center text-elephant-muted">
-                  No payment records yet.
-                </td>
+                <th className="p-4 font-semibold whitespace-nowrap">Date</th>
+                <th className="p-4 font-semibold whitespace-nowrap">
+                  Customer
+                </th>
+                <th className="p-4 font-semibold whitespace-nowrap">Service</th>
+                <th className="p-4 font-semibold whitespace-nowrap">Status</th>
+                <th className="p-4 font-semibold text-right whitespace-nowrap">
+                  Total
+                </th>
+                <th className="p-4 font-semibold text-right whitespace-nowrap">
+                  Deposit
+                </th>
+                <th className="p-4 font-semibold text-right whitespace-nowrap">
+                  Balance
+                </th>
               </tr>
-            ) : (
-              payments.map((apt) => {
-                const balance =
-                  Number(apt.total_price) -
-                  (apt.status === "confirmed" ? Number(apt.deposit_amount) : 0);
-                return (
-                  <tr key={apt.id} className="hover:bg-elephant/5">
-                    <td className="p-4 whitespace-nowrap text-elephant-muted">
-                      {formatDateDisplay(apt.created_at.split("T")[0])}
-                    </td>
-                    <td className="p-4 font-medium">{apt.customer_name}</td>
-                    <td className="p-4 text-elephant-muted">
-                      {apt.service_name}
-                    </td>
-                    <td className="p-4">
-                      <span
-                        className={`text-xs px-2 py-1 rounded-full ${
-                          apt.status === "confirmed"
-                            ? "bg-green-100 text-green-700"
-                            : apt.status === "pending_payment"
-                              ? "bg-blue-100 text-blue-700"
-                              : "bg-gray-100 text-gray-700"
-                        }`}>
-                        {apt.status === "pending_payment"
-                          ? "UNPAID"
-                          : apt.status.toUpperCase()}
-                      </span>
-                    </td>
-                    <td className="p-4 text-right">
-                      {formatCurrency(apt.total_price)}
-                    </td>
-                    <td className="p-4 text-right text-green-600 font-medium">
-                      {apt.status === "confirmed"
-                        ? formatCurrency(apt.deposit_amount)
-                        : "-"}
-                    </td>
-                    <td className="p-4 text-right text-elephant-muted">
-                      {formatCurrency(balance)}
-                    </td>
-                  </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-elephant/10">
+              {payments.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={7}
+                    className="p-8 text-center text-elephant-muted">
+                    No payment records yet.
+                  </td>
+                </tr>
+              ) : (
+                payments.map((apt) => {
+                  const balance =
+                    Number(apt.total_price) -
+                    (apt.status === "confirmed"
+                      ? Number(apt.deposit_amount)
+                      : 0);
+                  return (
+                    <tr key={apt.id} className="hover:bg-elephant/5">
+                      <td className="p-4 whitespace-nowrap text-elephant-muted">
+                        {formatDateDisplay(apt.created_at.split("T")[0])}
+                      </td>
+                      <td className="p-4 font-medium whitespace-nowrap">
+                        {apt.customer_name}
+                      </td>
+                      <td className="p-4 text-elephant-muted whitespace-nowrap">
+                        {apt.service_name}
+                      </td>
+                      <td className="p-4 whitespace-nowrap">
+                        <span
+                          className={`text-xs px-2 py-1 rounded-full ${
+                            apt.status === "confirmed"
+                              ? "bg-green-100 text-green-700"
+                              : apt.status === "pending_payment"
+                                ? "bg-blue-100 text-blue-700"
+                                : "bg-gray-100 text-gray-700"
+                          }`}>
+                          {apt.status === "pending_payment"
+                            ? "UNPAID"
+                            : apt.status.toUpperCase()}
+                        </span>
+                      </td>
+                      <td className="p-4 text-right whitespace-nowrap">
+                        {formatCurrency(apt.total_price)}
+                      </td>
+                      <td className="p-4 text-right text-green-600 font-medium whitespace-nowrap">
+                        {apt.status === "confirmed"
+                          ? formatCurrency(apt.deposit_amount)
+                          : "-"}
+                      </td>
+                      <td className="p-4 text-right text-elephant-muted whitespace-nowrap">
+                        {formatCurrency(balance)}
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

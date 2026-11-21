@@ -21,25 +21,21 @@ export function AdminLayout() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    // 1. Change the manifest to the admin version
     const manifestLink = document.querySelector('link[rel="manifest"]');
     const originalManifest =
       manifestLink?.getAttribute("href") || "/manifest.json";
     if (manifestLink) manifestLink.setAttribute("href", "/admin-manifest.json");
 
-    // 2. Change the theme color to Burnt Orange for the admin app
     const themeMeta = document.querySelector('meta[name="theme-color"]');
     const originalTheme = themeMeta?.getAttribute("content") || "#2E2E2E";
     if (themeMeta) themeMeta.setAttribute("content", "#C6511B");
 
-    // Cleanup: revert back to public settings when leaving admin
     return () => {
       if (manifestLink) manifestLink.setAttribute("href", originalManifest);
       if (themeMeta) themeMeta.setAttribute("content", originalTheme);
     };
   }, []);
 
-  // Close mobile menu when route changes
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [location.pathname]);
@@ -61,35 +57,26 @@ export function AdminLayout() {
   ];
 
   return (
-    <div className="min-h-screen bg-elephant/5 flex flex-col md:flex-row">
-      {/* --- MOBILE HEADER --- */}
-      <div className="md:hidden bg-white-pure border-b border-elephant/10 p-4 flex justify-between items-center sticky top-0 z-50">
-        <h1 className="text-xl font-serif text-elephant">Blasuu Admin</h1>
-        <button
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="p-2 text-elephant">
-          {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
-      </div>
+    <div className="flex h-screen overflow-hidden bg-elephant/5">
+      {/* --- MOBILE SIDEBAR OVERLAY --- */}
+      {isMobileMenuOpen && (
+        <div
+          className="fixed inset-0 bg-elephant/50 z-40 lg:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
 
-      {/* --- SIDEBAR (Desktop) & SLIDE-OUT MENU (Mobile) --- */}
+      {/* --- SIDEBAR --- */}
       <aside
-        className={`fixed md:sticky top-0 left-0 h-screen w-64 bg-white-pure border-r border-elephant/10 flex-col z-40 transition-transform duration-300 ease-in-out ${
-          isMobileMenuOpen
-            ? "translate-x-0 flex"
-            : "-translate-x-full hidden md:flex"
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white-pure border-r border-elephant/10 flex flex-col transform transition-transform duration-300 lg:static lg:translate-x-0 ${
+          isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         }`}>
-        {/* Desktop Logo */}
-        <div className="hidden md:block p-6 border-b border-elephant/10">
+        <div className="p-6 border-b border-elephant/10 flex justify-between items-center">
           <h1 className="text-xl font-serif text-elephant">Blasuu Admin</h1>
-        </div>
-
-        {/* Mobile Close Button */}
-        <div className="md:hidden p-4 flex justify-end">
           <button
             onClick={() => setIsMobileMenuOpen(false)}
-            className="p-2 text-elephant">
-            <X size={24} />
+            className="lg:hidden text-elephant-muted hover:text-elephant">
+            <X size={20} />
           </button>
         </div>
 
@@ -123,17 +110,22 @@ export function AdminLayout() {
         </div>
       </aside>
 
-      {/* --- MOBILE OVERLAY --- */}
-      {isMobileMenuOpen && (
-        <div
-          className="fixed inset-0 bg-elephant/50 z-30 md:hidden"
-          onClick={() => setIsMobileMenuOpen(false)}
-        />
-      )}
+      {/* --- MAIN CONTENT --- */}
+      <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        {/* Mobile Header */}
+        <header className="lg:hidden bg-white-pure border-b border-elephant/10 p-4 flex items-center gap-4 sticky top-0 z-30">
+          <button
+            onClick={() => setIsMobileMenuOpen(true)}
+            className="p-2 -ml-2 text-elephant">
+            <Menu size={24} />
+          </button>
+          <h1 className="text-lg font-serif text-elephant">Admin</h1>
+        </header>
 
-      {/* --- MAIN CONTENT AREA --- */}
-      <main className="flex-1 overflow-x-hidden">
-        <Outlet />
+        {/* Scrollable Page Content */}
+        <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-8">
+          <Outlet />
+        </div>
       </main>
     </div>
   );
