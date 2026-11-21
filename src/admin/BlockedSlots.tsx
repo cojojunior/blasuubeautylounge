@@ -25,9 +25,13 @@ export function BlockedSlots() {
 
   const handleAdd = async (e: FormEvent) => {
     e.preventDefault();
+
+    // Ensure empty string becomes NULL for the database (Whole Day)
+    const timeToBlock = formData.time === "" ? null : formData.time;
+
     const { error } = await supabase.from("blocked_slots").insert({
       blocked_date: formData.date,
-      blocked_time: formData.time || null, // null means the whole day is blocked
+      blocked_time: timeToBlock,
       reason: formData.reason,
     });
 
@@ -49,7 +53,7 @@ export function BlockedSlots() {
   };
 
   return (
-    <div className="p-8 max-w-5xl mx-auto">
+    <div className="max-w-5xl mx-auto">
       <h1 className="text-2xl font-serif text-elephant mb-6">
         Blocked Slots & Holidays
       </h1>

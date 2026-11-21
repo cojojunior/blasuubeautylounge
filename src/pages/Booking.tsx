@@ -36,6 +36,7 @@ export function Booking() {
   );
 
   const [bookedSlots, setBookedSlots] = useState<string[]>([]);
+  const [blockedTimes, setBlockedTimes] = useState<string[]>([]);
   const [fullyBookedDates, setFullyBookedDates] = useState<string[]>([]);
   const [isLoadingSlots, setIsLoadingSlots] = useState(false);
 
@@ -89,12 +90,10 @@ export function Booking() {
     const firstDay = getFirstDayOfMonth(year, month);
     const days = [];
 
-    // Empty slots for days before the 1st
     for (let i = 0; i < firstDay; i++) {
       days.push(<div key={`empty-${i}`} className="h-12"></div>);
     }
 
-    // Actual day buttons
     for (let d = 1; d <= daysInMonth; d++) {
       const dateObj = new Date(year, month, d);
       const today = new Date();
@@ -133,7 +132,7 @@ export function Booking() {
     return days;
   };
 
-  // --- FETCH MONTH BOOKINGS (To grey out fully booked dates) ---
+  // --- FETCH MONTH BOOKINGS ---
   useEffect(() => {
     async function fetchMonthBookings() {
       const year = currentMonth.getFullYear();
@@ -142,54 +141,86 @@ export function Booking() {
       const firstDay = formatDateForDB(new Date(year, month, 1));
       const lastDay = formatDateForDB(new Date(year, month + 1, 0));
 
-      const { data, error } = await supabase
-        .from("booked_slots")
-        .select("appointment_date, appointment_time")
-        .gte("appointment_date", firstDay)
-        .lte("appointment_date", lastDay);
+      const [aptResult, blockResult] = await Promise.all([
+        supabase
+          .from("booked_slots")
+          .select("appointment_date")
+          .gte("appointment_date", firstDay)
+          .lte("appointment_date", lastDay),
+        supabase
+          .from("blocked_slots")
+          .select("blocked_date, blocked_time")
+          .gte("blocked_date", firstDay)
+          .lte("blocked_date", lastDay),
+      ]);
 
-      if (!error && data) {
+      const fullDatesSet = new Set<string>();
+
+      // Mark fully booked days
+      if (aptResult.data) {
         const bookingsByDate: Record<string, number> = {};
-        data.forEach((b) => {
+        aptResult.data.forEach((b) => {
           bookingsByDate[b.appointment_date] =
             (bookingsByDate[b.appointment_date] || 0) + 1;
         });
-
-        // If a date has all available times booked, disable the whole day
-        const fullDates = Object.keys(bookingsByDate).filter(
-          (date) => bookingsByDate[date] >= times.length,
-        );
-        setFullyBookedDates(fullDates);
+        Object.keys(bookingsByDate).forEach((date) => {
+          if (bookingsByDate[date] >= times.length) fullDatesSet.add(date);
+        });
       }
+
+      // Mark Whole Day blocks
+      if (blockResult.data) {
+        blockResult.data.forEach((b) => {
+          if (b.blocked_time === null || b.blocked_time === "") {
+            fullDatesSet.add(b.blocked_date);
+          }
+        });
+      }
+
+      setFullyBookedDates(Array.from(fullDatesSet));
     }
     fetchMonthBookings();
   }, [currentMonth]);
 
-  // --- FETCH BOOKED SLOTS (When a date is selected) ---
+  // --- FETCH SLOTS FOR SELECTED DATE ---
   useEffect(() => {
     if (!selectedDate) return;
 
-    async function fetchBookings() {
+    async function fetchSlots() {
       setIsLoadingSlots(true);
       const targetDate = formatDateForDB(selectedDate!);
 
-      const { data, error } = await supabase
-        .from("booked_slots")
-        .select("appointment_time")
-        .eq("appointment_date", targetDate);
+      const [bookedResult, blockedResult] = await Promise.all([
+        supabase
+          .from("booked_slots")
+          .select("appointment_time")
+          .eq("appointment_date", targetDate),
+        supabase
+          .from("blocked_slots")
+          .select("blocked_time")
+          .eq("blocked_date", targetDate)
+          .not("blocked_time", "is", null),
+      ]);
 
-      if (!error && data) {
-        // Format the time to "HH:MM" so it perfectly matches our array
-        const formattedSlots = data.map((b) =>
-          b.appointment_time.substring(0, 5),
+      if (bookedResult.data) {
+        setBookedSlots(
+          bookedResult.data.map((b) => b.appointment_time.substring(0, 5)),
         );
-        setBookedSlots(formattedSlots);
       } else {
         setBookedSlots([]);
       }
+
+      if (blockedResult.data) {
+        setBlockedTimes(
+          blockedResult.data.map((b) => b.blocked_time.substring(0, 5)),
+        );
+      } else {
+        setBlockedTimes([]);
+      }
+
       setIsLoadingSlots(false);
     }
-    fetchBookings();
+    fetchSlots();
   }, [selectedDate]);
 
   // --- SUBMIT HANDLER ---
@@ -238,8 +269,6 @@ export function Booking() {
       window.location.href = moolreData.url;
     } catch (error: any) {
       console.error("Booking Failed:", error);
-
-      // Handle double booking database error (Postgres code: 23P01)
       if (
         error.code === "23P01" ||
         error.message?.includes("prevent_double_booking")
@@ -247,18 +276,14 @@ export function Booking() {
         setSubmitError(
           "Sorry, this time slot was just booked by someone else. Please select a different time.",
         );
-      }
-      // Handle offline errors
-      else if (
+      } else if (
         error.message === "TypeError: Failed to fetch" ||
         !navigator.onLine
       ) {
         setSubmitError(
           "Network error: Please check your internet connection and try again.",
         );
-      }
-      // Handle other errors
-      else {
+      } else {
         setSubmitError(
           error.message || "Something went wrong. Please try again.",
         );
@@ -275,7 +300,6 @@ export function Booking() {
         url={`${siteConfig.url}/book`}
       />
       <div className="w-full max-w-lg bg-white-pure relative flex flex-col">
-        {/* --- HEADER --- */}
         <div className="sticky top-0 bg-white-pure z-20 px-6 py-4 border-b border-elephant/10 flex items-center justify-between">
           <button
             onClick={() => window.history.back()}
@@ -287,7 +311,6 @@ export function Booking() {
         </div>
 
         <div className="p-6 flex-1 overflow-y-auto">
-          {/* --- SERVICE SELECTION & CATEGORY TABS --- */}
           <div className="mb-8">
             <div className="flex justify-between items-center mb-3">
               <p className="text-xs text-elephant-muted uppercase tracking-wider">
@@ -365,7 +388,6 @@ export function Booking() {
 
           <div className="h-px w-full bg-elephant/10 mb-8"></div>
 
-          {/* --- DATE PICKER --- */}
           <div className="flex justify-between items-center mb-6">
             <div>
               <h2 className="text-2xl font-semibold text-elephant">
@@ -453,11 +475,9 @@ export function Booking() {
             {renderCalendar()}
           </div>
 
-          {/* --- TIME SLOTS --- */}
           {selectedDate && (
             <div className="animate-fade-in">
               <div className="h-px w-full bg-elephant/10 mb-8"></div>
-
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-semibold text-elephant">
                   Select time
@@ -469,7 +489,8 @@ export function Booking() {
 
               <div className="grid grid-cols-3 gap-3 mb-8">
                 {times.map((time) => {
-                  const isBooked = bookedSlots.includes(time);
+                  const isBooked =
+                    bookedSlots.includes(time) || blockedTimes.includes(time);
                   const isSelected = selectedTime === time;
                   const [hour, minute] = time.split(":");
                   const displayHour =
@@ -497,7 +518,6 @@ export function Booking() {
             </div>
           )}
 
-          {/* --- DETAILS FORM / CONFIRMATION --- */}
           {!showDetailsForm ? (
             <div className="mt-auto pt-4">
               <Button
