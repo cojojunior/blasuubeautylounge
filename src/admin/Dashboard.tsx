@@ -24,9 +24,12 @@ export function Dashboard() {
     fetchAppointments();
     checkCalendarStatus();
 
+    let handled = false; // Prevents OAuth spam
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        if (handled) return;
         if (event === "SIGNED_IN" && session?.provider_refresh_token) {
+          handled = true;
           const { error } = await supabase.functions.invoke(
             "save-calendar-token",
             {
@@ -104,6 +107,7 @@ export function Dashboard() {
       .eq("id", id);
     if (error) return alert("Error updating status: " + error.message);
 
+    // Only sync to calendar if we are CONFIRMING the booking
     if (newStatus === "confirmed") {
       try {
         await supabase.functions.invoke("sync-booking-to-calendar", {
@@ -196,7 +200,7 @@ export function Dashboard() {
                           : apt.status === "cancelled"
                             ? "bg-red-100 text-red-700"
                             : apt.status === "pending_payment"
-                              ? "bg-blue-100 text-blue-700" // NEW STATUS COLOR
+                              ? "bg-blue-100 text-blue-700"
                               : "bg-yellow-100 text-yellow-700"
                       }`}>
                       {apt.status === "pending_payment"
@@ -216,39 +220,47 @@ export function Dashboard() {
                   <p className="text-sm text-elephant-muted mb-1">
                     <strong>Phone:</strong> {apt.customer_phone}
                   </p>
+                  {apt.payment_url && (
+                    <p className="text-sm text-burnt mb-1 mt-2">
+                      <strong>Payment Link Generated:</strong> Yes
+                    </p>
+                  )}
                 </div>
 
                 <div className="flex flex-col md:flex-row gap-2 md:items-center flex-shrink-0 border-t md:border-t-0 md:border-l border-elephant/10 pt-4 md:pt-0 md:pl-6">
-                  {/* Show Confirm & Chat for confirmed/pending */}
-                  {apt.status !== "cancelled" &&
-                    apt.status !== "pending_payment" && (
-                      <>
-                        <Button
-                          size="sm"
-                          className="bg-green-600 hover:bg-green-700 text-white"
-                          onClick={() => updateStatus(apt.id, "confirmed", apt)}
-                          disabled={apt.status === "confirmed"}>
-                          <CheckCircle size={16} className="mr-2" /> Confirm
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="text-red-600 border-red-200 hover:bg-red-50"
-                          onClick={() => updateStatus(apt.id, "cancelled", apt)}
-                          disabled={apt.status === "cancelled"}>
-                          <XCircle size={16} className="mr-2" /> Cancel
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="text-green-600 border-green-200 hover:bg-green-50"
-                          onClick={() =>
-                            openWhatsApp(apt.customer_phone, apt.customer_name)
-                          }>
-                          <MessageCircle size={16} className="mr-2" /> Chat
-                        </Button>
-                      </>
-                    )}
+                  {/* Show Confirm for pending_payment OR pending */}
+                  {(apt.status === "pending" ||
+                    apt.status === "pending_payment") && (
+                    <Button
+                      size="sm"
+                      className="bg-green-600 hover:bg-green-700 text-white"
+                      onClick={() => updateStatus(apt.id, "confirmed", apt)}>
+                      <CheckCircle size={16} className="mr-2" /> Confirm
+                    </Button>
+                  )}
+
+                  {/* Show Cancel & Chat for confirmed/pending */}
+                  {apt.status !== "cancelled" && (
+                    <>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-red-600 border-red-200 hover:bg-red-50"
+                        onClick={() => updateStatus(apt.id, "cancelled", apt)}
+                        disabled={apt.status === "cancelled"}>
+                        <XCircle size={16} className="mr-2" /> Cancel
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-green-600 border-green-200 hover:bg-green-50"
+                        onClick={() =>
+                          openWhatsApp(apt.customer_phone, apt.customer_name)
+                        }>
+                        <MessageCircle size={16} className="mr-2" /> Chat
+                      </Button>
+                    </>
+                  )}
 
                   {/* Show Delete for cancelled OR pending_payment */}
                   {(apt.status === "cancelled" ||
