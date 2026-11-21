@@ -34,6 +34,10 @@ export function Dashboard() {
     time: "09:00",
   });
 
+  // State to track booked slots for the offline modal
+  const [bookedSlots, setBookedSlots] = useState<string[]>([]);
+
+  // --- INITIAL SETUP & AUTH LISTENER ---
   useEffect(() => {
     fetchAppointments();
     checkCalendarStatus();
@@ -67,6 +71,29 @@ export function Dashboard() {
     return () => authListener.subscription.unsubscribe();
   }, []);
 
+  // --- FETCH BOOKED SLOTS FOR OFFLINE MODAL ---
+  useEffect(() => {
+    if (!offlineForm.date) {
+      setBookedSlots([]);
+      return;
+    }
+
+    async function fetchBookedSlots() {
+      const { data, error } = await supabase
+        .from("booked_slots")
+        .select("appointment_time")
+        .eq("appointment_date", offlineForm.date);
+
+      if (!error && data) {
+        setBookedSlots(data.map((b) => b.appointment_time));
+      } else {
+        setBookedSlots([]);
+      }
+    }
+    fetchBookedSlots();
+  }, [offlineForm.date]);
+
+  // --- GOOGLE CALENDAR OAUTH ---
   const checkCalendarStatus = async () => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("calendar") === "connected") {
@@ -98,6 +125,7 @@ export function Dashboard() {
     if (error) console.error("OAuth error:", error);
   };
 
+  // --- FETCH APPOINTMENTS ---
   const fetchAppointments = async () => {
     const { data, error } = await supabase
       .from("appointments")
@@ -114,6 +142,7 @@ export function Dashboard() {
     navigate("/admin");
   };
 
+  // --- UPDATE STATUS & SYNC ---
   const updateStatus = async (id: string, newStatus: string, apt: any) => {
     const { error } = await supabase
       .from("appointments")
@@ -172,15 +201,15 @@ export function Dashboard() {
         .insert({
           service_id: service.id,
           service_name: service.name,
-          appointment_date: offlineForm.date, // HTML date input provides YYYY-MM-DD
+          appointment_date: offlineForm.date,
           appointment_time: offlineForm.time,
           customer_name: offlineForm.name,
           customer_email: offlineForm.email || "no-email@blasuu.com",
           customer_phone: offlineForm.phone,
           total_price: totalPrice,
           deposit_amount: requiredDeposit,
-          status: "confirmed", // Automatically confirmed
-          booking_source: "offline", // Tag as offline
+          status: "confirmed",
+          booking_source: "offline",
         })
         .select()
         .single();
@@ -215,6 +244,7 @@ export function Dashboard() {
   return (
     <div className="min-h-screen bg-white-soft p-4 md:p-8">
       <div className="max-w-6xl mx-auto">
+        {/* --- HEADER --- */}
         <header className="flex flex-row justify-between items-center mb-8 pb-4 border-b border-elephant/10">
           <div>
             <h1 className="text-2xl md:text-3xl font-serif text-elephant">
@@ -224,7 +254,6 @@ export function Dashboard() {
           </div>
 
           <div className="flex items-center gap-2 md:gap-3">
-            {/* ADD WALK-IN BUTTON */}
             <Button
               variant="outline"
               onClick={() => setIsOfflineModalOpen(true)}
@@ -253,6 +282,7 @@ export function Dashboard() {
           </div>
         </header>
 
+        {/* --- APPOINTMENTS LIST --- */}
         {loading ? (
           <p className="text-elephant-muted text-center py-20">
             Loading appointments...
@@ -306,6 +336,7 @@ export function Dashboard() {
                   </p>
                 </div>
 
+                {/* Action Buttons */}
                 <div className="flex flex-col md:flex-row gap-2 md:items-center flex-shrink-0 border-t md:border-t-0 md:border-l border-elephant/10 pt-4 md:pt-0 md:pl-6">
                   {(apt.status === "pending" ||
                     apt.status === "pending_payment") && (
@@ -356,7 +387,7 @@ export function Dashboard() {
         )}
       </div>
 
-      {/* OFFLINE BOOKING MODAL */}
+      {/* --- OFFLINE BOOKING MODAL --- */}
       {isOfflineModalOpen && (
         <div className="fixed inset-0 bg-elephant/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white-pure rounded-2xl p-6 w-full max-w-md shadow-xl relative animate-fade-in">
@@ -426,8 +457,6 @@ export function Dashboard() {
                     ),
                   )}
                 </select>
-
-                {/* Custom Dropdown Arrow */}
                 <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-elephant-muted">
                   <svg
                     className="fill-current h-4 w-4"
@@ -449,6 +478,7 @@ export function Dashboard() {
                   }
                 />
 
+                {/* Disables time slots that are already booked */}
                 <select
                   className="w-1/2 p-3 border border-elephant/20 rounded-xl bg-white-soft text-sm"
                   value={offlineForm.time}
@@ -463,11 +493,14 @@ export function Dashboard() {
                     "14:00",
                     "15:00",
                     "16:00",
-                  ].map((t) => (
-                    <option key={t} value={t}>
-                      {t}
-                    </option>
-                  ))}
+                  ].map((t) => {
+                    const isBooked = bookedSlots.includes(t);
+                    return (
+                      <option key={t} value={t} disabled={isBooked}>
+                        {t} {isBooked ? "(Booked)" : ""}
+                      </option>
+                    );
+                  })}
                 </select>
               </div>
 

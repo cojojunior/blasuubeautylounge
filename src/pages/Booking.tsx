@@ -26,8 +26,7 @@ export function Booking() {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [showMonthPicker, setShowMonthPicker] = useState(false);
-
-  // Set the default category to "Nails" (or the first real category) instead of "All"
+  
   const [selectedCategory, setSelectedCategory] = useState(
     categories[1] || "Nails",
   );
@@ -38,6 +37,7 @@ export function Booking() {
   );
 
   const [bookedSlots, setBookedSlots] = useState<string[]>([]);
+  const [fullyBookedDates, setFullyBookedDates] = useState<string[]>([]); // New State
   const [isLoadingSlots, setIsLoadingSlots] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -75,7 +75,7 @@ export function Booking() {
   const toggleService = (id: string) => {
     setSelectedServiceIds((prev) => {
       if (prev.includes(id)) {
-        if (prev.length === 1) return prev; // Prevent deselecting the last item
+        if (prev.length === 1) return prev; 
         return prev.filter((sId) => sId !== id);
       }
       return [...prev, id];
@@ -90,34 +90,36 @@ export function Booking() {
     const firstDay = getFirstDayOfMonth(year, month);
     const days = [];
 
-    // Add empty slots for days before the 1st of the month
     for (let i = 0; i < firstDay; i++) {
       days.push(<div key={`empty-${i}`} className="h-12"></div>);
     }
 
-    // Add the actual day buttons
     for (let d = 1; d <= daysInMonth; d++) {
       const dateObj = new Date(year, month, d);
       const today = new Date();
       today.setHours(0, 0, 0, 0);
 
       const isPast = dateObj < today;
-      const isSelected =
-        selectedDate?.toDateString() === dateObj.toDateString();
+      const dateString = formatDateForDB(dateObj);
+      const isFullyBooked = fullyBookedDates.includes(dateString);
+      const isDisabled = isPast || isFullyBooked;
+      
+      const isSelected = selectedDate?.toDateString() === dateObj.toDateString();
 
       days.push(
         <button
           key={d}
           type="button"
-          disabled={isPast}
+          disabled={isDisabled}
           onClick={() => {
+            if (isDisabled) return;
             setSelectedDate(dateObj);
             setSelectedTime("");
             setShowDetailsForm(false);
           }}
           className={`h-12 w-12 mx-auto rounded-full flex items-center justify-center text-sm font-medium transition-all ${
-            isPast
-              ? "text-elephant-muted/30 cursor-not-allowed"
+            isDisabled
+              ? "text-elephant-muted/30 line-through cursor-not-allowed"
               : isSelected
                 ? "bg-burnt text-white-pure shadow-md"
                 : "text-elephant hover:bg-elephant/5"
@@ -129,7 +131,38 @@ export function Booking() {
     return days;
   };
 
-  // --- FETCH BOOKED SLOTS ---
+  // --- FETCH MONTH BOOKINGS (To grey out fully booked dates) ---
+  useEffect(() => {
+    async function fetchMonthBookings() {
+      const year = currentMonth.getFullYear();
+      const month = currentMonth.getMonth();
+      
+      const firstDay = formatDateForDB(new Date(year, month, 1));
+      const lastDay = formatDateForDB(new Date(year, month + 1, 0));
+
+      const { data, error } = await supabase
+        .from("booked_slots")
+        .select("appointment_date, appointment_time")
+        .gte("appointment_date", firstDay)
+        .lte("appointment_date", lastDay);
+
+      if (!error && data) {
+        const bookingsByDate: Record<string, number> = {};
+        data.forEach((b) => {
+          bookingsByDate[b.appointment_date] = (bookingsByDate[b.appointment_date] || 0) + 1;
+        });
+
+        // If a date has 5 or more bookings (times.length), it's full
+        const fullDates = Object.keys(bookingsByDate).filter(
+          (date) => bookingsByDate[date] >= times.length
+        );
+        setFullyBookedDates(fullDates);
+      }
+    }
+    fetchMonthBookings();
+  }, [currentMonth]);
+
+  // --- FETCH BOOKED SLOTS (When a date is selected) ---
   useEffect(() => {
     if (!selectedDate) return;
 
@@ -159,11 +192,10 @@ export function Booking() {
     if (!selectedDate) return;
 
     setIsSubmitting(true);
-    setSubmitError(null); // Clear any previous errors
+    setSubmitError(null); 
     const dateString = formatDateForDB(selectedDate);
 
     try {
-      // 1. Save booking via secure RPC
       const { data: bookingRef, error } = await supabase.rpc("create_booking", {
         p_service_id: selectedServiceIds.join(", "),
         p_service_name: combinedServiceNames,
@@ -179,7 +211,6 @@ export function Booking() {
       if (error) throw error;
       if (!bookingRef) throw new Error("No booking reference returned.");
 
-      // 2. Generate Moolre payment link
       const { data: moolreData, error: moolreError } =
         await supabase.functions.invoke("create-moolre-link", {
           body: {
@@ -192,27 +223,26 @@ export function Booking() {
         });
 
       if (moolreError || !moolreData?.url) {
-        throw new Error(
-          "Moolre failed to generate a payment link. Please try again.",
-        );
+        throw new Error("Moolre failed to generate a payment link. Please try again.");
       }
 
-      // 3. Redirect to Moolre Checkout
       window.location.href = moolreData.url;
     } catch (error: any) {
       console.error("Booking Failed:", error);
 
-      // 4. Handle Connection Error
-      if (error.message === "TypeError: Failed to fetch" || !navigator.onLine) {
-        setSubmitError(
-          "Network error: Please check your internet connection and try again.",
-        );
-      } else {
-        setSubmitError(
-          error.message || "Something went wrong. Please try again.",
-        );
+      // Handle double booking database error (Postgres code: 23P01)
+      if (error.code === "23P01" || error.message?.includes("prevent_double_booking")) {
+        setSubmitError("Sorry, this time slot was just booked by someone else. Please select a different time.");
+      } 
+      // Handle offline errors
+      else if (error.message === "TypeError: Failed to fetch" || !navigator.onLine) {
+        setSubmitError("Network error: Please check your internet connection and try again.");
+      } 
+      // Handle other errors
+      else {
+        setSubmitError(error.message || "Something went wrong. Please try again.");
       }
-      setIsSubmitting(false); // Keep them on the form to retry
+      setIsSubmitting(false); 
     }
   };
 
@@ -224,6 +254,7 @@ export function Booking() {
         url={`${siteConfig.url}/book`}
       />
       <div className="w-full max-w-lg bg-white-pure relative flex flex-col">
+        
         {/* --- HEADER --- */}
         <div className="sticky top-0 bg-white-pure z-20 px-6 py-4 border-b border-elephant/10 flex items-center justify-between">
           <button
@@ -236,6 +267,7 @@ export function Booking() {
         </div>
 
         <div className="p-6 flex-1 overflow-y-auto">
+          
           {/* --- SERVICE SELECTION & CATEGORY TABS --- */}
           <div className="mb-8">
             <div className="flex justify-between items-center mb-3">
@@ -244,7 +276,6 @@ export function Booking() {
               </p>
             </div>
 
-            {/* Category Filter Tabs */}
             <div className="flex gap-2 overflow-x-auto pb-3 mb-2 custom-scrollbar">
               {categories
                 .filter((c) => c !== "All" && c !== "Special Packages")
@@ -252,7 +283,7 @@ export function Booking() {
                   <button
                     key={cat}
                     type="button"
-                    onClick={() => setSelectedCategory(cat)}
+                    onClick={() => setSelectedCategory(cat)} 
                     className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all border ${
                       selectedCategory === cat
                         ? "bg-burnt text-white-pure border-burnt"
@@ -263,7 +294,6 @@ export function Booking() {
                 ))}
             </div>
 
-            {/* Filtered Services List (Strict category filtering) */}
             <div className="grid grid-cols-1 gap-2 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
               {services
                 .filter((s) => s.category === selectedCategory)
@@ -306,7 +336,6 @@ export function Booking() {
                 })}
             </div>
 
-            {/* Selected Total Summary */}
             <div className="mt-4 p-3 bg-white-soft rounded-xl border border-elephant/10 flex justify-between text-sm">
               <span className="text-elephant-muted">Selected Total:</span>
               <span className="font-medium text-elephant">
@@ -337,7 +366,6 @@ export function Booking() {
             </button>
           </div>
 
-          {/* Month/Year Picker Dropdown */}
           {showMonthPicker && (
             <div className="bg-white-pure border border-elephant/10 rounded-2xl p-4 mb-6 shadow-lg absolute z-30 right-6 w-64">
               <div className="flex justify-between items-center mb-4">
@@ -393,7 +421,6 @@ export function Booking() {
             </div>
           )}
 
-          {/* Calendar Grid */}
           <div className="grid grid-cols-7 gap-1 mb-2 text-center">
             {["S", "M", "T", "W", "T", "F", "S"].map((day, i) => (
               <div
@@ -469,7 +496,6 @@ export function Booking() {
             <form
               onSubmit={handleSubmit}
               className="space-y-4 animate-fade-in pt-6 border-t border-elephant/10">
-              {/* ERROR DISPLAY */}
               {submitError && (
                 <div className="p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl flex items-start gap-3">
                   <WifiOff size={20} className="flex-shrink-0 mt-0.5" />
@@ -494,7 +520,6 @@ export function Booking() {
                 </div>
               </div>
 
-              {/* Deposit Summary */}
               <div className="bg-white-soft p-4 rounded-xl border border-elephant/10 mb-6 text-sm">
                 <div className="flex justify-between mb-1">
                   <span className="text-elephant-muted">
