@@ -26,7 +26,11 @@ export function Booking() {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [showMonthPicker, setShowMonthPicker] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState("All");
+
+  // Set the default category to "Nails" (or the first real category) instead of "All"
+  const [selectedCategory, setSelectedCategory] = useState(
+    categories[1] || "Nails",
+  );
 
   const [selectedTime, setSelectedTime] = useState<string>("");
   const [selectedServiceIds, setSelectedServiceIds] = useState<string[]>(
@@ -43,7 +47,7 @@ export function Booking() {
     agreeTerms: false,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null); // New state for error display
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [showDetailsForm, setShowDetailsForm] = useState(false);
   const [isPolicyModalOpen, setIsPolicyModalOpen] = useState(false);
 
@@ -71,7 +75,7 @@ export function Booking() {
   const toggleService = (id: string) => {
     setSelectedServiceIds((prev) => {
       if (prev.includes(id)) {
-        if (prev.length === 1) return prev;
+        if (prev.length === 1) return prev; // Prevent deselecting the last item
         return prev.filter((sId) => sId !== id);
       }
       return [...prev, id];
@@ -86,10 +90,12 @@ export function Booking() {
     const firstDay = getFirstDayOfMonth(year, month);
     const days = [];
 
+    // Add empty slots for days before the 1st of the month
     for (let i = 0; i < firstDay; i++) {
       days.push(<div key={`empty-${i}`} className="h-12"></div>);
     }
 
+    // Add the actual day buttons
     for (let d = 1; d <= daysInMonth; d++) {
       const dateObj = new Date(year, month, d);
       const today = new Date();
@@ -196,7 +202,7 @@ export function Booking() {
     } catch (error: any) {
       console.error("Booking Failed:", error);
 
-      // 4. Handle Connection Error (Fallback removed)
+      // 4. Handle Connection Error
       if (error.message === "TypeError: Failed to fetch" || !navigator.onLine) {
         setSubmitError(
           "Network error: Please check your internet connection and try again.",
@@ -238,6 +244,7 @@ export function Booking() {
               </p>
             </div>
 
+            {/* Category Filter Tabs */}
             <div className="flex gap-2 overflow-x-auto pb-3 mb-2 custom-scrollbar">
               {categories
                 .filter((c) => c !== "All" && c !== "Special Packages")
@@ -245,11 +252,7 @@ export function Booking() {
                   <button
                     key={cat}
                     type="button"
-                    onClick={() =>
-                      setSelectedCategory(
-                        selectedCategory === cat ? "All" : cat,
-                      )
-                    }
+                    onClick={() => setSelectedCategory(cat)}
                     className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all border ${
                       selectedCategory === cat
                         ? "bg-burnt text-white-pure border-burnt"
@@ -260,13 +263,10 @@ export function Booking() {
                 ))}
             </div>
 
+            {/* Filtered Services List (Strict category filtering) */}
             <div className="grid grid-cols-1 gap-2 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
               {services
-                .filter(
-                  (s) =>
-                    selectedCategory === "All" ||
-                    s.category === selectedCategory,
-                )
+                .filter((s) => s.category === selectedCategory)
                 .map((service) => {
                   const isSelected = selectedServiceIds.includes(service.id);
                   return (
@@ -306,6 +306,7 @@ export function Booking() {
                 })}
             </div>
 
+            {/* Selected Total Summary */}
             <div className="mt-4 p-3 bg-white-soft rounded-xl border border-elephant/10 flex justify-between text-sm">
               <span className="text-elephant-muted">Selected Total:</span>
               <span className="font-medium text-elephant">
@@ -336,6 +337,7 @@ export function Booking() {
             </button>
           </div>
 
+          {/* Month/Year Picker Dropdown */}
           {showMonthPicker && (
             <div className="bg-white-pure border border-elephant/10 rounded-2xl p-4 mb-6 shadow-lg absolute z-30 right-6 w-64">
               <div className="flex justify-between items-center mb-4">
@@ -391,6 +393,7 @@ export function Booking() {
             </div>
           )}
 
+          {/* Calendar Grid */}
           <div className="grid grid-cols-7 gap-1 mb-2 text-center">
             {["S", "M", "T", "W", "T", "F", "S"].map((day, i) => (
               <div
@@ -400,7 +403,6 @@ export function Booking() {
               </div>
             ))}
           </div>
-
           <div className="grid grid-cols-7 gap-y-2 gap-x-1 mb-8">
             {renderCalendar()}
           </div>
@@ -492,6 +494,7 @@ export function Booking() {
                 </div>
               </div>
 
+              {/* Deposit Summary */}
               <div className="bg-white-soft p-4 rounded-xl border border-elephant/10 mb-6 text-sm">
                 <div className="flex justify-between mb-1">
                   <span className="text-elephant-muted">
