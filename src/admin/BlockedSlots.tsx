@@ -26,13 +26,14 @@ export function BlockedSlots() {
   const handleAdd = async (e: FormEvent) => {
     e.preventDefault();
 
-    // Ensure empty string becomes NULL for the database (Whole Day)
+    // Convert "Whole Day" to null for the DB
     const timeToBlock = formData.time === "" ? null : formData.time;
 
-    const { error } = await supabase.from("blocked_slots").insert({
-      blocked_date: formData.date,
-      blocked_time: timeToBlock,
-      reason: formData.reason,
+    // Call the secure function we just created
+    const { error } = await supabase.rpc("admin_add_block", {
+      p_date: formData.date,
+      p_time: timeToBlock,
+      p_reason: formData.reason,
     });
 
     if (error) {
@@ -50,6 +51,7 @@ export function BlockedSlots() {
       .delete()
       .eq("id", id);
     if (!error) fetchBlockedSlots();
+    else alert("Error deleting: " + error.message);
   };
 
   return (
