@@ -36,8 +36,8 @@ export function Booking() {
   );
 
   const [bookedSlots, setBookedSlots] = useState<string[]>([]);
-  const [blockedTimes, setBlockedTimes] = useState<string[]>([]); // NEW: Admin blocks
-  const [fullyBookedDates, setFullyBookedDates] = useState<string[]>([]);
+  const [blockedTimes, setBlockedTimes] = useState<string[]>([]); // Admin partial day blocks
+  const [fullyBookedDates, setFullyBookedDates] = useState<string[]>([]); // Fully booked OR whole-day blocks
   const [isLoadingSlots, setIsLoadingSlots] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -103,6 +103,7 @@ export function Booking() {
 
       const isPast = dateObj < today;
       const dateString = formatDateForDB(dateObj);
+      // STRICT CHECK: Date is disabled if it's in the past OR if it's in the fullyBookedDates array
       const isFullyBooked = fullyBookedDates.includes(dateString);
       const isDisabled = isPast || isFullyBooked;
 
@@ -134,7 +135,7 @@ export function Booking() {
     return days;
   };
 
-  // --- FETCH MONTH BOOKINGS (To grey out fully booked dates) ---
+  // --- FETCH MONTH BOOKINGS (To grey out fully booked/blocked dates) ---
   useEffect(() => {
     async function fetchMonthBookings() {
       const year = currentMonth.getFullYear();
@@ -160,6 +161,7 @@ export function Booking() {
 
       const fullDatesSet = new Set<string>();
 
+      // 3. Mark fully booked days based on appointment count
       if (!error && aptData) {
         const bookingsByDate: Record<string, number> = {};
         aptData.forEach((b) => {
@@ -167,13 +169,12 @@ export function Booking() {
             (bookingsByDate[b.appointment_date] || 0) + 1;
         });
 
-        // If a date has all available times booked, disable the whole day
         Object.keys(bookingsByDate).forEach((date) => {
           if (bookingsByDate[date] >= times.length) fullDatesSet.add(date);
         });
       }
 
-      // 3. Mark admin-blocked whole days
+      // 4. Mark admin-blocked whole days
       if (blockData) {
         blockData.forEach((b) => fullDatesSet.add(b.blocked_date));
       }
@@ -197,19 +198,18 @@ export function Booking() {
         .select("appointment_time")
         .eq("appointment_date", targetDate);
 
-      // 2. Fetch admin blocked times (partial days)
+      // 2. Fetch admin blocked times (partial day blocks)
       const { data: blockedData } = await supabase
         .from("blocked_slots")
         .select("blocked_time")
         .eq("blocked_date", targetDate)
-        .not("blocked_time", "is", null); // Filter out whole day blocks
+        .not("blocked_time", "is", null);
 
       if (!error && bookedData) {
         // Format the time to "HH:MM" so it perfectly matches our array
-        const formattedSlots = bookedData.map((b) =>
-          b.appointment_time.substring(0, 5),
+        setBookedSlots(
+          bookedData.map((b) => b.appointment_time.substring(0, 5)),
         );
-        setBookedSlots(formattedSlots);
       } else {
         setBookedSlots([]);
       }
