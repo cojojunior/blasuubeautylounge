@@ -1,6 +1,6 @@
 import { useState, useEffect, type FormEvent } from "react";
 import { useSearchParams } from "react-router-dom";
-import { allServices as services } from "../content";
+import { allServices as services, categories } from "../content";
 import { supabase } from "../lib/supabase";
 import { Button } from "../components/ui/Button";
 import { ChevronLeft, ChevronRight, Loader2, Check } from "lucide-react";
@@ -17,9 +17,11 @@ export function Booking() {
   const [searchParams] = useSearchParams();
   const initialService = searchParams.get("service");
 
+  // --- STATE ---
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [showMonthPicker, setShowMonthPicker] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState("All"); // For the filter tabs
 
   const [selectedTime, setSelectedTime] = useState<string>("");
   const [selectedServiceIds, setSelectedServiceIds] = useState<string[]>(
@@ -39,10 +41,10 @@ export function Booking() {
   const [showDetailsForm, setShowDetailsForm] = useState(false);
   const [isPolicyModalOpen, setIsPolicyModalOpen] = useState(false);
 
+  // --- CALCULATIONS ---
   const selectedServices = services.filter((s) =>
     selectedServiceIds.includes(s.id),
   );
-
   const totalPrice = selectedServices.reduce(
     (sum, service) => sum + service.price,
     0,
@@ -54,6 +56,7 @@ export function Booking() {
     0,
   );
 
+  // --- CALENDAR HELPERS ---
   const getDaysInMonth = (year: number, month: number) =>
     new Date(year, month + 1, 0).getDate();
   const getFirstDayOfMonth = (year: number, month: number) =>
@@ -62,13 +65,14 @@ export function Booking() {
   const toggleService = (id: string) => {
     setSelectedServiceIds((prev) => {
       if (prev.includes(id)) {
-        if (prev.length === 1) return prev;
+        if (prev.length === 1) return prev; // Prevent deselecting the last service
         return prev.filter((sId) => sId !== id);
       }
       return [...prev, id];
     });
   };
 
+  // --- CALENDAR RENDER ---
   const renderCalendar = () => {
     const year = currentMonth.getFullYear();
     const month = currentMonth.getMonth();
@@ -76,10 +80,12 @@ export function Booking() {
     const firstDay = getFirstDayOfMonth(year, month);
     const days = [];
 
+    // Empty slots for days before the 1st
     for (let i = 0; i < firstDay; i++) {
       days.push(<div key={`empty-${i}`} className="h-12"></div>);
     }
 
+    // Actual day buttons
     for (let d = 1; d <= daysInMonth; d++) {
       const dateObj = new Date(year, month, d);
       const today = new Date();
@@ -113,6 +119,7 @@ export function Booking() {
     return days;
   };
 
+  // --- FETCH BOOKED SLOTS (When date changes) ---
   useEffect(() => {
     if (!selectedDate) return;
 
@@ -120,7 +127,7 @@ export function Booking() {
       setIsLoadingSlots(true);
       const targetDate = formatDateForDB(selectedDate!);
 
-      // FIX 1: Query the secure 'booked_slots' view instead of the appointments table
+      // Query the secure 'booked_slots' view
       const { data, error } = await supabase
         .from("booked_slots")
         .select("appointment_time")
@@ -136,18 +143,19 @@ export function Booking() {
     fetchBookings();
   }, [selectedDate]);
 
+  // --- SUBMIT HANDLER ---
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!formData.agreeTerms) return alert("You must agree to the terms.");
     if (!selectedDate) return;
 
     setIsSubmitting(true);
+    const dateString = formatDateForDB(selectedDate);
+    let bookingRef = "";
 
     try {
-      const dateString = formatDateForDB(selectedDate);
-
-      // FIX 2: Use the secure RPC to insert the booking
-      const { data: bookingRef, error } = await supabase.rpc("create_booking", {
+      // 1. Save booking via secure RPC
+      const { data, error } = await supabase.rpc("create_booking", {
         p_service_id: selectedServiceIds.join(", "),
         p_service_name: combinedServiceNames,
         p_appointment_date: dateString,
@@ -160,7 +168,9 @@ export function Booking() {
       });
 
       if (error) throw error;
-      if (!bookingRef) throw new Error("No booking reference returned.");
+      if (!data) throw new Error("No booking reference returned.");
+
+      bookingRef = data;
 
       // 2. Generate Moolre payment link
       const { data: moolreData, error: moolreError } =
@@ -175,25 +185,31 @@ export function Booking() {
         });
 
       if (moolreError || !moolreData?.url) {
-        // Fallback: If Moolre fails, let them book via WhatsApp anyway
-        const message = generateBookingMessage(
-          bookingRef.split("-")[0].toUpperCase(),
-          combinedServiceNames,
-          dateString,
-          selectedTime,
-          formData.name,
-          requiredDeposit,
-        );
-        window.location.href = getWhatsAppLink(message);
-        return;
+        throw new Error("Moolre failed to generate a payment link.");
       }
 
       // 3. Redirect to Moolre Checkout
       window.location.href = moolreData.url;
     } catch (error: any) {
-      // Show the actual error in the console for debugging
       console.error("Booking Failed:", error);
-      alert("Error saving booking: " + (error.message || "Please try again."));
+
+      // 🚨 OFFLINE / ERROR FALLBACK 🚨
+      // If DB fails or internet drops, send them to WhatsApp with details
+      const fallbackRef = bookingRef
+        ? bookingRef.split("-")[0].toUpperCase()
+        : "OFFLINE-" + Math.floor(Math.random() * 10000);
+
+      const message = generateBookingMessage(
+        fallbackRef,
+        combinedServiceNames,
+        dateString,
+        selectedTime,
+        formData.name,
+        requiredDeposit,
+      );
+
+      window.location.href = getWhatsAppLink(message);
+    } finally {
       setIsSubmitting(false);
     }
   };
@@ -206,6 +222,7 @@ export function Booking() {
         url={`${siteConfig.url}/book`}
       />
       <div className="w-full max-w-lg bg-white-pure relative flex flex-col">
+        {/* --- HEADER --- */}
         <div className="sticky top-0 bg-white-pure z-20 px-6 py-4 border-b border-elephant/10 flex items-center justify-between">
           <button
             onClick={() => window.history.back()}
@@ -217,48 +234,82 @@ export function Booking() {
         </div>
 
         <div className="p-6 flex-1 overflow-y-auto">
+          {/* --- SERVICE SELECTION & CATEGORY TABS --- */}
           <div className="mb-8">
-            <p className="text-xs text-elephant-muted uppercase tracking-wider mb-3">
-              Select Services (You can choose multiple)
-            </p>
-            <div className="grid grid-cols-1 gap-2 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-              {services.map((service) => {
-                const isSelected = selectedServiceIds.includes(service.id);
-                return (
+            <div className="flex justify-between items-center mb-3">
+              <p className="text-xs text-elephant-muted uppercase tracking-wider">
+                Select Services (You can choose multiple)
+              </p>
+            </div>
+
+            {/* Category Filter Tabs */}
+            <div className="flex gap-2 overflow-x-auto pb-3 mb-2 custom-scrollbar">
+              {categories
+                .filter((c) => c !== "All" && c !== "Special Packages")
+                .map((cat) => (
                   <button
-                    key={service.id}
+                    key={cat}
                     type="button"
-                    onClick={() => toggleService(service.id)}
-                    className={`flex items-center justify-between p-3 rounded-xl border text-left transition-all ${
-                      isSelected
-                        ? "bg-burnt/5 border-burnt"
-                        : "bg-white-pure border-elephant/10 hover:border-burnt/30"
+                    onClick={() =>
+                      setSelectedCategory(
+                        selectedCategory === cat ? "All" : cat,
+                      )
+                    }
+                    className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all border ${
+                      selectedCategory === cat
+                        ? "bg-burnt text-white-pure border-burnt"
+                        : "bg-white-pure text-elephant-muted border-elephant/20 hover:border-burnt/50"
                     }`}>
-                    <div>
-                      <p className="font-medium text-sm text-elephant">
-                        {service.name}
-                      </p>
-                      <p className="text-xs text-elephant-muted">
-                        {formatCurrency(service.price)} •{" "}
-                        {service.durationMinutes} mins
-                      </p>
-                      {service.note && (
-                        <p className="text-[10px] text-burnt mt-1">
-                          {service.note}
-                        </p>
-                      )}
-                    </div>
-                    <div
-                      className={`w-6 h-6 rounded-full flex items-center justify-center border ${
-                        isSelected
-                          ? "bg-burnt border-burnt text-white-pure"
-                          : "border-elephant/20"
-                      }`}>
-                      {isSelected && <Check size={14} />}
-                    </div>
+                    {cat}
                   </button>
-                );
-              })}
+                ))}
+            </div>
+
+            {/* Filtered Services List */}
+            <div className="grid grid-cols-1 gap-2 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
+              {services
+                .filter(
+                  (s) =>
+                    selectedCategory === "All" ||
+                    s.category === selectedCategory,
+                )
+                .map((service) => {
+                  const isSelected = selectedServiceIds.includes(service.id);
+                  return (
+                    <button
+                      key={service.id}
+                      type="button"
+                      onClick={() => toggleService(service.id)}
+                      className={`flex items-center justify-between p-3 rounded-xl border text-left transition-all ${
+                        isSelected
+                          ? "bg-burnt/5 border-burnt"
+                          : "bg-white-pure border-elephant/10 hover:border-burnt/30"
+                      }`}>
+                      <div>
+                        <p className="font-medium text-sm text-elephant">
+                          {service.name}
+                        </p>
+                        <p className="text-xs text-elephant-muted">
+                          {formatCurrency(service.price)} •{" "}
+                          {service.durationMinutes} mins
+                        </p>
+                        {service.note && (
+                          <p className="text-[10px] text-burnt mt-1">
+                            {service.note}
+                          </p>
+                        )}
+                      </div>
+                      <div
+                        className={`w-6 h-6 rounded-full flex items-center justify-center border ${
+                          isSelected
+                            ? "bg-burnt border-burnt text-white-pure"
+                            : "border-elephant/20"
+                        }`}>
+                        {isSelected && <Check size={14} />}
+                      </div>
+                    </button>
+                  );
+                })}
             </div>
 
             <div className="mt-4 p-3 bg-white-soft rounded-xl border border-elephant/10 flex justify-between text-sm">
@@ -271,6 +322,7 @@ export function Booking() {
 
           <div className="h-px w-full bg-elephant/10 mb-8"></div>
 
+          {/* --- DATE PICKER --- */}
           <div className="flex justify-between items-center mb-6">
             <div>
               <h2 className="text-2xl font-semibold text-elephant">
@@ -290,6 +342,7 @@ export function Booking() {
             </button>
           </div>
 
+          {/* Month/Year Picker Dropdown */}
           {showMonthPicker && (
             <div className="bg-white-pure border border-elephant/10 rounded-2xl p-4 mb-6 shadow-lg absolute z-30 right-6 w-64">
               <div className="flex justify-between items-center mb-4">
@@ -345,6 +398,7 @@ export function Booking() {
             </div>
           )}
 
+          {/* Calendar Grid */}
           <div className="grid grid-cols-7 gap-1 mb-2 text-center">
             {["S", "M", "T", "W", "T", "F", "S"].map((day, i) => (
               <div
@@ -354,11 +408,11 @@ export function Booking() {
               </div>
             ))}
           </div>
-
           <div className="grid grid-cols-7 gap-y-2 gap-x-1 mb-8">
             {renderCalendar()}
           </div>
 
+          {/* --- TIME SLOTS --- */}
           {selectedDate && (
             <div className="animate-fade-in">
               <div className="h-px w-full bg-elephant/10 mb-8"></div>
@@ -402,6 +456,7 @@ export function Booking() {
             </div>
           )}
 
+          {/* --- DETAILS FORM / CONFIRMATION --- */}
           {!showDetailsForm ? (
             <div className="mt-auto pt-4">
               <Button
@@ -433,6 +488,7 @@ export function Booking() {
                 </div>
               </div>
 
+              {/* Deposit Summary */}
               <div className="bg-white-soft p-4 rounded-xl border border-elephant/10 mb-6 text-sm">
                 <div className="flex justify-between mb-1">
                   <span className="text-elephant-muted">
