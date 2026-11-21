@@ -26,7 +26,6 @@ export function Booking() {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [showMonthPicker, setShowMonthPicker] = useState(false);
-  
   const [selectedCategory, setSelectedCategory] = useState(
     categories[1] || "Nails",
   );
@@ -37,7 +36,7 @@ export function Booking() {
   );
 
   const [bookedSlots, setBookedSlots] = useState<string[]>([]);
-  const [fullyBookedDates, setFullyBookedDates] = useState<string[]>([]); // New State
+  const [fullyBookedDates, setFullyBookedDates] = useState<string[]>([]);
   const [isLoadingSlots, setIsLoadingSlots] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -75,7 +74,7 @@ export function Booking() {
   const toggleService = (id: string) => {
     setSelectedServiceIds((prev) => {
       if (prev.includes(id)) {
-        if (prev.length === 1) return prev; 
+        if (prev.length === 1) return prev;
         return prev.filter((sId) => sId !== id);
       }
       return [...prev, id];
@@ -90,10 +89,12 @@ export function Booking() {
     const firstDay = getFirstDayOfMonth(year, month);
     const days = [];
 
+    // Empty slots for days before the 1st
     for (let i = 0; i < firstDay; i++) {
       days.push(<div key={`empty-${i}`} className="h-12"></div>);
     }
 
+    // Actual day buttons
     for (let d = 1; d <= daysInMonth; d++) {
       const dateObj = new Date(year, month, d);
       const today = new Date();
@@ -103,8 +104,9 @@ export function Booking() {
       const dateString = formatDateForDB(dateObj);
       const isFullyBooked = fullyBookedDates.includes(dateString);
       const isDisabled = isPast || isFullyBooked;
-      
-      const isSelected = selectedDate?.toDateString() === dateObj.toDateString();
+
+      const isSelected =
+        selectedDate?.toDateString() === dateObj.toDateString();
 
       days.push(
         <button
@@ -136,7 +138,7 @@ export function Booking() {
     async function fetchMonthBookings() {
       const year = currentMonth.getFullYear();
       const month = currentMonth.getMonth();
-      
+
       const firstDay = formatDateForDB(new Date(year, month, 1));
       const lastDay = formatDateForDB(new Date(year, month + 1, 0));
 
@@ -149,12 +151,13 @@ export function Booking() {
       if (!error && data) {
         const bookingsByDate: Record<string, number> = {};
         data.forEach((b) => {
-          bookingsByDate[b.appointment_date] = (bookingsByDate[b.appointment_date] || 0) + 1;
+          bookingsByDate[b.appointment_date] =
+            (bookingsByDate[b.appointment_date] || 0) + 1;
         });
 
-        // If a date has 5 or more bookings (times.length), it's full
+        // If a date has all available times booked, disable the whole day
         const fullDates = Object.keys(bookingsByDate).filter(
-          (date) => bookingsByDate[date] >= times.length
+          (date) => bookingsByDate[date] >= times.length,
         );
         setFullyBookedDates(fullDates);
       }
@@ -176,7 +179,11 @@ export function Booking() {
         .eq("appointment_date", targetDate);
 
       if (!error && data) {
-        setBookedSlots(data.map((b) => b.appointment_time));
+        // Format the time to "HH:MM" so it perfectly matches our array
+        const formattedSlots = data.map((b) =>
+          b.appointment_time.substring(0, 5),
+        );
+        setBookedSlots(formattedSlots);
       } else {
         setBookedSlots([]);
       }
@@ -192,7 +199,7 @@ export function Booking() {
     if (!selectedDate) return;
 
     setIsSubmitting(true);
-    setSubmitError(null); 
+    setSubmitError(null);
     const dateString = formatDateForDB(selectedDate);
 
     try {
@@ -223,7 +230,9 @@ export function Booking() {
         });
 
       if (moolreError || !moolreData?.url) {
-        throw new Error("Moolre failed to generate a payment link. Please try again.");
+        throw new Error(
+          "Moolre failed to generate a payment link. Please try again.",
+        );
       }
 
       window.location.href = moolreData.url;
@@ -231,18 +240,30 @@ export function Booking() {
       console.error("Booking Failed:", error);
 
       // Handle double booking database error (Postgres code: 23P01)
-      if (error.code === "23P01" || error.message?.includes("prevent_double_booking")) {
-        setSubmitError("Sorry, this time slot was just booked by someone else. Please select a different time.");
-      } 
+      if (
+        error.code === "23P01" ||
+        error.message?.includes("prevent_double_booking")
+      ) {
+        setSubmitError(
+          "Sorry, this time slot was just booked by someone else. Please select a different time.",
+        );
+      }
       // Handle offline errors
-      else if (error.message === "TypeError: Failed to fetch" || !navigator.onLine) {
-        setSubmitError("Network error: Please check your internet connection and try again.");
-      } 
+      else if (
+        error.message === "TypeError: Failed to fetch" ||
+        !navigator.onLine
+      ) {
+        setSubmitError(
+          "Network error: Please check your internet connection and try again.",
+        );
+      }
       // Handle other errors
       else {
-        setSubmitError(error.message || "Something went wrong. Please try again.");
+        setSubmitError(
+          error.message || "Something went wrong. Please try again.",
+        );
       }
-      setIsSubmitting(false); 
+      setIsSubmitting(false);
     }
   };
 
@@ -254,7 +275,6 @@ export function Booking() {
         url={`${siteConfig.url}/book`}
       />
       <div className="w-full max-w-lg bg-white-pure relative flex flex-col">
-        
         {/* --- HEADER --- */}
         <div className="sticky top-0 bg-white-pure z-20 px-6 py-4 border-b border-elephant/10 flex items-center justify-between">
           <button
@@ -267,7 +287,6 @@ export function Booking() {
         </div>
 
         <div className="p-6 flex-1 overflow-y-auto">
-          
           {/* --- SERVICE SELECTION & CATEGORY TABS --- */}
           <div className="mb-8">
             <div className="flex justify-between items-center mb-3">
@@ -283,7 +302,7 @@ export function Booking() {
                   <button
                     key={cat}
                     type="button"
-                    onClick={() => setSelectedCategory(cat)} 
+                    onClick={() => setSelectedCategory(cat)}
                     className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all border ${
                       selectedCategory === cat
                         ? "bg-burnt text-white-pure border-burnt"

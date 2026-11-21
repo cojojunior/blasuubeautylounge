@@ -25,6 +25,14 @@ import { Refund } from "./pages/policies/Refund";
 import { AdminLayout } from "./admin/AdminLayout";
 import { Login } from "./admin/Login";
 import { Dashboard } from "./admin/Dashboard";
+import { Appointments } from "./admin/Appointments";
+import { AppointmentDetail } from "./admin/AppointmentDetail";
+import { Services as AdminServices } from "./admin/Services"; // Renamed to avoid conflict with public Services
+import { BlockedSlots } from "./admin/BlockedSlots";
+import { BusinessHours } from "./admin/BusinessHours";
+import { Notifications } from "./admin/Notifications";
+import { Payments } from "./admin/Payments";
+import { Policies } from "./admin/Policies";
 
 export default function App() {
   return (
@@ -55,10 +63,21 @@ export default function App() {
           <Route path="*" element={<NotFound />} />
         </Route>
 
-        {/* ADMIN ROUTES (No Header/Footer) */}
+        {/* ADMIN ROUTES */}
         <Route element={<AdminLayout />}>
           <Route path="/admin" element={<Login />} />
           <Route path="/admin/dashboard" element={<Dashboard />} />
+          <Route path="/admin/appointments" element={<Appointments />} />
+          <Route
+            path="/admin/appointments/:id"
+            element={<AppointmentDetail />}
+          />
+          <Route path="/admin/services" element={<AdminServices />} />
+          <Route path="/admin/hours" element={<BusinessHours />} />
+          <Route path="/admin/blocked" element={<BlockedSlots />} />
+          <Route path="/admin/notifications" element={<Notifications />} />
+          <Route path="/admin/payments" element={<Payments />} />
+          <Route path="/admin/policies" element={<Policies />} />
         </Route>
       </Routes>
     </Router>
