@@ -36,6 +36,7 @@ export function Booking() {
   );
 
   const [bookedSlots, setBookedSlots] = useState<string[]>([]);
+  const [blockedTimes, setBlockedTimes] = useState<string[]>([]); // NEW: Admin blocks
   const [fullyBookedDates, setFullyBookedDates] = useState<string[]>([]);
   const [isLoadingSlots, setIsLoadingSlots] = useState(false);
 
@@ -142,54 +143,86 @@ export function Booking() {
       const firstDay = formatDateForDB(new Date(year, month, 1));
       const lastDay = formatDateForDB(new Date(year, month + 1, 0));
 
-      const { data, error } = await supabase
+      // 1. Fetch appointments to count how many slots are filled
+      const { data: aptData, error } = await supabase
         .from("booked_slots")
         .select("appointment_date, appointment_time")
         .gte("appointment_date", firstDay)
         .lte("appointment_date", lastDay);
 
-      if (!error && data) {
+      // 2. Fetch whole-day blocks from admin
+      const { data: blockData } = await supabase
+        .from("blocked_slots")
+        .select("blocked_date")
+        .is("blocked_time", null) // Only looking for "Whole Day" blocks
+        .gte("blocked_date", firstDay)
+        .lte("blocked_date", lastDay);
+
+      const fullDatesSet = new Set<string>();
+
+      if (!error && aptData) {
         const bookingsByDate: Record<string, number> = {};
-        data.forEach((b) => {
+        aptData.forEach((b) => {
           bookingsByDate[b.appointment_date] =
             (bookingsByDate[b.appointment_date] || 0) + 1;
         });
 
         // If a date has all available times booked, disable the whole day
-        const fullDates = Object.keys(bookingsByDate).filter(
-          (date) => bookingsByDate[date] >= times.length,
-        );
-        setFullyBookedDates(fullDates);
+        Object.keys(bookingsByDate).forEach((date) => {
+          if (bookingsByDate[date] >= times.length) fullDatesSet.add(date);
+        });
       }
+
+      // 3. Mark admin-blocked whole days
+      if (blockData) {
+        blockData.forEach((b) => fullDatesSet.add(b.blocked_date));
+      }
+
+      setFullyBookedDates(Array.from(fullDatesSet));
     }
     fetchMonthBookings();
   }, [currentMonth]);
 
-  // --- FETCH BOOKED SLOTS (When a date is selected) ---
+  // --- FETCH SLOTS FOR SELECTED DATE ---
   useEffect(() => {
     if (!selectedDate) return;
 
-    async function fetchBookings() {
+    async function fetchSlots() {
       setIsLoadingSlots(true);
       const targetDate = formatDateForDB(selectedDate!);
 
-      const { data, error } = await supabase
+      // 1. Fetch actual booked appointments
+      const { data: bookedData, error } = await supabase
         .from("booked_slots")
         .select("appointment_time")
         .eq("appointment_date", targetDate);
 
-      if (!error && data) {
+      // 2. Fetch admin blocked times (partial days)
+      const { data: blockedData } = await supabase
+        .from("blocked_slots")
+        .select("blocked_time")
+        .eq("blocked_date", targetDate)
+        .not("blocked_time", "is", null); // Filter out whole day blocks
+
+      if (!error && bookedData) {
         // Format the time to "HH:MM" so it perfectly matches our array
-        const formattedSlots = data.map((b) =>
+        const formattedSlots = bookedData.map((b) =>
           b.appointment_time.substring(0, 5),
         );
         setBookedSlots(formattedSlots);
       } else {
         setBookedSlots([]);
       }
+
+      if (blockedData) {
+        setBlockedTimes(blockedData.map((b) => b.blocked_time.substring(0, 5)));
+      } else {
+        setBlockedTimes([]);
+      }
+
       setIsLoadingSlots(false);
     }
-    fetchBookings();
+    fetchSlots();
   }, [selectedDate]);
 
   // --- SUBMIT HANDLER ---
@@ -469,7 +502,9 @@ export function Booking() {
 
               <div className="grid grid-cols-3 gap-3 mb-8">
                 {times.map((time) => {
-                  const isBooked = bookedSlots.includes(time);
+                  // STRICT DISABLED CHECK: Booked OR Admin Blocked
+                  const isBooked =
+                    bookedSlots.includes(time) || blockedTimes.includes(time);
                   const isSelected = selectedTime === time;
                   const [hour, minute] = time.split(":");
                   const displayHour =
