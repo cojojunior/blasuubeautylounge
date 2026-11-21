@@ -402,18 +402,41 @@ export function Dashboard() {
                 }
               />
 
-              <select
-                className="w-full p-3 border border-elephant/20 rounded-xl bg-white-soft text-sm"
-                value={offlineForm.serviceId}
-                onChange={(e) =>
-                  setOfflineForm({ ...offlineForm, serviceId: e.target.value })
-                }>
-                {services.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name} - {formatCurrency(s.price)}
-                  </option>
-                ))}
-              </select>
+              <div className="relative">
+                <select
+                  className="w-full p-3 border border-elephant/20 rounded-xl bg-white-soft text-sm appearance-none cursor-pointer outline-none focus:border-burnt"
+                  value={offlineForm.serviceId}
+                  onChange={(e) =>
+                    setOfflineForm({
+                      ...offlineForm,
+                      serviceId: e.target.value,
+                    })
+                  }>
+                  {Array.from(new Set(services.map((s) => s.category))).map(
+                    (category) => (
+                      <optgroup key={category} label={category}>
+                        {services
+                          .filter((s) => s.category === category)
+                          .map((s) => (
+                            <option key={s.id} value={s.id}>
+                              {s.name} - {formatCurrency(s.price)}
+                            </option>
+                          ))}
+                      </optgroup>
+                    ),
+                  )}
+                </select>
+
+                {/* Custom Dropdown Arrow */}
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-elephant-muted">
+                  <svg
+                    className="fill-current h-4 w-4"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20">
+                    <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                  </svg>
+                </div>
+              </div>
 
               <div className="flex gap-2">
                 <input
