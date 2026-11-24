@@ -25,7 +25,7 @@ export function Dashboard() {
     serviceId: services[0].id,
     date: "",
     time: "09:00",
-    paymentMethod: "cash" as "cash" | "momo" | "bank", // Added 'bank' type
+    paymentMethod: "cash", // NEW: Default to Cash
   });
   const [bookedSlots, setBookedSlots] = useState<string[]>([]);
 
@@ -168,7 +168,7 @@ export function Dashboard() {
           deposit_amount: requiredDeposit, // Full payment
           status: "confirmed",
           booking_source: "offline",
-          payment_method: offlineForm.paymentMethod, // Save 'cash', 'momo', or 'bank'
+          payment_method: offlineForm.paymentMethod, // Save 'cash' or 'momo'
         })
         .select()
         .single();
@@ -451,43 +451,31 @@ export function Dashboard() {
                 </select>
               </div>
 
-              {/* PAYMENT METHOD SELECTION (Cash, MoMo, Bank) */}
-              <div className="flex gap-1.5 mb-2">
+              {/* NEW: PAYMENT METHOD TOGGLE */}
+              <div className="flex gap-2 mb-2">
                 <button
                   type="button"
                   onClick={() =>
                     setOfflineForm({ ...offlineForm, paymentMethod: "cash" })
                   }
-                  className={`flex-1 py-3 rounded-xl border font-medium text-xs transition-all ${
+                  className={`flex-1 py-3 rounded-xl border font-medium text-sm transition-all ${
                     offlineForm.paymentMethod === "cash"
                       ? "bg-green-50 border-green-600 text-green-700"
                       : "bg-white-pure border-elephant/20 text-elephant-muted"
                   }`}>
-                  Cash
+                  Cash Payment
                 </button>
                 <button
                   type="button"
                   onClick={() =>
                     setOfflineForm({ ...offlineForm, paymentMethod: "momo" })
                   }
-                  className={`flex-1 py-3 rounded-xl border font-medium text-xs transition-all ${
+                  className={`flex-1 py-3 rounded-xl border font-medium text-sm transition-all ${
                     offlineForm.paymentMethod === "momo"
                       ? "bg-blue-50 border-blue-600 text-blue-700"
                       : "bg-white-pure border-elephant/20 text-elephant-muted"
                   }`}>
-                  MoMo
-                </button>
-                <button
-                  type="button"
-                  onClick={() =>
-                    setOfflineForm({ ...offlineForm, paymentMethod: "bank" })
-                  }
-                  className={`flex-1 py-3 rounded-xl border font-medium text-xs transition-all ${
-                    offlineForm.paymentMethod === "bank"
-                      ? "bg-purple-50 border-purple-600 text-purple-700"
-                      : "bg-white-pure border-elephant/20 text-elephant-muted"
-                  }`}>
-                  Bank
+                  MoMo (Moolre)
                 </button>
               </div>
 
