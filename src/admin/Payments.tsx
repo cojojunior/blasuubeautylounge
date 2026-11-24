@@ -17,9 +17,7 @@ export function Payments() {
   // --- SETTLE MODAL STATE ---
   const [settlingId, setSettlingId] = useState<string | null>(null);
   const [settleAmount, setSettleAmount] = useState<number>(0);
-const [settleMethod, setSettleMethod] = useState<"cash" | "momo" | "bank">(
-  "cash",
-);
+  const [settleMethod, setSettleMethod] = useState<"cash" | "momo">("cash"); // Removed 'bank'
 
   const fetchPayments = async () => {
     const { data, error } = await supabase
@@ -31,7 +29,6 @@ const [settleMethod, setSettleMethod] = useState<"cash" | "momo" | "bank">(
     if (!error && data) {
       setPayments(data);
 
-      // Calculate stats
       let collected = 0;
       let total = 0;
 
@@ -55,7 +52,6 @@ const [settleMethod, setSettleMethod] = useState<"cash" | "momo" | "bank">(
     fetchPayments();
   }, []);
 
-  // --- HANDLE BALANCE SETTLEMENT ---
   const handleSettleBalance = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!settlingId) return;
@@ -63,7 +59,6 @@ const [settleMethod, setSettleMethod] = useState<"cash" | "momo" | "bank">(
     const apt = payments.find((p) => p.id === settlingId);
     if (!apt) return;
 
-    // Add the new payment to the existing deposit
     const newDepositAmount = Number(apt.deposit_amount) + settleAmount;
 
     const { error } = await supabase
@@ -80,7 +75,7 @@ const [settleMethod, setSettleMethod] = useState<"cash" | "momo" | "bank">(
     } else {
       setSettlingId(null);
       setSettleAmount(0);
-      fetchPayments(); // Refresh the list
+      fetchPayments();
     }
   };
 
@@ -92,7 +87,6 @@ const [settleMethod, setSettleMethod] = useState<"cash" | "momo" | "bank">(
         Payments & Revenue
       </h1>
 
-      {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div className="bg-white-pure p-6 rounded-2xl border border-elephant/10">
           <div className="flex items-center gap-3 mb-2 text-green-600">
@@ -131,7 +125,6 @@ const [settleMethod, setSettleMethod] = useState<"cash" | "momo" | "bank">(
         </div>
       </div>
 
-      {/* Payment Table */}
       <div className="bg-white-pure rounded-2xl border border-elephant/10 overflow-hidden">
         <div className="overflow-x-auto w-full">
           <table className="w-full text-left text-sm min-w-[900px]">
@@ -239,7 +232,6 @@ const [settleMethod, setSettleMethod] = useState<"cash" | "momo" | "bank">(
         </div>
       </div>
 
-      {/* --- SETTLE BALANCE MODAL --- */}
       {settlingId && (
         <div className="fixed inset-0 bg-elephant/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white-pure rounded-2xl p-6 w-full max-w-sm shadow-xl relative">
@@ -277,12 +269,6 @@ const [settleMethod, setSettleMethod] = useState<"cash" | "momo" | "bank">(
                   onClick={() => setSettleMethod("momo")}
                   className={`flex-1 py-3 rounded-xl border font-medium text-sm ${settleMethod === "momo" ? "bg-blue-50 border-blue-600 text-blue-700" : "bg-white border-elephant/20"}`}>
                   MoMo
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setSettleMethod("bank")}
-                  className={`flex-1 py-3 rounded-xl border font-medium text-sm ${settleMethod === "bank" ? "bg-gray-100 border-gray-600 text-gray-700" : "bg-white border-elephant/20"}`}>
-                  Bank
                 </button>
               </div>
               <Button type="submit" className="w-full py-3 mt-4">

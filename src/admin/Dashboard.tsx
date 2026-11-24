@@ -25,7 +25,7 @@ export function Dashboard() {
     serviceId: services[0].id,
     date: "",
     time: "09:00",
-    paymentMethod: "cash", // NEW: Default to Cash
+    paymentMethod: "cash" as "cash" | "momo", // Removed 'bank'
   });
   const [bookedSlots, setBookedSlots] = useState<string[]>([]);
 
@@ -451,7 +451,7 @@ export function Dashboard() {
                 </select>
               </div>
 
-              {/* NEW: PAYMENT METHOD TOGGLE */}
+              {/* PAYMENT METHOD TOGGLE (Cash & MoMo only) */}
               <div className="flex gap-2 mb-2">
                 <button
                   type="button"
