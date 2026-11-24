@@ -11,6 +11,7 @@ import {
   WifiOff,
   Building2,
   Smartphone,
+  Copy,
 } from "lucide-react";
 import { PolicyModal } from "../components/booking/PolicyModal";
 import { formatDateForDB } from "../lib/datetime";
@@ -53,6 +54,10 @@ export function Booking() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [showDetailsForm, setShowDetailsForm] = useState(false);
   const [isPolicyModalOpen, setIsPolicyModalOpen] = useState(false);
+
+  // --- BANK UI STATE ---
+  const [generatedBank, setGeneratedBank] = useState<any>(null);
+  const [bookingRef, setBookingRef] = useState<string | null>(null);
 
   // --- CALCULATIONS ---
   const selectedServices = services.filter((s) =>
@@ -236,7 +241,7 @@ export function Booking() {
 
     try {
       // 1. Create the booking in the database
-      const { data: bookingRef, error } = await supabase.rpc("create_booking", {
+      const { data: bookingId, error } = await supabase.rpc("create_booking", {
         p_service_id: selectedServiceIds.join(", "),
         p_service_name: combinedServiceNames,
         p_appointment_date: dateString,
@@ -249,10 +254,12 @@ export function Booking() {
       });
 
       if (error) throw error;
-      if (!bookingRef) throw new Error("No booking reference returned.");
+      if (!bookingId) throw new Error("No booking reference returned.");
 
       // 2. Branch based on payment method
       if (formData.paymentMethod === "bank") {
+        setBookingRef(bookingId); // Save reference for the UI
+
         // Generate the Virtual Bank Account
         const { data: bankData, error: bankError } =
           await supabase.functions.invoke("create-bank-account", {
@@ -261,21 +268,19 @@ export function Booking() {
               lastName: formData.name.split(" ").slice(1).join(" ") || "Client",
               email: formData.email,
               phone: formData.phone,
-              reference: bookingRef,
+              reference: bookingId,
             },
           });
 
-        // 🚨 FIX: Catch the specific Moolre error message
         if (bankError) {
           let errorMsg = "Failed to generate bank details.";
-          if (bankData && bankData.error) {
-            errorMsg = bankData.error;
-          }
+          if (bankData && bankData.error) errorMsg = bankData.error;
           throw new Error(errorMsg);
         }
 
-        // Redirect to the confirmation page where they will see the bank details
-        window.location.href = `${window.location.origin}/booking-confirmation?ref=${bookingRef}`;
+        // Show the bank details on the same page instead of redirecting
+        setGeneratedBank(bankData);
+        setIsSubmitting(false);
         return;
       }
 
@@ -285,9 +290,9 @@ export function Booking() {
           body: {
             amount: requiredDeposit,
             email: formData.email,
-            reference: bookingRef,
+            reference: bookingId,
             callbackUrl: `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/moolre-webhook`,
-            redirectUrl: `${window.location.origin}/booking-confirmation?ref=${bookingRef}`,
+            redirectUrl: `${window.location.origin}/booking-confirmation?ref=${bookingId}`,
           },
         });
 
@@ -331,6 +336,7 @@ export function Booking() {
         url={`${siteConfig.url}/book`}
       />
       <div className="w-full max-w-lg bg-white-pure relative flex flex-col">
+        {/* HEADER */}
         <div className="sticky top-0 bg-white-pure z-20 px-6 py-4 border-b border-elephant/10 flex items-center justify-between">
           <button
             onClick={() => window.history.back()}
@@ -719,6 +725,74 @@ export function Booking() {
                 </Button>
               </div>
             </form>
+          )}
+
+          {/* BANK DETAILS SCREEN (Shows after generation) */}
+          {generatedBank && (
+            <div className="mt-8 animate-fade-in">
+              <div className="bg-green-50 border border-green-200 p-6 rounded-2xl">
+                <h3 className="text-xl font-serif text-green-800 mb-2 text-center">
+                  Bank Transfer Details
+                </h3>
+                <p className="text-sm text-green-700 text-center mb-6">
+                  Please transfer{" "}
+                  <strong>{formatCurrency(requiredDeposit)}</strong> to the
+                  account below to confirm your booking.
+                </p>
+
+                <div className="bg-white-pure p-4 rounded-xl border border-green-100 mb-4 text-left">
+                  {/* FIXED BANK NAME */}
+                  <p className="text-xs text-elephant-muted mb-1">Bank Name</p>
+                  <p className="font-semibold text-elephant mb-3">
+                    Access Bank
+                  </p>
+
+                  {/* FIXED ACCOUNT NAME */}
+                  <p className="text-xs text-elephant-muted mb-1">
+                    Account Name
+                  </p>
+                  <p className="font-semibold text-elephant mb-3">
+                    Blasuu Beauty Lounge
+                  </p>
+
+                  <p className="text-xs text-elephant-muted mb-1">
+                    Account Number
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <p className="text-2xl font-mono font-bold text-burnt tracking-wider">
+                      {generatedBank.accountno ||
+                        generatedBank.account_number ||
+                        generatedBank.accountNumber ||
+                        "Generating..."}
+                    </p>
+                    <button
+                      onClick={() =>
+                        navigator.clipboard.writeText(
+                          generatedBank.accountno ||
+                            generatedBank.account_number ||
+                            generatedBank.accountNumber,
+                        )
+                      }
+                      className="text-elephant-muted hover:text-burnt p-2"
+                      title="Copy Account Number">
+                      <Copy size={20} />
+                    </button>
+                  </div>
+                </div>
+                <p className="text-xs text-green-700 text-center mb-6">
+                  Use <strong>{bookingRef?.split("-")[0].toUpperCase()}</strong>{" "}
+                  as the transfer reference. Your booking will be automatically
+                  confirmed once the transfer is received.
+                </p>
+                <div className="text-center">
+                  <a
+                    href="/"
+                    className="text-burnt hover:underline text-sm font-medium">
+                    I have made the transfer
+                  </a>
+                </div>
+              </div>
+            </div>
           )}
         </div>
       </div>
