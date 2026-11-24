@@ -47,7 +47,7 @@ export function Booking() {
     phone: "",
     email: "",
     agreeTerms: false,
-    paymentMethod: "momo" as "momo" | "bank", // NEW
+    paymentMethod: "momo" as "momo" | "bank",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -254,9 +254,8 @@ export function Booking() {
       // 2. Branch based on payment method
       if (formData.paymentMethod === "bank") {
         // Generate the Virtual Bank Account
-        const { error: bankError } = await supabase.functions.invoke(
-          "create-bank-account",
-          {
+        const { data: bankData, error: bankError } =
+          await supabase.functions.invoke("create-bank-account", {
             body: {
               firstName: formData.name.split(" ")[0],
               lastName: formData.name.split(" ").slice(1).join(" ") || "Client",
@@ -264,10 +263,16 @@ export function Booking() {
               phone: formData.phone,
               reference: bookingRef,
             },
-          },
-        );
+          });
 
-        if (bankError) throw new Error("Failed to generate bank details.");
+        // 🚨 FIX: Catch the specific Moolre error message
+        if (bankError) {
+          let errorMsg = "Failed to generate bank details.";
+          if (bankData && bankData.error) {
+            errorMsg = bankData.error;
+          }
+          throw new Error(errorMsg);
+        }
 
         // Redirect to the confirmation page where they will see the bank details
         window.location.href = `${window.location.origin}/booking-confirmation?ref=${bookingRef}`;
