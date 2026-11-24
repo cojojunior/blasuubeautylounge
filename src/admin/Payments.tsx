@@ -17,7 +17,9 @@ export function Payments() {
   // --- SETTLE MODAL STATE ---
   const [settlingId, setSettlingId] = useState<string | null>(null);
   const [settleAmount, setSettleAmount] = useState<number>(0);
-  const [settleMethod, setSettleMethod] = useState<"cash" | "momo">("cash");
+const [settleMethod, setSettleMethod] = useState<"cash" | "momo" | "bank">(
+  "cash",
+);
 
   const fetchPayments = async () => {
     const { data, error } = await supabase
@@ -267,25 +269,22 @@ export function Payments() {
                 <button
                   type="button"
                   onClick={() => setSettleMethod("cash")}
-                  className={`flex-1 py-3 rounded-xl border font-medium text-sm ${
-                    settleMethod === "cash"
-                      ? "bg-green-50 border-green-600 text-green-700"
-                      : "bg-white border-elephant/20"
-                  }`}>
+                  className={`flex-1 py-3 rounded-xl border font-medium text-sm ${settleMethod === "cash" ? "bg-green-50 border-green-600 text-green-700" : "bg-white border-elephant/20"}`}>
                   Cash
                 </button>
                 <button
                   type="button"
                   onClick={() => setSettleMethod("momo")}
-                  className={`flex-1 py-3 rounded-xl border font-medium text-sm ${
-                    settleMethod === "momo"
-                      ? "bg-blue-50 border-blue-600 text-blue-700"
-                      : "bg-white border-elephant/20"
-                  }`}>
+                  className={`flex-1 py-3 rounded-xl border font-medium text-sm ${settleMethod === "momo" ? "bg-blue-50 border-blue-600 text-blue-700" : "bg-white border-elephant/20"}`}>
                   MoMo
                 </button>
+                <button
+                  type="button"
+                  onClick={() => setSettleMethod("bank")}
+                  className={`flex-1 py-3 rounded-xl border font-medium text-sm ${settleMethod === "bank" ? "bg-gray-100 border-gray-600 text-gray-700" : "bg-white border-elephant/20"}`}>
+                  Bank
+                </button>
               </div>
-
               <Button type="submit" className="w-full py-3 mt-4">
                 Save Payment
               </Button>

@@ -1,54 +1,52 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { supabase } from "../lib/supabase";
-import { CheckCircle2, Loader2, MessageCircle, XCircle } from "lucide-react";
+import {
+  CheckCircle2,
+  Loader2,
+  MessageCircle,
+  XCircle,
+  Building2,
+} from "lucide-react";
 import { getWhatsAppLink } from "../lib/whatsapp";
 
 export function BookingConfirmation() {
   const [searchParams] = useSearchParams();
   const bookingId = searchParams.get("ref");
 
-  // Added "notfound" to the status types
   const [status, setStatus] = useState<
     "loading" | "confirmed" | "pending" | "notfound"
   >("loading");
   const [bookingData, setBookingData] = useState<any>(null);
 
   useEffect(() => {
-    // If there's no ref ID in the URL, show not found immediately
     if (!bookingId) {
       setStatus("notfound");
       return;
     }
 
     const checkStatus = async () => {
-      // Use the secure RPC we created in the SQL editor
       const { data, error } = await supabase.rpc("get_booking_by_ref", {
         booking_id: bookingId,
       });
 
-      if (error) {
-        console.error("Error fetching booking:", error);
-        return true; // Stop polling on network/database error
-      }
-
-      // RPC returns an array. Grab the first item, or null if empty.
+      if (error) return true;
       const booking = data && data.length > 0 ? data[0] : null;
 
       if (!booking) {
         setStatus("notfound");
-        return true; // Stop polling. The booking doesn't exist.
+        return true;
       }
 
       setBookingData(booking);
 
       if (booking.status === "confirmed") {
         setStatus("confirmed");
-        return true; // Stop polling. We are done.
+        return true;
       }
 
       setStatus("pending");
-      return false; // Keep polling. The webhook hasn't confirmed it yet.
+      return false;
     };
 
     checkStatus();
@@ -66,6 +64,11 @@ export function BookingConfirmation() {
     window.location.href = getWhatsAppLink(message);
   };
 
+  // Parse bank details if they exist
+  const bankDetails = bookingData?.bank_details
+    ? JSON.parse(bookingData.bank_details)
+    : null;
+
   return (
     <div className="min-h-screen bg-white-pure flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-white-soft p-8 rounded-3xl border border-black/10 text-center shadow-lg">
@@ -77,7 +80,7 @@ export function BookingConfirmation() {
             />
             <h2 className="text-2xl font-serif mb-2">Verifying Payment</h2>
             <p className="text-elephant-muted text-sm">
-              Please wait while we confirm your transaction with Moolre...
+              Please wait while we check your payment status...
             </p>
           </>
         )}
@@ -98,7 +101,44 @@ export function BookingConfirmation() {
           </>
         )}
 
-        {status === "pending" && (
+        {status === "pending" && bankDetails && (
+          <>
+            <Building2 size={48} className="text-blue-500 mx-auto mb-4" />
+            <h2 className="text-2xl font-serif mb-2">Pay via Bank Transfer</h2>
+            <p className="text-elephant-muted text-sm mb-6">
+              Please transfer <strong>GH₵ {bookingData.deposit_amount}</strong>{" "}
+              to the following account. Your booking will be confirmed
+              automatically once the transfer is received.
+            </p>
+            <div className="bg-white-pure p-4 rounded-xl border border-elephant/10 text-left mb-6">
+              <p className="text-sm text-elephant-muted mb-1">Bank Name</p>
+              <p className="font-semibold text-elephant mb-3">
+                {bankDetails.bankname || "First Atlantic Bank"}
+              </p>
+
+              <p className="text-sm text-elephant-muted mb-1">Account Name</p>
+              <p className="font-semibold text-elephant mb-3">
+                {bankDetails.accountname}
+              </p>
+
+              <p className="text-sm text-elephant-muted mb-1">Account Number</p>
+              <p className="text-2xl font-mono font-bold text-burnt tracking-wider">
+                {bankDetails.accountno}
+              </p>
+            </div>
+            <p className="text-xs text-elephant-muted mb-6">
+              Use <strong>{bookingData.id.split("-")[0].toUpperCase()}</strong>{" "}
+              as the transfer reference.
+            </p>
+            <Link
+              to="/"
+              className="text-burnt hover:underline text-sm font-medium">
+              I have made the transfer
+            </Link>
+          </>
+        )}
+
+        {status === "pending" && !bankDetails && (
           <>
             <Loader2
               size={48}
