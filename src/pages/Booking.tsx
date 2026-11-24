@@ -9,6 +9,8 @@ import {
   Loader2,
   Check,
   WifiOff,
+  Building2,
+  Smartphone,
 } from "lucide-react";
 import { PolicyModal } from "../components/booking/PolicyModal";
 import { formatDateForDB } from "../lib/datetime";
@@ -45,6 +47,7 @@ export function Booking() {
     phone: "",
     email: "",
     agreeTerms: false,
+    paymentMethod: "momo" as "momo" | "bank", // NEW
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -156,7 +159,6 @@ export function Booking() {
 
       const fullDatesSet = new Set<string>();
 
-      // Mark fully booked days
       if (aptResult.data) {
         const bookingsByDate: Record<string, number> = {};
         aptResult.data.forEach((b) => {
@@ -168,7 +170,6 @@ export function Booking() {
         });
       }
 
-      // Mark Whole Day blocks
       if (blockResult.data) {
         blockResult.data.forEach((b) => {
           if (b.blocked_time === null || b.blocked_time === "") {
@@ -234,6 +235,7 @@ export function Booking() {
     const dateString = formatDateForDB(selectedDate);
 
     try {
+      // 1. Create the booking in the database
       const { data: bookingRef, error } = await supabase.rpc("create_booking", {
         p_service_id: selectedServiceIds.join(", "),
         p_service_name: combinedServiceNames,
@@ -249,6 +251,30 @@ export function Booking() {
       if (error) throw error;
       if (!bookingRef) throw new Error("No booking reference returned.");
 
+      // 2. Branch based on payment method
+      if (formData.paymentMethod === "bank") {
+        // Generate the Virtual Bank Account
+        const { error: bankError } = await supabase.functions.invoke(
+          "create-bank-account",
+          {
+            body: {
+              firstName: formData.name.split(" ")[0],
+              lastName: formData.name.split(" ").slice(1).join(" ") || "Client",
+              email: formData.email,
+              phone: formData.phone,
+              reference: bookingRef,
+            },
+          },
+        );
+
+        if (bankError) throw new Error("Failed to generate bank details.");
+
+        // Redirect to the confirmation page where they will see the bank details
+        window.location.href = `${window.location.origin}/booking-confirmation?ref=${bookingRef}`;
+        return;
+      }
+
+      // 3. If MoMo, generate the payment link and redirect to Moolre
       const { data: moolreData, error: moolreError } =
         await supabase.functions.invoke("create-moolre-link", {
           body: {
@@ -311,6 +337,7 @@ export function Booking() {
         </div>
 
         <div className="p-6 flex-1 overflow-y-auto">
+          {/* SERVICE SELECTION */}
           <div className="mb-8">
             <div className="flex justify-between items-center mb-3">
               <p className="text-xs text-elephant-muted uppercase tracking-wider">
@@ -388,6 +415,7 @@ export function Booking() {
 
           <div className="h-px w-full bg-elephant/10 mb-8"></div>
 
+          {/* DATE PICKER */}
           <div className="flex justify-between items-center mb-6">
             <div>
               <h2 className="text-2xl font-semibold text-elephant">
@@ -475,6 +503,7 @@ export function Booking() {
             {renderCalendar()}
           </div>
 
+          {/* TIME SLOTS */}
           {selectedDate && (
             <div className="animate-fade-in">
               <div className="h-px w-full bg-elephant/10 mb-8"></div>
@@ -518,6 +547,7 @@ export function Booking() {
             </div>
           )}
 
+          {/* DETAILS FORM */}
           {!showDetailsForm ? (
             <div className="mt-auto pt-4">
               <Button
@@ -606,6 +636,39 @@ export function Booking() {
                 }
               />
 
+              {/* PAYMENT METHOD SELECTION */}
+              <div className="mt-6">
+                <label className="block text-sm font-medium text-elephant mb-2">
+                  Choose Payment Method
+                </label>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setFormData({ ...formData, paymentMethod: "momo" })
+                    }
+                    className={`flex-1 py-3 rounded-xl border font-medium text-sm flex items-center justify-center gap-2 transition-all ${
+                      formData.paymentMethod === "momo"
+                        ? "bg-blue-50 border-blue-600 text-blue-700 shadow-sm"
+                        : "bg-white-pure border-elephant/20 text-elephant-muted hover:border-elephant/40"
+                    }`}>
+                    <Smartphone size={18} /> Mobile Money
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setFormData({ ...formData, paymentMethod: "bank" })
+                    }
+                    className={`flex-1 py-3 rounded-xl border font-medium text-sm flex items-center justify-center gap-2 transition-all ${
+                      formData.paymentMethod === "bank"
+                        ? "bg-green-50 border-green-600 text-green-700 shadow-sm"
+                        : "bg-white-pure border-elephant/20 text-elephant-muted hover:border-elephant/40"
+                    }`}>
+                    <Building2 size={18} /> Bank Transfer
+                  </button>
+                </div>
+              </div>
+
               <label className="flex items-start gap-3 mt-4 cursor-pointer">
                 <input
                   type="checkbox"
@@ -642,10 +705,12 @@ export function Booking() {
                   className="w-2/3 py-4"
                   disabled={isSubmitting || !formData.agreeTerms}>
                   {isSubmitting
-                    ? "Saving..."
+                    ? "Processing..."
                     : submitError
                       ? "Try Again"
-                      : "Book Appointment"}
+                      : formData.paymentMethod === "bank"
+                        ? "Get Bank Details"
+                        : "Pay via MoMo"}
                 </Button>
               </div>
             </form>
