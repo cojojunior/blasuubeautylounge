@@ -207,7 +207,7 @@ export function Appointments() {
               />
               <input
                 type="email"
-                placeholder="Email (For Calendar)"
+                placeholder="Email"
                 value={walkInData.email}
                 onChange={(e) =>
                   setWalkInData({ ...walkInData, email: e.target.value })
@@ -333,7 +333,7 @@ export function Appointments() {
                       ? "bg-blue-50 border-blue-600 text-blue-700"
                       : "bg-white-pure border-elephant/20 text-elephant-muted"
                   }`}>
-                  MoMo (Moolre)
+                  MoMo
                 </button>
               </div>
             </div>
