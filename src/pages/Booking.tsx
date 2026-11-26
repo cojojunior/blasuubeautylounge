@@ -16,7 +16,31 @@ import { formatCurrency } from "../lib/currency";
 import { Seo } from "../components/seo/Seo";
 import { siteConfig } from "../config/site";
 
-const times = ["09:00", "10:00", "11:00", "13:00", "14:00", "15:00"];
+// --- NEW: Dynamic Business Hours ---
+const businessHours = {
+  0: { start: 14, end: 19.5 }, // Sunday: 14:00 - 19:30
+  1: { start: 9, end: 20 }, // Monday: 09:00 - 20:00
+  2: { start: 10, end: 20 }, // Tuesday: 10:00 - 20:00
+  3: { start: 9, end: 20 }, // Wednesday: 09:00 - 20:00
+  4: { start: 9, end: 20 }, // Thursday: 09:00 - 20:00
+  5: { start: 9, end: 20 }, // Friday: 09:00 - 20:00
+  6: { start: 8, end: 20 }, // Saturday: 08:00 - 20:00
+};
+
+const generateSlots = (dayOfWeek: number) => {
+  const hours = businessHours[dayOfWeek as keyof typeof businessHours];
+  if (!hours) return [];
+
+  const slots = [];
+  for (let i = hours.start; i < hours.end; i++) {
+    slots.push(`${String(i).padStart(2, "0")}:00`);
+    // Add half-hour slots if the end time allows it
+    if (i + 0.5 < hours.end) {
+      slots.push(`${String(i).padStart(2, "0")}:30`);
+    }
+  }
+  return slots;
+};
 
 export function Booking() {
   const [searchParams] = useSearchParams();
@@ -81,6 +105,11 @@ export function Booking() {
       return [...prev, id];
     });
   };
+
+  // --- DYNAMIC SLOTS ---
+  const availableTimes = selectedDate
+    ? generateSlots(selectedDate.getDay())
+    : [];
 
   // --- CALENDAR RENDER ---
   const renderCalendar = () => {
@@ -163,7 +192,10 @@ export function Booking() {
             (bookingsByDate[b.appointment_date] || 0) + 1;
         });
         Object.keys(bookingsByDate).forEach((date) => {
-          if (bookingsByDate[date] >= times.length) fullDatesSet.add(date);
+          // We need to check against the slots for that specific day
+          const dayOfWeek = new Date(date).getDay();
+          const slotsForDay = generateSlots(dayOfWeek).length;
+          if (bookingsByDate[date] >= slotsForDay) fullDatesSet.add(date);
         });
       }
 
@@ -489,32 +521,38 @@ export function Booking() {
               </div>
 
               <div className="grid grid-cols-3 gap-3 mb-8">
-                {times.map((time) => {
-                  const isBooked =
-                    bookedSlots.includes(time) || blockedTimes.includes(time);
-                  const isSelected = selectedTime === time;
-                  const [hour, minute] = time.split(":");
-                  const displayHour =
-                    parseInt(hour) > 12 ? parseInt(hour) - 12 : hour;
-                  const ampm = parseInt(hour) >= 12 ? "PM" : "AM";
+                {availableTimes.length === 0 ? (
+                  <p className="col-span-3 text-sm text-elephant-muted text-center py-4">
+                    We are closed on this day. Please select another date.
+                  </p>
+                ) : (
+                  availableTimes.map((time) => {
+                    const isBooked =
+                      bookedSlots.includes(time) || blockedTimes.includes(time);
+                    const isSelected = selectedTime === time;
+                    const [hour, minute] = time.split(":");
+                    const displayHour =
+                      parseInt(hour) > 12 ? parseInt(hour) - 12 : hour;
+                    const ampm = parseInt(hour) >= 12 ? "PM" : "AM";
 
-                  return (
-                    <button
-                      key={time}
-                      type="button"
-                      disabled={isBooked || isLoadingSlots}
-                      onClick={() => setSelectedTime(time)}
-                      className={`py-3 rounded-xl border text-sm font-medium transition-all ${
-                        isBooked
-                          ? "bg-elephant/5 text-elephant-muted border-transparent cursor-not-allowed line-through opacity-60"
-                          : isSelected
-                            ? "bg-elephant text-white-pure border-elephant shadow-md"
-                            : "bg-white-pure border-elephant/20 text-elephant hover:border-elephant"
-                      }`}>
-                      {displayHour}:{minute} {ampm}
-                    </button>
-                  );
-                })}
+                    return (
+                      <button
+                        key={time}
+                        type="button"
+                        disabled={isBooked || isLoadingSlots}
+                        onClick={() => setSelectedTime(time)}
+                        className={`py-3 rounded-xl border text-sm font-medium transition-all ${
+                          isBooked
+                            ? "bg-elephant/5 text-elephant-muted border-transparent cursor-not-allowed line-through opacity-60"
+                            : isSelected
+                              ? "bg-elephant text-white-pure border-elephant shadow-md"
+                              : "bg-white-pure border-elephant/20 text-elephant hover:border-elephant"
+                        }`}>
+                        {displayHour}:{minute} {ampm}
+                      </button>
+                    );
+                  })
+                )}
               </div>
             </div>
           )}

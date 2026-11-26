@@ -1,13 +1,11 @@
 import { Link } from "react-router-dom";
-import { MapPin, Phone, Mail } from "lucide-react";
-import { FaInstagram, FaFacebookF, FaTiktok } from "react-icons/fa6"; 
+import { MapPin, Phone, Mail, Clock } from "lucide-react";
+import { FaInstagram, FaFacebookF, FaTiktok } from "react-icons/fa6";
 import { businessConfig } from "../../config/business";
 
 export function Footer() {
   return (
-    // Removed the outer padding and white background. The footer is now full width.
     <footer className="w-full bg-[#0F1115] text-white-pure">
-      {/* Inner container to keep the text centered and readable */}
       <div className="max-w-7xl mx-auto px-6 py-6 md:py-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-6">
           {/* Brand, About & Contact Column */}
@@ -35,21 +33,21 @@ export function Footer() {
               <a
                 href={businessConfig.socials.instagram}
                 target="_blank"
-                rel="https://www.instagram.com/blasuubeautylounge"
+                rel="noreferrer"
                 className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-burnt hover:border-burnt transition-all">
                 <FaInstagram className="text-white-pure" />
               </a>
               <a
                 href={businessConfig.socials.facebook}
                 target="_blank"
-                rel="https://facebook.com/blasuubeautylounge"
+                rel="noreferrer"
                 className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-burnt hover:border-burnt transition-all">
                 <FaFacebookF className="text-white-pure" />
               </a>
               <a
                 href={businessConfig.socials.tiktok}
                 target="_blank"
-                rel="https://www.tiktok.com/@blasuubeautylounge"
+                rel="noreferrer"
                 className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-burnt hover:border-burnt transition-all">
                 <FaTiktok className="text-white-pure" />
               </a>
@@ -121,10 +119,10 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Contact & Legal Links */}
+          {/* Contact & Hours */}
           <div>
             <h3 className="font-serif font-semibold text-lg !text-white mb-4">
-              Contact & Legal
+              Contact & Hours
             </h3>
             <ul className="space-y-4 text-sm text-gray-400 mb-6">
               <li className="flex items-start gap-3">
@@ -150,7 +148,33 @@ export function Footer() {
                   {businessConfig.email}
                 </a>
               </li>
+
+              {/* NEW: Hours in Footer */}
+              <li className="flex items-start gap-3 pt-2">
+                <Clock
+                  size={18}
+                  className="text-gray-500 mt-0.5 flex-shrink-0"
+                />
+                <div className="flex flex-col gap-1 text-xs">
+                  <span className="text-white-pure font-medium mb-1">
+                    Hours
+                  </span>
+                  <span className="flex justify-between w-40">
+                    <span>Mon, Wed-Fri:</span> <span>9:00 – 20:00</span>
+                  </span>
+                  <span className="flex justify-between w-40">
+                    <span>Tue:</span> <span>10:00 – 20:00</span>
+                  </span>
+                  <span className="flex justify-between w-40">
+                    <span>Sat:</span> <span>8:00 – 20:00</span>
+                  </span>
+                  <span className="flex justify-between w-40">
+                    <span>Sun:</span> <span>14:00 – 19:30</span>
+                  </span>
+                </div>
+              </li>
             </ul>
+
             <ul className="space-y-2 text-xs text-gray-500">
               <li>
                 <Link

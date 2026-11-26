@@ -74,12 +74,33 @@ export function Contact() {
                 <div className="w-10 h-10 rounded-full bg-burnt/10 flex items-center justify-center flex-shrink-0 text-burnt">
                   <Clock size={20} />
                 </div>
-                <div>
-                  <h3 className="font-medium text-elephant">Hours</h3>
-                  <p className="text-elephant-muted text-sm mt-1">
-                    Mon - Sat: 9:00 AM - 6:00 PM
-                  </p>
-                  <p className="text-elephant-muted text-sm">Sunday: Closed</p>
+                <div className="w-full">
+                  <h3 className="font-medium text-elephant mb-2">
+                    Opening Hours
+                  </h3>
+                  <ul className="text-sm text-elephant-muted space-y-1">
+                    <li className="flex justify-between border-b border-elephant/5 pb-1">
+                      <span>Monday</span> <span>09:00 – 20:00</span>
+                    </li>
+                    <li className="flex justify-between border-b border-elephant/5 pb-1">
+                      <span>Tuesday</span> <span>10:00 – 20:00</span>
+                    </li>
+                    <li className="flex justify-between border-b border-elephant/5 pb-1">
+                      <span>Wednesday</span> <span>09:00 – 20:00</span>
+                    </li>
+                    <li className="flex justify-between border-b border-elephant/5 pb-1">
+                      <span>Thursday</span> <span>09:00 – 20:00</span>
+                    </li>
+                    <li className="flex justify-between border-b border-elephant/5 pb-1">
+                      <span>Friday</span> <span>09:00 – 20:00</span>
+                    </li>
+                    <li className="flex justify-between border-b border-elephant/5 pb-1">
+                      <span>Saturday</span> <span>08:00 – 20:00</span>
+                    </li>
+                    <li className="flex justify-between pt-1">
+                      <span>Sunday</span> <span>14:00 – 19:30</span>
+                    </li>
+                  </ul>
                 </div>
               </div>
             </div>
@@ -99,7 +120,6 @@ export function Contact() {
           <div className="h-64 lg:h-auto bg-elephant/5 relative min-h-[400px] rounded-3xl overflow-hidden border border-elephant/10">
             <iframe
               title="Blasuu Beauty Lounge Location"
-              // Paste your exact 'src' URL here
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3970.2130987062596!2d-0.17602312366569264!3d5.682310294299458!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xfdf9dc1fc27d59d%3A0x2d4db5648a04f2b3!2sBlasuu%20Beauty%20Lounge!5e0!3m2!1sen!2sgh!4v1794680173904!5m2!1sen!2sgh"
               width="100%"
               height="100%"
