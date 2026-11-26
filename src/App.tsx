@@ -1,5 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { RootLayout } from "./components/layout/RootLayout";
+import { InstallPwaBanner } from "./components/sections/InstallPwaBanner";
+
 
 // Auth Guard
 import { ProtectedRoute } from "./admin/components/ProtectedRoute";
@@ -40,6 +42,7 @@ import { Policies } from "./admin/Policies";
 export default function App() {
   return (
     <Router>
+      <InstallPwaBanner />
       <Routes>
         {/* PUBLIC ROUTES */}
         <Route element={<RootLayout />}>
