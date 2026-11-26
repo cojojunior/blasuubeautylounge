@@ -103,7 +103,6 @@ export function Dashboard() {
       setIsCalendarConnected(true);
     } else {
       // DO NOT auto-trigger connectCalendar() here.
-      // Just set to false and let the user click the button.
       setIsCalendarConnected(false);
     }
   };
@@ -164,7 +163,7 @@ export function Dashboard() {
             </Button>
           )}
 
-          {/* Optional: Show a status indicator if it IS connected */}
+          {/* Status indicator if it IS connected */}
           {isCalendarConnected && (
             <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-green-50 text-green-700 text-sm font-medium border border-green-200">
               <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
