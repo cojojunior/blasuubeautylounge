@@ -25,7 +25,7 @@ export function Dashboard() {
     serviceId: services[0].id,
     date: "",
     time: "09:00",
-    paymentMethod: "cash" as "cash" | "momo", // Removed 'bank'
+    paymentMethod: "cash" as "cash" | "momo",
   });
   const [bookedSlots, setBookedSlots] = useState<string[]>([]);
 
@@ -165,10 +165,10 @@ export function Dashboard() {
           customer_email: offlineForm.email || "no-email@blasuu.com",
           customer_phone: offlineForm.phone,
           total_price: totalPrice,
-          deposit_amount: requiredDeposit, // Full payment
+          deposit_amount: requiredDeposit,
           status: "confirmed",
           booking_source: "offline",
-          payment_method: offlineForm.paymentMethod, // Save 'cash' or 'momo'
+          payment_method: offlineForm.paymentMethod,
         })
         .select()
         .single();
@@ -451,7 +451,7 @@ export function Dashboard() {
                 </select>
               </div>
 
-              {/* PAYMENT METHOD TOGGLE (Cash & MoMo only) */}
+              {/* PAYMENT METHOD TOGGLE */}
               <div className="flex gap-2 mb-2">
                 <button
                   type="button"
