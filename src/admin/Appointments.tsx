@@ -27,9 +27,10 @@ export function Appointments() {
   const [walkInData, setWalkInData] = useState({
     name: "",
     phone: "",
+    email: "", // Added email field
     date: "",
     time: "",
-    paymentMethod: "cash" as "cash" | "momo", // Added state for payment method
+    paymentMethod: "cash" as "cash" | "momo",
   });
   const [selectedServiceIds, setSelectedServiceIds] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState(
@@ -40,7 +41,6 @@ export function Appointments() {
   useEffect(() => {
     if (location.state?.openWalkIn) {
       setShowWalkInForm(true);
-      // Clear history state so refreshing doesn't re-open the form
       window.history.replaceState({}, document.title);
     }
   }, [location]);
@@ -78,7 +78,7 @@ export function Appointments() {
   const toggleService = (id: string) => {
     setSelectedServiceIds((prev) => {
       if (prev.includes(id)) {
-        if (prev.length === 1) return prev; // Keep at least one
+        if (prev.length === 1) return prev;
         return prev.filter((sId) => sId !== id);
       }
       return [...prev, id];
@@ -98,35 +98,46 @@ export function Appointments() {
     setIsSubmitting(true);
 
     try {
-      const { error } = await supabase.from("appointments").insert({
-        customer_name: walkInData.name,
-        customer_phone: walkInData.phone,
-        customer_email: "walkin@blasuu.com", // Placeholder
-        service_id: selectedServiceIds.join(", "),
-        service_name: combinedServiceNames,
-        appointment_date: walkInData.date, // Already in YYYY-MM-DD format from input
-        appointment_time: walkInData.time,
-        total_price: totalPrice,
-        deposit_amount: 0, // Walk-ins don't pay deposit online
-        status: "confirmed", // Auto-confirm walk-ins
-        booking_source: "offline",
-        payment_method: walkInData.paymentMethod, // Fixed: Using the schema's column
-      });
+      const { data, error } = await supabase
+        .from("appointments")
+        .insert({
+          customer_name: walkInData.name,
+          customer_phone: walkInData.phone,
+          customer_email: walkInData.email || "walkin@blasuu.com", // Use entered email or fallback
+          service_id: selectedServiceIds.join(", "),
+          service_name: combinedServiceNames,
+          appointment_date: walkInData.date,
+          appointment_time: walkInData.time,
+          total_price: totalPrice,
+          deposit_amount: 0,
+          status: "confirmed",
+          booking_source: "offline",
+          payment_method: walkInData.paymentMethod,
+        })
+        .select()
+        .single();
 
       if (error) throw error;
+
+      // --- TRIGGER CALENDAR SYNC ---
+      // This will now send the email to the backend to invite the customer
+      await supabase.functions.invoke("sync-booking-to-calendar", {
+        body: { appointment: data },
+      });
 
       // Reset form and refresh list
       setShowWalkInForm(false);
       setWalkInData({
         name: "",
         phone: "",
+        email: "",
         date: "",
         time: "",
         paymentMethod: "cash",
       });
       setSelectedServiceIds([]);
       fetchAppointments();
-      alert("Walk-in booking saved successfully!");
+      alert("Walk-in booking saved and synced to Calendar!");
     } catch (error: any) {
       alert("Error saving walk-in: " + error.message);
     } finally {
@@ -154,7 +165,7 @@ export function Appointments() {
   if (loading) return <div className="p-8">Loading appointments...</div>;
 
   return (
-    <div className="max-w-6xl mx-auto">
+    <div className="w-full max-w-6xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-serif text-elephant">All Appointments</h1>
         <Button
@@ -173,7 +184,7 @@ export function Appointments() {
           </h2>
           <form onSubmit={handleWalkInSubmit} className="space-y-6">
             {/* Customer Details Row */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <input
                 required
                 type="text"
@@ -194,6 +205,15 @@ export function Appointments() {
                 }
                 className="w-full p-3 border border-elephant/20 rounded-xl bg-white-soft text-sm outline-none focus:border-burnt"
               />
+              <input
+                type="email"
+                placeholder="Email (For Calendar)"
+                value={walkInData.email}
+                onChange={(e) =>
+                  setWalkInData({ ...walkInData, email: e.target.value })
+                }
+                className="w-full p-3 border border-elephant/20 rounded-xl bg-white-soft text-sm outline-none focus:border-burnt"
+              />
               <div className="flex gap-2">
                 <input
                   required
@@ -202,7 +222,7 @@ export function Appointments() {
                   onChange={(e) =>
                     setWalkInData({ ...walkInData, date: e.target.value })
                   }
-                  className="w-full p-3 border border-elephant/20 rounded-xl bg-white-soft text-sm outline-none focus:border-burnt"
+                  className="w-full p-3 border border-elephant/20 rounded-xl bg-white-soft text-sm outline-none focus:border-burnt text-elephant-muted"
                 />
                 <input
                   required
@@ -211,7 +231,7 @@ export function Appointments() {
                   onChange={(e) =>
                     setWalkInData({ ...walkInData, time: e.target.value })
                   }
-                  className="w-full p-3 border border-elephant/20 rounded-xl bg-white-soft text-sm outline-none focus:border-burnt"
+                  className="w-full p-3 border border-elephant/20 rounded-xl bg-white-soft text-sm outline-none focus:border-burnt text-elephant-muted"
                 />
               </div>
             </div>
@@ -239,7 +259,7 @@ export function Appointments() {
                   ))}
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[300px] overflow-y-auto w-full pr-2 custom-scrollbar">
                 {services
                   .filter((s) => s.category === selectedCategory)
                   .map((service) => {
@@ -335,7 +355,7 @@ export function Appointments() {
                     Saving...
                   </>
                 ) : (
-                  "Save Walk-in"
+                  "Save & Sync to Calendar"
                 )}
               </Button>
             </div>
