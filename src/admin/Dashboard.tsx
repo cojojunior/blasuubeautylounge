@@ -15,6 +15,7 @@ import { formatCurrency } from "../lib/currency";
 export function Dashboard() {
   // --- STATE ---
   const [isCalendarConnected, setIsCalendarConnected] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(false);
 
   // Stats State
   const [stats, setStats] = useState({
@@ -29,12 +30,17 @@ export function Dashboard() {
     fetchStats();
     checkCalendarStatus();
 
-    let handled = false;
+    // Only listen for auth changes if we are returning from a calendar connect redirect
+    const isReturningFromCalendar =
+      new URLSearchParams(window.location.search).get("calendar") ===
+      "connected";
+
+    if (!isReturningFromCalendar) return;
+
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        if (handled) return;
         if (event === "SIGNED_IN" && session?.provider_refresh_token) {
-          handled = true;
+          // Save the token
           const { error } = await supabase.functions.invoke(
             "save-calendar-token",
             {
@@ -45,6 +51,8 @@ export function Dashboard() {
           if (!error) {
             alert("Google Calendar connected successfully!");
             setIsCalendarConnected(true);
+
+            // Clean the URL so refreshing doesn't trigger this again
             window.history.replaceState(
               {},
               document.title,
@@ -78,25 +86,31 @@ export function Dashboard() {
     }
   };
 
-  // --- GOOGLE CALENDAR OAUTH ---
+  // --- CHECK CALENDAR STATUS ---
   const checkCalendarStatus = async () => {
+    // If we just came back from OAuth, we know we are connected
     const params = new URLSearchParams(window.location.search);
     if (params.get("calendar") === "connected") {
       setIsCalendarConnected(true);
       return;
     }
 
+    // Otherwise, check the DB for a token
     const { data: hasToken, error } = await supabase.rpc(
       "check_calendar_connection",
     );
     if (!error && hasToken) {
       setIsCalendarConnected(true);
     } else {
-      connectCalendar();
+      // DO NOT auto-trigger connectCalendar() here.
+      // Just set to false and let the user click the button.
+      setIsCalendarConnected(false);
     }
   };
 
+  // --- MANUAL GOOGLE CALENDAR OAUTH TRIGGER ---
   const connectCalendar = async () => {
+    setIsConnecting(true);
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
@@ -106,7 +120,11 @@ export function Dashboard() {
         queryParams: { access_type: "offline", prompt: "consent" },
       },
     });
-    if (error) console.error("OAuth error:", error);
+
+    if (error) {
+      console.error("OAuth error:", error);
+      setIsConnecting(false);
+    }
   };
 
   return (
@@ -123,7 +141,6 @@ export function Dashboard() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2 md:gap-3">
-          {/* REDIRECT TO APPOINTMENTS PAGE WITH STATE */}
           <Link to="/admin/appointments" state={{ openWalkIn: true }}>
             <Button
               variant="outline"
@@ -133,14 +150,26 @@ export function Dashboard() {
             </Button>
           </Link>
 
+          {/* Only show button if NOT connected */}
           {!isCalendarConnected && (
             <Button
               variant="outline"
               onClick={connectCalendar}
+              disabled={isConnecting}
               className="text-blue-600 border-blue-200 px-3 md:px-4">
               <Calendar size={16} className="md:mr-2" />
-              <span className="hidden md:inline">Connect Calendar</span>
+              <span className="hidden md:inline">
+                {isConnecting ? "Connecting..." : "Connect Calendar"}
+              </span>
             </Button>
+          )}
+
+          {/* Optional: Show a status indicator if it IS connected */}
+          {isCalendarConnected && (
+            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-green-50 text-green-700 text-sm font-medium border border-green-200">
+              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+              Calendar Synced
+            </div>
           )}
         </div>
       </header>
