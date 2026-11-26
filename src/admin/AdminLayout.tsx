@@ -13,6 +13,7 @@ import {
   LogOut,
   Menu,
   X,
+  CalendarPlus, // Added icon for calendar
 } from "lucide-react";
 import { SplashScreen } from "../components/sections/SplashScreen";
 
@@ -20,9 +21,45 @@ export function AdminLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  // --- ADDED: Splash state ---
   const [showSplash, setShowSplash] = useState(true);
+
+  // --- NEW: Calendar Connection State ---
+  const [isCalendarConnected, setIsCalendarConnected] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(false);
+
+  // Check calendar status on mount
+  useEffect(() => {
+    const checkCalendarStatus = async () => {
+      const { data: hasToken, error } = await supabase.rpc(
+        "check_calendar_connection",
+      );
+      if (!error && hasToken) {
+        setIsCalendarConnected(true);
+      }
+    };
+    checkCalendarStatus();
+  }, []);
+
+  // Handle Google OAuth
+  const connectCalendar = async () => {
+    setIsConnecting(true);
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        scopes:
+          "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/calendar.events",
+        // Redirect back to dashboard after connecting
+        redirectTo: `${window.location.origin}/admin/dashboard?calendar=connected`,
+        queryParams: { access_type: "offline", prompt: "consent" },
+      },
+    });
+
+    if (error) {
+      console.error("OAuth error:", error);
+      setIsConnecting(false);
+      alert("Failed to connect calendar. Please try again.");
+    }
+  };
 
   useEffect(() => {
     const manifestLink = document.querySelector('link[rel="manifest"]');
@@ -62,7 +99,6 @@ export function AdminLayout() {
 
   return (
     <>
-      {/* --- SPLASH SCREEN OVERLAY --- */}
       {showSplash && <SplashScreen onComplete={() => setShowSplash(false)} />}
 
       <div className="flex h-screen overflow-hidden bg-elephant/5">
@@ -108,6 +144,24 @@ export function AdminLayout() {
             })}
           </nav>
 
+          {/* --- NEW: CALENDAR SECTION --- */}
+          <div className="px-4 pb-2">
+            {!isCalendarConnected ? (
+              <button
+                onClick={connectCalendar}
+                disabled={isConnecting}
+                className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 transition-all text-sm font-medium">
+                <CalendarPlus size={18} />
+                {isConnecting ? "Connecting..." : "Connect Calendar"}
+              </button>
+            ) : (
+              <div className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl bg-green-50 text-green-700 border border-green-200 text-sm font-medium">
+                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                Calendar Synced
+              </div>
+            )}
+          </div>
+
           <div className="p-4 border-t border-elephant/10">
             <button
               onClick={handleLogout}
@@ -120,7 +174,6 @@ export function AdminLayout() {
 
         {/* --- MAIN CONTENT --- */}
         <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
-          {/* Mobile Header */}
           <header className="lg:hidden bg-white-pure border-b border-elephant/10 p-4 flex items-center gap-4 sticky top-0 z-30">
             <button
               onClick={() => setIsMobileMenuOpen(true)}
@@ -130,11 +183,8 @@ export function AdminLayout() {
             <h1 className="text-lg font-serif text-elephant">Admin</h1>
           </header>
 
-          {/* Scrollable Page Content */}
           <div
-            className={`flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-8 transition-opacity duration-1000 ${
-              showSplash ? "opacity-0" : "opacity-100"
-            }`}>
+            className={`flex-1 w-full max-w-full overflow-y-auto overflow-x-hidden p-4 md:p-8 transition-opacity duration-1000 ${showSplash ? "opacity-0" : "opacity-100"}`}>
             <Outlet />
           </div>
         </main>
