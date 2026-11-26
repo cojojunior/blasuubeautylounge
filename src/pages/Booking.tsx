@@ -34,10 +34,6 @@ const generateSlots = (dayOfWeek: number) => {
   const slots = [];
   for (let i = hours.start; i < hours.end; i++) {
     slots.push(`${String(i).padStart(2, "0")}:00`);
-    // Add half-hour slots if the end time allows it
-    if (i + 0.5 < hours.end) {
-      slots.push(`${String(i).padStart(2, "0")}:30`);
-    }
   }
   return slots;
 };
