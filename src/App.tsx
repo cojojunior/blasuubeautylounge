@@ -1,6 +1,9 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { RootLayout } from "./components/layout/RootLayout";
 
+// Auth Guard
+import { ProtectedRoute } from "./admin/components/ProtectedRoute";
+
 // Public Pages
 import { Home } from "./pages/Home";
 import { Services } from "./pages/Services";
@@ -27,7 +30,7 @@ import { Login } from "./admin/Login";
 import { Dashboard } from "./admin/Dashboard";
 import { Appointments } from "./admin/Appointments";
 import { AppointmentDetail } from "./admin/AppointmentDetail";
-import { Services as AdminServices } from "./admin/Services"; // Renamed to avoid conflict with public Services
+import { Services as AdminServices } from "./admin/Services";
 import { BlockedSlots } from "./admin/BlockedSlots";
 import { BusinessHours } from "./admin/BusinessHours";
 import { Notifications } from "./admin/Notifications";
@@ -63,21 +66,25 @@ export default function App() {
           <Route path="*" element={<NotFound />} />
         </Route>
 
-        {/* ADMIN ROUTES */}
-        <Route element={<AdminLayout />}>
-          <Route path="/admin" element={<Login />} />
-          <Route path="/admin/dashboard" element={<Dashboard />} />
-          <Route path="/admin/appointments" element={<Appointments />} />
-          <Route
-            path="/admin/appointments/:id"
-            element={<AppointmentDetail />}
-          />
-          <Route path="/admin/services" element={<AdminServices />} />
-          <Route path="/admin/hours" element={<BusinessHours />} />
-          <Route path="/admin/blocked" element={<BlockedSlots />} />
-          <Route path="/admin/notifications" element={<Notifications />} />
-          <Route path="/admin/payments" element={<Payments />} />
-          <Route path="/admin/policies" element={<Policies />} />
+        {/* ADMIN LOGIN — no sidebar, no protection */}
+        <Route path="/admin" element={<Login />} />
+
+        {/* ADMIN PROTECTED ROUTES — guarded, then rendered inside AdminLayout */}
+        <Route element={<ProtectedRoute />}>
+          <Route element={<AdminLayout />}>
+            <Route path="/admin/dashboard" element={<Dashboard />} />
+            <Route path="/admin/appointments" element={<Appointments />} />
+            <Route
+              path="/admin/appointments/:id"
+              element={<AppointmentDetail />}
+            />
+            <Route path="/admin/services" element={<AdminServices />} />
+            <Route path="/admin/hours" element={<BusinessHours />} />
+            <Route path="/admin/blocked" element={<BlockedSlots />} />
+            <Route path="/admin/notifications" element={<Notifications />} />
+            <Route path="/admin/payments" element={<Payments />} />
+            <Route path="/admin/policies" element={<Policies />} />
+          </Route>
         </Route>
       </Routes>
     </Router>
