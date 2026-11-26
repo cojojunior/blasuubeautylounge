@@ -21,7 +21,7 @@ export function SplashScreen({ onComplete }: { onComplete: () => void }) {
       }`}>
       <div className="flex flex-col items-center">
         <img
-          src="/icon-192.png"
+          src="/icon-512.png"
           alt="Blasuu Beauty Lounge"
           className="w-48 md:w-64 lg:w-80 h-auto object-contain animate-[premiumLogoReveal_1.5s_ease-out_forwards]"
           style={{ opacity: 0, transform: "scale(0.95)" }} />
