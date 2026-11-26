@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { Button } from "../components/ui/Button";
 import {
@@ -12,15 +12,12 @@ import {
   Loader2,
 } from "lucide-react";
 import { formatCurrency } from "../lib/currency";
-import {
-  formatDateDisplay,
-  formatTimeDisplay,
-  formatDateForDB,
-} from "../lib/datetime";
+import { formatDateDisplay, formatTimeDisplay } from "../lib/datetime";
 import { getCustomerWhatsAppLink } from "../lib/whatsapp";
 import { allServices as services, categories } from "../content";
 
 export function Appointments() {
+  const location = useLocation();
   const [appointments, setAppointments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -37,6 +34,15 @@ export function Appointments() {
   const [selectedCategory, setSelectedCategory] = useState(
     categories[1] || "Nails",
   );
+
+  // --- DETECT REDIRECT FROM DASHBOARD ---
+  useEffect(() => {
+    if (location.state?.openWalkIn) {
+      setShowWalkInForm(true);
+      // Clear history state so refreshing doesn't re-open the form
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
 
   // --- FETCH APPOINTMENTS ---
   const fetchAppointments = async () => {
@@ -97,13 +103,13 @@ export function Appointments() {
         customer_email: "walkin@blasuu.com", // Placeholder
         service_id: selectedServiceIds.join(", "),
         service_name: combinedServiceNames,
-        appointment_date: formatDateForDB(new Date(walkInData.date)),
+        appointment_date: walkInData.date, // Already in YYYY-MM-DD format from input
         appointment_time: walkInData.time,
         total_price: totalPrice,
         deposit_amount: 0, // Walk-ins don't pay deposit online
         status: "confirmed", // Auto-confirm walk-ins
         booking_source: "offline",
-        payment_status: "unpaid", // You can mark this paid later if needed
+        payment_status: "unpaid",
       });
 
       if (error) throw error;
