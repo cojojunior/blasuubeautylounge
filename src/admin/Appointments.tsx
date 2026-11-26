@@ -29,6 +29,7 @@ export function Appointments() {
     phone: "",
     date: "",
     time: "",
+    paymentMethod: "cash" as "cash" | "momo", // Added state for payment method
   });
   const [selectedServiceIds, setSelectedServiceIds] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState(
@@ -109,14 +110,20 @@ export function Appointments() {
         deposit_amount: 0, // Walk-ins don't pay deposit online
         status: "confirmed", // Auto-confirm walk-ins
         booking_source: "offline",
-        payment_status: "unpaid",
+        payment_method: walkInData.paymentMethod, // Fixed: Using the schema's column
       });
 
       if (error) throw error;
 
       // Reset form and refresh list
       setShowWalkInForm(false);
-      setWalkInData({ name: "", phone: "", date: "", time: "" });
+      setWalkInData({
+        name: "",
+        phone: "",
+        date: "",
+        time: "",
+        paymentMethod: "cash",
+      });
       setSelectedServiceIds([]);
       fetchAppointments();
       alert("Walk-in booking saved successfully!");
@@ -278,7 +285,40 @@ export function Appointments() {
               </div>
             </div>
 
-            <div className="flex justify-end gap-3">
+            {/* PAYMENT METHOD TOGGLE */}
+            <div>
+              <p className="text-xs text-elephant-muted uppercase tracking-wider mb-3">
+                Payment Method
+              </p>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setWalkInData({ ...walkInData, paymentMethod: "cash" })
+                  }
+                  className={`flex-1 py-3 rounded-xl border font-medium text-sm transition-all ${
+                    walkInData.paymentMethod === "cash"
+                      ? "bg-green-50 border-green-600 text-green-700"
+                      : "bg-white-pure border-elephant/20 text-elephant-muted"
+                  }`}>
+                  Cash Payment
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setWalkInData({ ...walkInData, paymentMethod: "momo" })
+                  }
+                  className={`flex-1 py-3 rounded-xl border font-medium text-sm transition-all ${
+                    walkInData.paymentMethod === "momo"
+                      ? "bg-blue-50 border-blue-600 text-blue-700"
+                      : "bg-white-pure border-elephant/20 text-elephant-muted"
+                  }`}>
+                  MoMo (Moolre)
+                </button>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-2">
               <Button
                 type="button"
                 variant="outline"
